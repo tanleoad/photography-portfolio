@@ -42,6 +42,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4500);
   }
 
+  /* ---- Hero "Selected Stories" auto-cycle ----
+     Titles/images advance on their own every 4.5s. Pauses while the
+     visitor's mouse is over the list (real :hover takes over via CSS),
+     and only runs on devices with a real pointer — touch/mobile skips
+     this since those screens show every image inline already. */
+  const cheroList = document.querySelector('.chero-list');
+  if (cheroList && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const storyLinks = Array.from(cheroList.querySelectorAll('.story-link'));
+    const mediaByClass = {};
+    storyLinks.forEach(link => {
+      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
+      if (slug) mediaByClass[slug] = document.querySelector('.chero-media .story-media.' + slug);
+    });
+
+    let cycleIndex = 0;
+    let cycleTimer = null;
+
+    const clearActive = () => {
+      storyLinks.forEach(l => l.classList.remove('is-active'));
+      Object.values(mediaByClass).forEach(m => m && m.classList.remove('is-active'));
+    };
+
+    const setActive = (i) => {
+      clearActive();
+      const link = storyLinks[i];
+      if (!link) return;
+      link.classList.add('is-active');
+      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
+      if (slug && mediaByClass[slug]) mediaByClass[slug].classList.add('is-active');
+    };
+
+    const startCycle = () => {
+      setActive(cycleIndex);
+      cycleTimer = setInterval(() => {
+        cycleIndex = (cycleIndex + 1) % storyLinks.length;
+        setActive(cycleIndex);
+      }, 4500);
+    };
+
+    const stopCycle = () => {
+      clearInterval(cycleTimer);
+      clearActive();
+    };
+
+    if (storyLinks.length) {
+      startCycle();
+      cheroList.addEventListener('mouseenter', stopCycle);
+      cheroList.addEventListener('mouseleave', startCycle);
+    }
+  }
+
   /* ---- Scroll reveal ----
      Elements are visible by default in CSS. Only after we confirm
      IntersectionObserver works do we opt them into the pre-animation
