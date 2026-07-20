@@ -164,67 +164,151 @@ h1,h2,h3,h4{
   .nav-toggle.open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 }
 
-/* ---------------- Hero (landing) ---------------- */
-.hero{
+/* ---------------- Cinematic hero + hover-reveal story index (merged, one viewport) ---------------- */
+.chero{
   position: relative;
   height: 100svh;
-  min-height: 560px;
+  min-height: 640px;
   overflow: hidden;
   display:flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
 }
-.hero-slides{
-  position:absolute; inset:0;
+.chero-media{
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
 }
-.hero-slide{
-  position:absolute; inset:0;
+.chero-base{
+  position:absolute; inset: -3%;
+  background-size: cover;
+  background-position: center;
+  animation: cheroZoom 26s ease-in-out infinite alternate;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+@keyframes cheroZoom{
+  from{ transform: scale(1); }
+  to{ transform: scale(1.07); }
+}
+/* the 5 story images — hidden until their title is hovered */
+.chero-media .story-media{
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transition: opacity 4s ease-in-out;
+  transform: scale(1.06);
+  transition: opacity 1.1s ease, transform 1.6s ease;
 }
-.hero-slide.active{ opacity: 1; }
-.hero-scrim{
+.chero:has(.s-afterdark:hover) .chero-media .story-media.s-afterdark,
+.chero:has(.s-palace:hover) .chero-media .story-media.s-palace,
+.chero:has(.s-blossom:hover) .chero-media .story-media.s-blossom,
+.chero:has(.s-corniche:hover) .chero-media .story-media.s-corniche,
+.chero:has(.s-domes:hover) .chero-media .story-media.s-domes{
+  opacity: 1;
+  transform: scale(1);
+}
+.chero:has(.story-link:hover) .chero-base{ opacity: 0; }
+.chero-scrim{
   position:absolute; inset:0;
   background:
-    linear-gradient(to top, rgba(8,7,6,0.92) 0%, rgba(8,7,6,0.25) 45%, rgba(8,7,6,0.35) 100%),
-    linear-gradient(to bottom, rgba(8,7,6,0.55) 0%, rgba(8,7,6,0) 30%);
-  z-index: 1;
+    linear-gradient(to top, rgba(8,7,6,0.88) 0%, rgba(8,7,6,0.28) 46%, rgba(8,7,6,0.45) 100%),
+    linear-gradient(to bottom, rgba(8,7,6,0.5) 0%, rgba(8,7,6,0) 26%);
 }
-.hero-content{
+
+.chero-content{
   position: relative;
   z-index: 2;
-  padding: 0 var(--page-pad) clamp(3rem, 8vw, 6rem);
+  padding: 0 var(--page-pad) clamp(2.6rem, 6vw, 4.6rem);
   width:100%;
 }
-.hero-content .eyebrow{ color: rgba(243,240,233,0.7); margin-bottom: 1.1rem; }
-.hero-title{
-  font-size: clamp(2.6rem, 7.5vw, 6.2rem);
-  max-width: 16ch;
-  font-weight: 400;
+.chero-role{
+  font-family:'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.7rem;
+  color: rgba(243,240,233,0.6);
+  font-weight: 500;
+  margin-bottom: clamp(1.2rem, 3vw, 2rem);
+  transition: opacity 0.4s ease;
 }
-.hero-title em{ font-style: italic; color: var(--accent); font-weight:400; }
-.hero-sub{
-  margin-top: 1.4rem;
-  max-width: 46ch;
-  color: var(--text-dim);
-  font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+.chero:has(.story-link:hover) .chero-role{ opacity: 0.5; }
+
+.chero-list{ list-style:none; max-width: 900px; }
+.story-row{ }
+.story-link{
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: clamp(0.3rem, 1vw, 0.55rem) 0;
 }
+.story-title{
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 6vw, 4.2rem);
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+  transition: opacity 0.4s ease, color 0.4s ease;
+}
+.story-tag{
+  margin-top: 0.5em;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  flex-shrink: 0;
+  transition: opacity 0.4s ease;
+}
+.chero-list:hover .story-title,
+.chero-list:hover .story-tag{ opacity: 0.35; }
+.story-link:hover .story-title{ opacity: 1; color: var(--accent); }
+.story-link:hover .story-tag{ opacity: 0.8; }
+
+.story-media-m{ display: none; }
+
 .hero-scroll{
   position:absolute;
   bottom: 2rem; right: var(--page-pad);
   z-index:2;
   writing-mode: vertical-rl;
   display:flex; align-items:center; gap: 0.8rem;
-  color: var(--text-dim);
-  font-size: 0.72rem;
+  color: rgba(243,240,233,0.5);
+  font-size: 0.7rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 .hero-scroll::before{
   content:"";
   width:1px; height: 46px;
-  background: var(--text-dim);
+  background: rgba(243,240,233,0.4);
+}
+
+@media (max-width: 780px){
+  .chero{ height: auto; min-height: 0; display: block; }
+  .chero-media{ position: relative; height: 62vh; min-height: 340px; }
+  .chero-base{ animation: none; }
+  .chero-media .story-media{ display: none; }
+  .chero-content{ padding-top: clamp(2.4rem, 7vw, 3.4rem); }
+  .chero-list{ max-width: none; border-top: 1px solid var(--border); }
+  .story-row{ border-bottom: 1px solid var(--border); }
+  .story-link{ flex-direction: column; padding: clamp(1.2rem, 4vw, 1.8rem) 0 0; }
+  .story-title{ text-shadow: none; }
+  .story-tag{ margin-top: 0.2rem; }
+  .story-media-m{
+    display: block;
+    width: 100%;
+    height: 58vw;
+    min-height: 220px;
+    object-fit: cover;
+    margin: 1rem 0 1.6rem;
+  }
+  .hero-scroll{ display: none; }
 }
 
 /* ---------------- Section framing ---------------- */
@@ -376,6 +460,38 @@ h1,h2,h3,h4{
 .intro-split-text p{ color: var(--text-dim); max-width: 46ch; }
 @media (max-width: 800px){
   .intro-split{ grid-template-columns: 1fr; }
+}
+
+/* ---------------- Quiet text link ---------------- */
+.quiet-link{
+  display:inline-flex; align-items:center; gap:0.6rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.3s ease, border-color 0.3s ease, gap 0.3s ease;
+}
+.quiet-link span{ transition: transform 0.3s ease; }
+.quiet-link:hover{ color: var(--accent); border-color: var(--accent); gap: 0.9rem; }
+
+/* ---------------- Quiet closing ---------------- */
+.closing{
+  padding: clamp(6rem, 12vw, 10rem) 0;
+  border-top: 1px solid var(--border);
+  text-align:center;
+}
+.closing .eyebrow{ display:block; margin-bottom: 1.6rem; }
+.closing blockquote{
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.6vw, 2.8rem);
+  max-width: 20ch;
+  margin: 0 auto clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--text);
+  line-height: 1.28;
 }
 
 /* ---------------- CTA band ---------------- */
