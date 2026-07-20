@@ -2,7 +2,7 @@
    Tania Khan Photography — base styles
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
 :root{
   --bg: #0a0908;
@@ -226,22 +226,6 @@ h1,h2,h3,h4{
   padding: 0 var(--page-pad) clamp(2.6rem, 6vw, 4.6rem);
   width:100%;
 }
-.chero-role{
-  font-family: 'Fraunces', serif;
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.01em;
-  font-size: clamp(1.3rem, 3.4vw, 2.3rem);
-  line-height: 1.25;
-  color: var(--text);
-  max-width: 16ch;
-  margin-bottom: clamp(1.8rem, 4vw, 3rem);
-  text-shadow: 0 2px 24px rgba(0,0,0,0.45);
-  transition: opacity 0.4s ease;
-}
-.chero:has(.story-link:hover) .chero-role,
-.chero:has(.story-link.is-active) .chero-role{ opacity: 0.5; }
-
 .chero-list{ list-style:none; max-width: 900px; }
 .story-row{ }
 .story-link{
@@ -253,20 +237,22 @@ h1,h2,h3,h4{
   padding: clamp(0.2rem, 0.7vw, 0.4rem) 0;
 }
 .story-title{
-  font-family: 'Fraunces', serif;
-  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(1.3rem, 3.6vw, 2.6rem);
   line-height: 1.12;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--text);
   text-shadow: 0 2px 30px rgba(0,0,0,0.5);
   transition: opacity 0.4s ease, color 0.4s ease;
 }
 .story-tag{
-  margin-top: 0.4em;
-  font-size: 0.62rem;
+  margin-top: 0.5em;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   color: var(--text-faint);
   flex-shrink: 0;
   transition: opacity 0.4s ease;
