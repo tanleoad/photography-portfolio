@@ -728,15 +728,28 @@ h1,h2,h3,h4{
 }
 
 /* ---------------- Projects: Sony Workshops ---------------- */
-.workshop-split{
+.workshops-head{
+  max-width: 60ch;
+  margin-bottom: clamp(2rem, 4.5vw, 3rem);
+}
+.workshops-head h2{
+  font-size: clamp(1.9rem, 3.6vw, 2.7rem);
+  margin: 0.6rem 0 0;
+}
+.workshops-list{
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 6vw, 4.5rem);
+}
+.workshop-entry{
   display:grid;
   grid-template-columns: 1fr 0.6fr;
   gap: clamp(2rem, 5vw, 5rem);
-  align-items:center;
+  align-items:start;
 }
-.workshop-text h2{
-  font-size: clamp(1.9rem, 3.6vw, 2.7rem);
-  margin: 0.6rem 0 0.9rem;
+.workshop-entry:not(:first-child){
+  padding-top: clamp(3rem, 6vw, 4.5rem);
+  border-top: 1px solid var(--border);
 }
 .workshop-text h3{
   font-family:'Inter', sans-serif;
@@ -763,7 +776,7 @@ h1,h2,h3,h4{
   display: block;
 }
 @media (max-width: 800px){
-  .workshop-split{ grid-template-columns: 1fr; }
+  .workshop-entry{ grid-template-columns: 1fr; }
   .workshop-video{ order: -1; }
 }
 
