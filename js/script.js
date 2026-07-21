@@ -93,6 +93,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ---- Projects: horizontal drag-to-scroll lineup (mouse/trackpad) ----
+     Touch and trackpad swipe already scroll the row natively via
+     overflow-x + scroll-snap in CSS; this just adds click-and-drag
+     for mouse users, the way Apple's product carousels work. */
+  const lineupGrid = document.querySelector('.lineup-grid');
+  if (lineupGrid) {
+    let isDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+    let dragged = false;
+
+    const endDrag = () => {
+      isDown = false;
+      lineupGrid.classList.remove('dragging');
+    };
+
+    lineupGrid.addEventListener('mousedown', (e) => {
+      isDown = true;
+      dragged = false;
+      lineupGrid.classList.add('dragging');
+      startX = e.pageX;
+      scrollStart = lineupGrid.scrollLeft;
+    });
+    window.addEventListener('mouseup', endDrag);
+    lineupGrid.addEventListener('mouseleave', endDrag);
+    lineupGrid.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const delta = e.pageX - startX;
+      if (Math.abs(delta) > 5) dragged = true;
+      lineupGrid.scrollLeft = scrollStart - delta;
+    });
+    lineupGrid.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', (e) => {
+        if (dragged) e.preventDefault();
+      });
+    });
+  }
+
   /* ---- Scroll reveal ----
      Elements are visible by default in CSS. Only after we confirm
      IntersectionObserver works do we opt them into the pre-animation
