@@ -431,17 +431,22 @@ h1,h2,h3,h4{
   position:absolute;
   bottom: 2rem; right: var(--page-pad);
   z-index:2;
-  writing-mode: vertical-rl;
-  display:flex; align-items:center; gap: 0.8rem;
-  color: rgba(243,240,233,0.5);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  display:flex;
+  color: rgba(243,240,233,0.55);
+  opacity: 0.8;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  animation: heroScrollBounce 2.4s ease-in-out infinite;
 }
-.hero-scroll::before{
-  content:"";
-  width:1px; height: 46px;
-  background: rgba(243,240,233,0.4);
+.hero-scroll:hover{
+  color: var(--accent);
+  opacity: 1;
+}
+@keyframes heroScrollBounce{
+  0%, 100%{ transform: translateY(0); }
+  50%{ transform: translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-scroll{ animation: none; }
 }
 
 @media (max-width: 780px){
