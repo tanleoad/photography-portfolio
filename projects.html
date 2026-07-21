@@ -12,18 +12,26 @@
 
 <header class="site-nav site-nav-centered">
   <a href="index.html" class="brand">Tanleo<span>_</span></a>
-  <nav>
-    <ul class="nav-links">
+  <button class="menu-trigger" id="menuTrigger" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay">
+    <span class="menu-trigger-icon"><span></span><span></span></span>
+    <span class="menu-trigger-label">Menu</span>
+  </button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <button class="menu-close" id="menuClose" aria-label="Close menu">
+    <span class="menu-close-icon">&times;</span>
+    <span class="menu-close-label">Close</span>
+  </button>
+  <nav class="menu-overlay-nav">
+    <ul>
       <li><a href="index.html">Home</a></li>
       <li><a href="projects.html" class="active">Projects</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
   </nav>
-  <button class="nav-toggle" aria-label="Toggle menu">
-    <span></span><span></span><span></span>
-  </button>
-</header>
+</div>
 
 <section class="page-banner" style="background-image:url('images/corniche-beach-skyline.jpg')">
   <div class="page-banner-inner">
