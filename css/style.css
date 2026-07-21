@@ -155,8 +155,8 @@ h1,h2,h3,h4{
   line-height: 1;
 }
 .site-nav-centered nav{
-  grid-column: 1;
-  justify-self: start;
+  grid-column: 3;
+  justify-self: end;
 }
 .site-nav-centered .nav-toggle{
   grid-column: 3;
