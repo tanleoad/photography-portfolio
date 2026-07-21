@@ -98,15 +98,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuOverlay = document.getElementById('menuOverlay');
   const menuClose = document.getElementById('menuClose');
   if (menuTrigger && menuOverlay) {
+    const menuSlides = menuOverlay.querySelectorAll('.menu-overlay-image-slide');
+    let menuSlideIndex = 0;
+    let menuSlideTimer = null;
+
+    const startMenuSlideshow = () => {
+      if (!menuSlides.length) return;
+      menuSlideTimer = setInterval(() => {
+        menuSlides[menuSlideIndex].classList.remove('active');
+        menuSlideIndex = (menuSlideIndex + 1) % menuSlides.length;
+        menuSlides[menuSlideIndex].classList.add('active');
+      }, 3200);
+    };
+    const stopMenuSlideshow = () => {
+      clearInterval(menuSlideTimer);
+    };
+
     const openMenu = () => {
       menuOverlay.classList.add('open');
       menuTrigger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
+      startMenuSlideshow();
     };
     const closeMenu = () => {
       menuOverlay.classList.remove('open');
       menuTrigger.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
+      stopMenuSlideshow();
     };
     menuTrigger.addEventListener('click', openMenu);
     if (menuClose) menuClose.addEventListener('click', closeMenu);

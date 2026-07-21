@@ -224,9 +224,18 @@ h1,h2,h3,h4{
 }
 .menu-overlay-image{
   flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.menu-overlay-image-slide{
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease;
 }
+.menu-overlay-image-slide.active{ opacity: 1; }
 .menu-close{
   display:flex;
   align-items:center;
