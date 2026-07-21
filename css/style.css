@@ -394,7 +394,7 @@ h1,h2,h3,h4{
 .chero-list:hover .story-title,
 .chero-list:hover .story-tag,
 .chero-list:has(.story-link.is-active) .story-title,
-.chero-list:has(.story-link.is-active) .story-tag{ opacity: 0.35; }
+.chero-list:has(.story-link.is-active) .story-tag{ opacity: 0.8; }
 .story-link:hover .story-title,
 .story-link.is-active .story-title{ opacity: 1; color: var(--accent); }
 .story-link:hover .story-tag,
