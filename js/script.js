@@ -93,6 +93,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ---- Home: full-screen menu overlay ---- */
+  const menuTrigger = document.getElementById('menuTrigger');
+  const menuOverlay = document.getElementById('menuOverlay');
+  const menuClose = document.getElementById('menuClose');
+  if (menuTrigger && menuOverlay) {
+    const openMenu = () => {
+      menuOverlay.classList.add('open');
+      menuTrigger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    };
+    const closeMenu = () => {
+      menuOverlay.classList.remove('open');
+      menuTrigger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+    menuTrigger.addEventListener('click', openMenu);
+    if (menuClose) menuClose.addEventListener('click', closeMenu);
+    menuOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
+
   /* ---- Projects: horizontal drag-to-scroll lineup (mouse/trackpad) ----
      Touch and trackpad swipe already scroll the row natively via
      overflow-x + scroll-snap in CSS; this just adds click-and-drag
