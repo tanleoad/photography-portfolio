@@ -108,7 +108,7 @@ h1,h2,h3,h4{
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: opacity 0.9s ease;
+  transition: opacity 1.3s cubic-bezier(0.16,1,0.3,1);
 }
 .intro-overlay.intro-hide{
   opacity: 0;
@@ -127,8 +127,8 @@ h1,h2,h3,h4{
   display:inline-block;
   opacity:0;
   transform: translateY(14px);
-  animation: introLetterIn 0.6s ease forwards;
-  animation-delay: calc(var(--i) * 0.09s);
+  animation: introLetterIn 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: calc(var(--i) * 0.15s);
 }
 .intro-underscore{ color: var(--accent); }
 @keyframes introLetterIn{

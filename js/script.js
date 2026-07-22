@@ -212,15 +212,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       document.body.classList.add('intro-active');
       const introLetters = introOverlay.querySelectorAll('.intro-name span');
-      const introLastDelay = (introLetters.length - 1) * 90;
-      const introHoldTime = 500;
-      const introFadeTime = 900;
+      const introLastDelay = (introLetters.length - 1) * 150;
+      const introLetterDuration = 700;
+      const introHoldTime = 600;
+      const introFadeTime = 1300;
       setTimeout(() => {
         introOverlay.classList.add('intro-hide');
         document.body.classList.remove('intro-active');
         sessionStorage.setItem('tanleoIntroSeen', '1');
         setTimeout(() => introOverlay.remove(), introFadeTime);
-      }, introLastDelay + 600 + introHoldTime);
+      }, introLastDelay + introLetterDuration + introHoldTime);
     }
   }
 
