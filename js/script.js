@@ -115,15 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openMenu = () => {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       menuOverlay.classList.add('open');
       menuTrigger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
+      if (scrollbarWidth > 0) document.body.style.paddingRight = scrollbarWidth + 'px';
       startMenuSlideshow();
     };
     const closeMenu = () => {
       menuOverlay.classList.remove('open');
       menuTrigger.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
       stopMenuSlideshow();
     };
     menuTrigger.addEventListener('click', openMenu);
