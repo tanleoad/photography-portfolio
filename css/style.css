@@ -735,19 +735,26 @@ body.intro-active{ overflow:hidden; }
 .archive-entry:last-child{
   border-bottom: 1px solid var(--border);
 }
-.archive-entry-head{
+.archive-entry-body{
+  display:grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items:center;
+}
+.archive-entry-left{
   display:flex;
-  align-items:baseline;
+  flex-direction:column;
   justify-content:space-between;
-  gap: 1.5rem;
-  flex-wrap:wrap;
+  gap: 2.5rem;
+  height:100%;
 }
 .archive-entry-title{
   font-family:'Fraunces', serif;
   font-weight:400;
-  font-size: clamp(2.6rem, 7vw, 5.2rem);
-  line-height:1;
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  line-height:1.05;
   letter-spacing:-0.01em;
+  max-width: 10ch;
 }
 .archive-entry-link{
   display:inline-flex;
@@ -766,33 +773,56 @@ body.intro-active{ overflow:hidden; }
 }
 .archive-entry:hover .archive-entry-link{ color: var(--accent); }
 .archive-entry:hover .archive-entry-link span{ transform: translateX(4px); }
+.archive-entry-right{
+  display:flex;
+  flex-direction:column;
+}
 .archive-entry-desc{
-  margin-top: 1rem;
-  max-width: 460px;
   color: var(--text-dim);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  max-width: 42ch;
 }
-.archive-entry-image{
-  margin-top: clamp(2.2rem, 5vw, 3.5rem);
-  overflow:hidden;
+.archive-entry-photo-wrap{
+  position:relative;
+  aspect-ratio: 4 / 5;
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
 }
-.archive-entry-image img{
+.archive-entry-photo-stack{
+  position:absolute;
+  inset:0;
+  border:1px solid var(--border);
+  background: var(--card);
+}
+.archive-entry-photo-stack.s1{ transform: rotate(-4deg) translate(-10px, 8px); z-index:1; }
+.archive-entry-photo-stack.s2{ transform: rotate(3deg) translate(8px, -6px); z-index:2; }
+.archive-entry-photo{
+  position:relative;
+  z-index:3;
   width:100%;
-  height:auto;
-  max-height: 78vh;
+  height:100%;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background: var(--card);
+}
+.archive-entry-photo img{
+  width:100%;
+  height:100%;
   object-fit: cover;
   display:block;
   transform: scale(1);
   transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
 }
-.archive-entry:hover .archive-entry-image img{
-  transform: scale(1.02);
+.archive-entry:hover .archive-entry-photo img{
+  transform: scale(1.04);
+}
+@media (max-width: 900px){
+  .archive-entry-body{ grid-template-columns: 1fr; }
+  .archive-entry-left{ height:auto; gap: 1.5rem; }
 }
 @media (max-width: 640px){
-  .archive-entry-title{ font-size: clamp(2.2rem, 11vw, 3rem); }
+  .archive-entry-title{ font-size: clamp(2.1rem, 9vw, 2.8rem); max-width:none; }
   .archive-entry{ padding: clamp(2.2rem, 10vw, 3rem) 0; }
-  .archive-entry-image img{ max-height: 60vh; }
 }
 
 /* ---------------- Projects: category lineup cards (horizontal scroll) ---------------- */
