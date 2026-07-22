@@ -204,25 +204,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   }
 
-  /* ---- Homepage intro (index.html only, plays once per browser session) ---- */
+  /* ---- Homepage intro (index.html only, plays every time the page loads) ---- */
   const introOverlay = document.getElementById('introOverlay');
   if (introOverlay) {
-    if (sessionStorage.getItem('tanleoIntroSeen')) {
-      introOverlay.remove();
-    } else {
-      document.body.classList.add('intro-active');
-      const introLetters = introOverlay.querySelectorAll('.intro-name span');
-      const introLastDelay = (introLetters.length - 1) * 150;
-      const introLetterDuration = 700;
-      const introHoldTime = 600;
-      const introFadeTime = 1300;
-      setTimeout(() => {
-        introOverlay.classList.add('intro-hide');
-        document.body.classList.remove('intro-active');
-        sessionStorage.setItem('tanleoIntroSeen', '1');
-        setTimeout(() => introOverlay.remove(), introFadeTime);
-      }, introLastDelay + introLetterDuration + introHoldTime);
-    }
+    document.body.classList.add('intro-active');
+    const introLetters = introOverlay.querySelectorAll('.intro-name span');
+    const introLastDelay = (introLetters.length - 1) * 150;
+    const introLetterDuration = 700;
+    const introHoldTime = 600;
+    const introFadeTime = 1300;
+    setTimeout(() => {
+      introOverlay.classList.add('intro-hide');
+      document.body.classList.remove('intro-active');
+      setTimeout(() => introOverlay.remove(), introFadeTime);
+    }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
 });
