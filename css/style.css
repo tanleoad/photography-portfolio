@@ -201,19 +201,21 @@ h1,h2,h3,h4{
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background: var(--bg);
+  background: transparent;
   display:flex;
   flex-direction:row;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-16px);
   transition: opacity 0.45s ease, transform 0.45s ease, visibility 0s linear 0.45s;
+  pointer-events: none;
 }
 .menu-overlay.open{
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
   transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: auto;
 }
 .menu-overlay-left{
   width: 42%;
@@ -221,8 +223,10 @@ h1,h2,h3,h4{
   padding: var(--page-pad);
   display:flex;
   flex-direction:column;
+  background: var(--bg);
 }
 .menu-overlay-image{
+  display:none;
   flex: 1;
   position: relative;
   overflow: hidden;
