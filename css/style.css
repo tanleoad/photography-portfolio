@@ -722,9 +722,21 @@ body.intro-active{ overflow:hidden; }
   color: var(--text-dim);
   line-height: 1.6;
 }
+.carousel-scroll-wrapper{
+  position:relative;
+}
+.carousel-pin{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
 .carousel{
   position:relative;
-  padding: clamp(1rem, 3vw, 2rem) 0 clamp(4rem, 9vw, 6.5rem);
+  width:100%;
 }
 .carousel-viewport{
   overflow:hidden;
@@ -733,7 +745,6 @@ body.intro-active{ overflow:hidden; }
 .carousel-track{
   display:flex;
   align-items:center;
-  transition: transform 0.85s cubic-bezier(0.16,1,0.3,1);
   will-change: transform;
 }
 .carousel-slide{
@@ -742,7 +753,7 @@ body.intro-active{ overflow:hidden; }
   margin: 0 clamp(0.8rem, 2vw, 1.6rem);
   opacity: 0.35;
   transform: scale(0.86);
-  transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1), transform 0.85s cubic-bezier(0.16,1,0.3,1);
+  transition: opacity 0.2s linear, transform 0.2s linear;
 }
 .carousel-slide.is-active{
   opacity: 1;
@@ -849,6 +860,14 @@ body.intro-active{ overflow:hidden; }
 @media (max-width: 700px){
   .carousel-slide{ width: min(320px, 74vw); }
   .carousel-desc{ display:none; }
+  /* No scroll-hijack on touch screens (see js/script.js) — the pin
+     must not force a full 100vh section here, or it leaves a large
+     empty gap below the shorter natural content. */
+  .carousel-pin{
+    position: static;
+    height: auto;
+    padding: clamp(1.5rem, 6vw, 2.5rem) 0 clamp(3rem, 10vw, 4.5rem);
+  }
 }
 
 /* ---------------- Projects: category lineup cards (horizontal scroll) ---------------- */
