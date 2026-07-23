@@ -786,16 +786,22 @@ body.intro-active{ overflow:hidden; }
 .archive-entry-photo-wrap{
   position:relative;
   aspect-ratio: 4 / 5;
-  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+  width: min(100%, 400px);
+  margin: clamp(1.8rem, 4vw, 2.6rem) auto 0;
 }
 .archive-entry-photo-stack{
   position:absolute;
   inset:0;
   border:1px solid var(--border);
   background: var(--card);
+  transition: transform 1.1s cubic-bezier(0.16,1,0.3,1);
 }
 .archive-entry-photo-stack.s1{ transform: rotate(-4deg) translate(-10px, 8px); z-index:1; }
-.archive-entry-photo-stack.s2{ transform: rotate(3deg) translate(8px, -6px); z-index:2; }
+.archive-entry-photo-stack.s2{ transform: rotate(3deg) translate(8px, -6px); z-index:2; transition-delay: 0.08s; }
+.archive-entry.reveal.pre .archive-entry-photo-stack.s1,
+.archive-entry.reveal.pre .archive-entry-photo-stack.s2{
+  transform: rotate(0deg) translate(0, 0);
+}
 .archive-entry-photo{
   position:relative;
   z-index:3;
