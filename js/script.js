@@ -220,4 +220,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
+  /* ---- Projects page: carousel navigation ----
+     Only present on projects.html, so everything is guarded on the
+     track existing. Uses offsetLeft/offsetWidth (pure layout properties,
+     unaffected by the scale/opacity transitions on the slides) to work
+     out the centering position, so it's never thrown off by measuring
+     mid-animation. */
+  const carouselTrack = document.getElementById('carouselTrack');
+  if (carouselTrack) {
+    const carouselSlides = Array.from(carouselTrack.querySelectorAll('.carousel-slide'));
+    const carouselViewport = document.querySelector('.carousel-viewport');
+    const carouselPrev = document.getElementById('carouselPrev');
+    const carouselNext = document.getElementById('carouselNext');
+    const carouselCounter = document.getElementById('carouselCounter');
+    let carouselActive = 0;
+
+    const carouselLayout = () => {
+      const vw = carouselViewport.clientWidth;
+      const slide = carouselSlides[carouselActive];
+      const step = carouselSlides.length > 1 ? (carouselSlides[1].offsetLeft - carouselSlides[0].offsetLeft) : 0;
+      const slideNaturalLeft = carouselActive * step;
+      const targetTx = (vw - slide.offsetWidth) / 2 - slideNaturalLeft;
+      carouselTrack.style.transform = `translateX(${targetTx}px)`;
+    };
+
+    const carouselUpdate = () => {
+      carouselSlides.forEach((s, i) => s.classList.toggle('is-active', i === carouselActive));
+      if (carouselPrev) carouselPrev.disabled = carouselActive === 0;
+      if (carouselNext) carouselNext.disabled = carouselActive === carouselSlides.length - 1;
+      if (carouselCounter) {
+        carouselCounter.textContent = String(carouselActive + 1).padStart(2, '0') + ' / ' + String(carouselSlides.length).padStart(2, '0');
+      }
+      requestAnimationFrame(carouselLayout);
+    };
+
+    carouselSlides.forEach((s, i) => {
+      const photo = s.querySelector('.carousel-photo');
+      if (!photo) return;
+      photo.addEventListener('click', (e) => {
+        if (i === carouselActive) return;
+        e.preventDefault();
+        carouselActive = i;
+        carouselUpdate();
+      });
+    });
+
+    if (carouselPrev) carouselPrev.addEventListener('click', () => { if (carouselActive > 0) { carouselActive--; carouselUpdate(); } });
+    if (carouselNext) carouselNext.addEventListener('click', () => { if (carouselActive < carouselSlides.length - 1) { carouselActive++; carouselUpdate(); } });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' && carouselActive < carouselSlides.length - 1) { carouselActive++; carouselUpdate(); }
+      if (e.key === 'ArrowLeft' && carouselActive > 0) { carouselActive--; carouselUpdate(); }
+    });
+
+    window.addEventListener('resize', () => requestAnimationFrame(carouselLayout));
+    carouselUpdate();
+  }
+
 });
