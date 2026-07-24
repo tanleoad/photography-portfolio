@@ -767,12 +767,14 @@ body.intro-active{ overflow:hidden; }
   border: 1px solid var(--border);
   background: var(--card);
   cursor: default;
+  perspective: 900px;
 }
 .carousel-slide:not(.is-active) .carousel-photo{ cursor:pointer; }
 .carousel-photo img{
   width:100%; height:100%; object-fit:cover; display:block;
   transform: scale(1);
-  transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+  will-change: transform;
 }
 .carousel-slide.is-active .carousel-photo:hover img{
   transform: scale(1.04);
@@ -868,6 +870,48 @@ body.intro-active{ overflow:hidden; }
     height: auto;
     padding: clamp(1.5rem, 6vw, 2.5rem) 0 clamp(3rem, 10vw, 4.5rem);
   }
+}
+
+/* ---------------- Projects: custom cursor + photo tilt (desktop hover only) ----------------
+   Added by JS only on pages with the carousel (script.js toggles
+   `has-custom-cursor` on <body>), so this never affects other pages. */
+body.has-custom-cursor,
+body.has-custom-cursor a,
+body.has-custom-cursor button{
+  cursor: none;
+}
+.cursor-dot{
+  position: fixed;
+  top: 0; left: 0;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 3000;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+  transition: width 0.25s ease, height 0.25s ease;
+  display: none;
+}
+body.has-custom-cursor .cursor-dot{ display: block; }
+.cursor-dot.is-grown{ width: 64px; height: 64px; }
+.cursor-dot-label{
+  position: absolute; inset: 0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Inter', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.cursor-dot.is-grown .cursor-dot-label{ opacity: 1; }
+@media (hover: none), (pointer: coarse){
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button{ cursor: auto; }
+  .cursor-dot{ display: none !important; }
 }
 
 /* ---------------- Projects: category lineup cards (horizontal scroll) ---------------- */

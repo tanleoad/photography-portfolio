@@ -375,6 +375,63 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'scroll') goToIndexScroll(carouselActive - 1); else goToIndexClick(carouselActive - 1);
       }
     });
+
+    /* ---- Custom cursor + photo tilt (desktop hover only) ----
+       Only on hover-capable, fine-pointer devices — touch/mobile never
+       gets a cursor to replace, so this stays out of their way
+       entirely (matching the pattern already used for the homepage
+       "Selected Stories" hover cycle above). */
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      document.body.classList.add('has-custom-cursor');
+
+      const cursorDot = document.createElement('div');
+      cursorDot.className = 'cursor-dot';
+      cursorDot.innerHTML = '<span class="cursor-dot-label"></span>';
+      document.body.appendChild(cursorDot);
+      const cursorLabel = cursorDot.querySelector('.cursor-dot-label');
+
+      let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
+      window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+      (function tickCursor() {
+        cx += (mx - cx) * 0.2;
+        cy += (my - cy) * 0.2;
+        cursorDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+        requestAnimationFrame(tickCursor);
+      })();
+
+      const growCursor = (label) => {
+        cursorDot.classList.add('is-grown');
+        cursorLabel.textContent = label || '';
+      };
+      const shrinkCursor = () => cursorDot.classList.remove('is-grown');
+
+      document.querySelectorAll('.carousel-explore, .carousel-arrow').forEach(el => {
+        el.addEventListener('mouseenter', () => growCursor(''));
+        el.addEventListener('mouseleave', shrinkCursor);
+      });
+
+      // Photos: grow the cursor into a "View" label, and gently tilt
+      // the image toward the pointer — a livelier hover than a flat
+      // zoom, while still calm enough for a photography portfolio.
+      carouselSlides.forEach((slide) => {
+        const photo = slide.querySelector('.carousel-photo');
+        const img = photo && photo.querySelector('img');
+        if (!photo || !img) return;
+
+        photo.addEventListener('mouseenter', () => growCursor('View'));
+        photo.addEventListener('mouseleave', () => {
+          shrinkCursor();
+          img.style.transform = '';
+        });
+        photo.addEventListener('mousemove', (e) => {
+          const r = photo.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          const activeScale = slide.classList.contains('is-active') ? 1.04 : 1.0;
+          img.style.transform = `scale(${activeScale}) rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg)`;
+        });
+      });
+    }
   }
 
 });
