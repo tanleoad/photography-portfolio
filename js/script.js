@@ -220,6 +220,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
+  /* ---- Homepage: Selected Works drifting gallery (index.html only) ----
+     Duplicates the track once (not baked into the HTML) so the drift
+     loops seamlessly without doubling the page's image weight. Reuses
+     the same custom-cursor component as the Projects carousel. */
+  const galleryTrack = document.getElementById('galleryTrack');
+  if (galleryTrack) {
+    const galleryClone = galleryTrack.cloneNode(true);
+    galleryClone.removeAttribute('id');
+    Array.from(galleryClone.children).forEach(c => galleryTrack.appendChild(c));
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      document.body.classList.add('has-custom-cursor');
+      let cursorDot = document.querySelector('.cursor-dot');
+      let cursorLabel;
+      if (!cursorDot) {
+        cursorDot = document.createElement('div');
+        cursorDot.className = 'cursor-dot';
+        cursorDot.innerHTML = '<span class="cursor-dot-label"></span>';
+        document.body.appendChild(cursorDot);
+        let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
+        window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+        (function tickCursor() {
+          cx += (mx - cx) * 0.2;
+          cy += (my - cy) * 0.2;
+          cursorDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+          requestAnimationFrame(tickCursor);
+        })();
+      }
+      cursorLabel = cursorDot.querySelector('.cursor-dot-label');
+      const growCursor = (label) => { cursorDot.classList.add('is-grown'); cursorLabel.textContent = label || ''; };
+      const shrinkCursor = () => cursorDot.classList.remove('is-grown');
+
+      document.querySelectorAll('.gallery-item').forEach(item => {
+        const isLive = item.tagName === 'A';
+        item.addEventListener('mouseenter', () => growCursor(isLive ? 'Enter' : ''));
+        item.addEventListener('mouseleave', shrinkCursor);
+      });
+    }
+  }
+
   /* ---- Projects page: scroll-driven carousel ----
      Desktop: vertical scroll through a tall wrapper drives horizontal
      movement through the slides, like a pinned "scrollytelling" section.
