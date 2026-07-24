@@ -220,44 +220,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
+  /* ---- Site-wide: tiny camera cursor + click flash ----
+     Runs on every page. On hover-capable, fine-pointer devices (desktop)
+     it swaps the native pointer for a small camera icon that grows and
+     turns gold over anything clickable — sections below call
+     cursor.grow(label)/cursor.shrink() for their own interactive
+     elements. Text fields keep their real caret cursor. The click
+     flash is separate from the cursor itself and fires on every click
+     anywhere on the page, including touch, since it's just a burst at
+     the click point. */
+  const cursor = (() => {
+    let grow = () => {};
+    let shrink = () => {};
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      document.body.classList.add('has-custom-cursor');
+
+      const cam = document.createElement('div');
+      cam.className = 'cursor-cam';
+      cam.innerHTML =
+        '<span class="cursor-cam-icon">' +
+          '<svg viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<defs><mask id="camRingMask">' +
+              '<rect x="0" y="0" width="32" height="24" fill="#fff"/>' +
+              '<circle cx="16" cy="14" r="4.1" fill="#000"/>' +
+            '</mask></defs>' +
+            '<path d="M11 1.6h10a2.2 2.2 0 0 1 2.2 2.2v2.3H8.8V3.8A2.2 2.2 0 0 1 11 1.6Z" fill="currentColor"/>' +
+            '<rect x="2" y="6" width="28" height="16.4" rx="4" fill="currentColor"/>' +
+            '<circle cx="16" cy="14" r="6.3" fill="#fff" mask="url(#camRingMask)"/>' +
+          '</svg>' +
+        '</span>' +
+        '<span class="cursor-cam-label"></span>';
+      document.body.appendChild(cam);
+      const camLabel = cam.querySelector('.cursor-cam-label');
+
+      let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
+      window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+      (function tickCursor() {
+        cx += (mx - cx) * 0.2;
+        cy += (my - cy) * 0.2;
+        cam.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+        requestAnimationFrame(tickCursor);
+      })();
+
+      // A camera icon over a text field is confusing — hide it and
+      // let the real text caret show instead.
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.addEventListener('mouseenter', () => cam.classList.add('is-hidden'));
+        el.addEventListener('mouseleave', () => cam.classList.remove('is-hidden'));
+      });
+
+      grow = (label) => { cam.classList.add('is-grown'); camLabel.textContent = label || ''; };
+      shrink = () => cam.classList.remove('is-grown');
+
+      // Tiny shutter-press squeeze on the icon itself when you click.
+      document.addEventListener('mousedown', () => cam.classList.add('is-clicked'));
+      document.addEventListener('mouseup', () => cam.classList.remove('is-clicked'));
+    }
+
+    const flashVeil = document.createElement('div');
+    flashVeil.className = 'flash-veil';
+    document.body.appendChild(flashVeil);
+
+    document.addEventListener('click', (e) => {
+      const flash = document.createElement('div');
+      flash.className = 'cursor-flash';
+      flash.style.left = e.clientX + 'px';
+      flash.style.top = e.clientY + 'px';
+      document.body.appendChild(flash);
+      requestAnimationFrame(() => flash.classList.add('is-active'));
+      setTimeout(() => flash.remove(), 600);
+
+      // Whole-screen brightness pop so the flash reads clearly
+      // against both light and dark photos.
+      flashVeil.classList.remove('is-active');
+      void flashVeil.offsetWidth; // restart the animation on rapid clicks
+      flashVeil.classList.add('is-active');
+    });
+
+    return { grow, shrink };
+  })();
+
   /* ---- Homepage: Selected Works drifting gallery (index.html only) ----
      Duplicates the track once (not baked into the HTML) so the drift
-     loops seamlessly without doubling the page's image weight. Reuses
-     the same custom-cursor component as the Projects carousel. */
+     loops seamlessly without doubling the page's image weight. */
   const galleryTrack = document.getElementById('galleryTrack');
   if (galleryTrack) {
     const galleryClone = galleryTrack.cloneNode(true);
     galleryClone.removeAttribute('id');
     Array.from(galleryClone.children).forEach(c => galleryTrack.appendChild(c));
 
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      document.body.classList.add('has-custom-cursor');
-      let cursorDot = document.querySelector('.cursor-dot');
-      let cursorLabel;
-      if (!cursorDot) {
-        cursorDot = document.createElement('div');
-        cursorDot.className = 'cursor-dot';
-        cursorDot.innerHTML = '<span class="cursor-dot-label"></span>';
-        document.body.appendChild(cursorDot);
-        let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
-        window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
-        (function tickCursor() {
-          cx += (mx - cx) * 0.2;
-          cy += (my - cy) * 0.2;
-          cursorDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
-          requestAnimationFrame(tickCursor);
-        })();
-      }
-      cursorLabel = cursorDot.querySelector('.cursor-dot-label');
-      const growCursor = (label) => { cursorDot.classList.add('is-grown'); cursorLabel.textContent = label || ''; };
-      const shrinkCursor = () => cursorDot.classList.remove('is-grown');
-
-      document.querySelectorAll('.gallery-item').forEach(item => {
-        const isLive = item.tagName === 'A';
-        item.addEventListener('mouseenter', () => growCursor(isLive ? 'Enter' : ''));
-        item.addEventListener('mouseleave', shrinkCursor);
-      });
-    }
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      const isLive = item.tagName === 'A';
+      item.addEventListener('mouseenter', () => cursor.grow(isLive ? 'Enter' : ''));
+      item.addEventListener('mouseleave', cursor.shrink);
+    });
   }
 
   /* ---- Projects page: scroll-driven carousel ----
@@ -416,62 +473,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    /* ---- Custom cursor + photo tilt (desktop hover only) ----
-       Only on hover-capable, fine-pointer devices — touch/mobile never
-       gets a cursor to replace, so this stays out of their way
-       entirely (matching the pattern already used for the homepage
-       "Selected Stories" hover cycle above). */
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      document.body.classList.add('has-custom-cursor');
+    /* ---- Camera cursor + photo tilt (desktop hover only) ----
+       The camera cursor itself is the shared site-wide one set up
+       above; this just tells it when to grow over carousel controls
+       and photos, and adds the gentle tilt-toward-pointer on photos. */
+    document.querySelectorAll('.carousel-explore, .carousel-arrow').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.grow(''));
+      el.addEventListener('mouseleave', cursor.shrink);
+    });
 
-      const cursorDot = document.createElement('div');
-      cursorDot.className = 'cursor-dot';
-      cursorDot.innerHTML = '<span class="cursor-dot-label"></span>';
-      document.body.appendChild(cursorDot);
-      const cursorLabel = cursorDot.querySelector('.cursor-dot-label');
+    // Photos: grow the cursor into a "View" label, and gently tilt
+    // the image toward the pointer — a livelier hover than a flat
+    // zoom, while still calm enough for a photography portfolio.
+    carouselSlides.forEach((slide) => {
+      const photo = slide.querySelector('.carousel-photo');
+      const img = photo && photo.querySelector('img');
+      if (!photo || !img) return;
 
-      let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
-      window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
-      (function tickCursor() {
-        cx += (mx - cx) * 0.2;
-        cy += (my - cy) * 0.2;
-        cursorDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
-        requestAnimationFrame(tickCursor);
-      })();
-
-      const growCursor = (label) => {
-        cursorDot.classList.add('is-grown');
-        cursorLabel.textContent = label || '';
-      };
-      const shrinkCursor = () => cursorDot.classList.remove('is-grown');
-
-      document.querySelectorAll('.carousel-explore, .carousel-arrow').forEach(el => {
-        el.addEventListener('mouseenter', () => growCursor(''));
-        el.addEventListener('mouseleave', shrinkCursor);
+      photo.addEventListener('mouseenter', () => cursor.grow('View'));
+      photo.addEventListener('mouseleave', () => {
+        cursor.shrink();
+        img.style.transform = '';
       });
-
-      // Photos: grow the cursor into a "View" label, and gently tilt
-      // the image toward the pointer — a livelier hover than a flat
-      // zoom, while still calm enough for a photography portfolio.
-      carouselSlides.forEach((slide) => {
-        const photo = slide.querySelector('.carousel-photo');
-        const img = photo && photo.querySelector('img');
-        if (!photo || !img) return;
-
-        photo.addEventListener('mouseenter', () => growCursor('View'));
-        photo.addEventListener('mouseleave', () => {
-          shrinkCursor();
-          img.style.transform = '';
-        });
-        photo.addEventListener('mousemove', (e) => {
-          const r = photo.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width - 0.5;
-          const py = (e.clientY - r.top) / r.height - 0.5;
-          const activeScale = slide.classList.contains('is-active') ? 1.04 : 1.0;
-          img.style.transform = `scale(${activeScale}) rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg)`;
-        });
+      photo.addEventListener('mousemove', (e) => {
+        const r = photo.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        const activeScale = slide.classList.contains('is-active') ? 1.04 : 1.0;
+        img.style.transform = `scale(${activeScale}) rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg)`;
       });
-    }
+    });
   }
 
 });
