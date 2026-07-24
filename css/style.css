@@ -938,17 +938,24 @@ body.intro-active{ overflow:hidden; }
 .work-list-media{
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 0.6rem;
 }
 .work-list-media-row{
-  height: 5rem;
+  /* Kept at roughly the same portrait aspect ratio (~4:5) at every
+     size — width and height grow together — so a hover never forces
+     one of Tanleo's portrait-oriented photos into an ugly wide, thin
+     crop the way changing height alone did. */
+  width: 30%;
+  height: 8.5rem;
   overflow: hidden;
   background: var(--bg-elev);
-  opacity: 0.5;
-  transition: height 0.7s cubic-bezier(0.33,1,0.68,1), opacity 0.5s ease;
+  opacity: 0.55;
+  transition: width 0.7s cubic-bezier(0.33,1,0.68,1), height 0.7s cubic-bezier(0.33,1,0.68,1), opacity 0.5s ease;
 }
 .work-list-media-row.is-active{
-  height: 26rem;
+  width: 100%;
+  height: 28rem;
   opacity: 1;
 }
 .work-list-media-row img{
