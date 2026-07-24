@@ -370,6 +370,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---- Work page: gentle image parallax ----
+     Each editorial photograph drifts slightly against the scroll —
+     the same "motion connects sections instead of cutting" idea as
+     the homepage hero exit, just applied here to keep every entry on
+     the Work page feeling alive rather than static. Desktop only,
+     respects reduced-motion, and every image is pre-scaled in CSS so
+     the drift never reveals an edge. */
+  const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
+  const parallaxEnabled = parallaxEls.length &&
+    window.matchMedia('(min-width: 901px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (parallaxEnabled) {
+    let parallaxTicking = false;
+    const updateParallax = () => {
+      parallaxTicking = false;
+      const viewportH = window.innerHeight;
+      parallaxEls.forEach(el => {
+        const r = el.getBoundingClientRect();
+        const centerOffset = (r.top + r.height / 2) - viewportH / 2;
+        const shift = Math.max(-1, Math.min(1, centerOffset / viewportH)) * 26;
+        el.style.transform = `scale(1.12) translateY(${shift}px)`;
+      });
+    };
+    window.addEventListener('scroll', () => {
+      if (!parallaxTicking) { parallaxTicking = true; requestAnimationFrame(updateParallax); }
+    }, { passive: true });
+    window.addEventListener('resize', updateParallax);
+    updateParallax();
+  }
+
+  /* ---- Work page: editorial index entries grow the camera cursor,
+     same as every other clickable photograph on the site. */
+  document.querySelectorAll('.work-entry:not(.work-entry-soon)').forEach(entry => {
+    entry.addEventListener('mouseenter', () => cursor.grow('Enter'));
+    entry.addEventListener('mouseleave', cursor.shrink);
+  });
+
   /* ---- Projects page: scroll-driven carousel ----
      Desktop: vertical scroll through a tall wrapper drives horizontal
      movement through the slides, like a pinned "scrollytelling" section.

@@ -867,6 +867,69 @@ body.intro-active{ overflow:hidden; }
   color: var(--text-dim);
   line-height: 1.6;
 }
+
+/* ---------------- Work: editorial index ---------------- */
+/* Each body of work gets one large, asymmetrical spread — photography
+   dominant and bleeding to the true edge of the screen on the left,
+   typography quietly inset on the right. No cards, no grid: this is
+   meant to read like the contents page of a printed monograph. */
+.work-index{ padding-bottom: clamp(2rem, 5vw, 4rem); }
+.work-entry{
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  align-items: center;
+  min-height: 92vh;
+  border-top: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+}
+.work-entry:last-child{ border-bottom: 1px solid var(--border); }
+.work-entry-media{
+  height: min(78vh, 720px);
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+.work-entry-media img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.12);
+  will-change: transform;
+}
+.work-entry-info{
+  padding: clamp(2rem, 4vw, 3rem) var(--page-pad) clamp(2rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem);
+}
+.work-entry-num{
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  margin-bottom: 1.1rem;
+}
+.work-entry-title{
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  margin-bottom: 1rem;
+}
+.work-entry-desc{
+  color: var(--text-dim);
+  max-width: 34ch;
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
+}
+.work-entry-link.is-disabled{
+  opacity: 0.5;
+  pointer-events: none;
+}
+@media (max-width: 900px){
+  .work-entry{
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .work-entry-media{ height: 62vw; min-height: 260px; }
+  .work-entry-info{ padding: 1.8rem var(--page-pad) 2.6rem; }
+  .work-entry-desc{ max-width: none; }
+}
 .carousel-scroll-wrapper{
   position:relative;
 }
