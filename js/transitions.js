@@ -49,7 +49,9 @@
     'projects.html': 'Projects — Tanleo_',
     'about.html': 'About — Tanleo_',
     'contact.html': 'Contact — Tanleo_',
-    'street.html': 'Street — Tanleo_'
+    'street.html': 'Street — Tanleo_',
+    'architecture.html': 'Architecture — Tanleo_',
+    'portraits.html': 'Portraits — Tanleo_'
   };
 
   let pendingFlipState = null;

@@ -192,16 +192,16 @@ function initPageContent() {
 
   /* ---- Work page: hover-reveal index ----
      Hovering a category name brightens it (handled in CSS via
-     :hover) and cross-fades in its matching photograph over in
-     .work-list-media — two separate branches of the DOM, so the
-     image swap itself has to happen in JS. Leaving the whole list
-     reverts the photograph back to the first (Street) entry. Cursor
-     itself is set up once, globally — see below — so it's always
-     available here even right after a page transition. */
+     :hover) and grows its matching photograph in .work-list-media —
+     two separate branches of the DOM, so the row swap itself has to
+     happen in JS. Leaving the whole list reverts the stack back to
+     the first (Street) entry. Cursor itself is set up once, globally
+     — see below — so it's always available here even right after a
+     page transition. */
   const workListNames = document.querySelector('.work-list-names');
   const workListItems = Array.from(document.querySelectorAll('.work-list-item'));
   if (workListNames && workListItems.length) {
-    const mediaImgs = Array.from(document.querySelectorAll('.work-list-media-img'));
+    const mediaImgs = Array.from(document.querySelectorAll('.work-list-media-row'));
     const showMedia = (key) => {
       mediaImgs.forEach(m => m.classList.toggle('is-active', m.getAttribute('data-work-image') === key));
     };

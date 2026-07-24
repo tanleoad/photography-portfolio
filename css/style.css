@@ -869,27 +869,28 @@ body.intro-active{ overflow:hidden; }
 }
 
 /* ---------------- Work: hover-reveal index ----------------
-   A stacked list of category names, dimmed by default — hovering one
-   brightens it and cross-fades in its photograph on the right, so the
-   list itself feels like the primary object rather than a row of
-   thumbnails. Direct reference: detroit.paris/projects. Each name sits
+   Direct reference: detroit.paris/projects. Every category name is
+   huge, all the time — not just on hover — dimmed by default and
+   brightening on hover/active. On the right, every category has its
+   own photograph already stacked in place, small by default; the
+   hovered one grows tall and pushes the rest of the stack down,
+   rather than one image simply swapping for another. Each name sits
    in its own [data-work] row; the matching photograph lives in
-   .work-list-media as a stack of absolutely-positioned images keyed by
-   [data-work-image], toggled via JS in initPageContent() since a hover
-   on one column needs to affect an unrelated element in the other. */
+   .work-list-media as a column of rows keyed by [data-work-image],
+   toggled via JS in initPageContent() since a hover on one column
+   needs to affect an unrelated element in the other. */
 .work-list{ padding-bottom: clamp(3rem, 6vw, 5rem); }
 .work-list-grid{
   display: grid;
-  grid-template-columns: minmax(0, 58%) minmax(0, 42%);
-  align-items: center;
+  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  align-items: start;
   gap: clamp(1.5rem, 4vw, 3rem);
-  padding: 0 var(--page-pad);
-  min-height: 74vh;
+  padding: clamp(2rem, 5vw, 3.5rem) var(--page-pad) 0;
 }
 .work-list-names{ display: flex; flex-direction: column; }
 .work-list-item{
   display: block;
-  padding: clamp(1.1rem, 2.6vw, 1.9rem) 0;
+  padding: clamp(0.6rem, 1.6vw, 1.1rem) 0;
   border-top: 1px solid var(--border);
   text-decoration: none;
   cursor: pointer;
@@ -908,8 +909,9 @@ body.intro-active{ overflow:hidden; }
   flex: none;
 }
 .work-list-name{
-  font-size: clamp(2.1rem, 5.6vw, 4.6rem);
-  line-height: 0.98;
+  font-size: clamp(3rem, 8.5vw, 7.5rem);
+  line-height: 0.88;
+  text-transform: uppercase;
   color: var(--text-faint);
   transition: color 0.5s ease;
 }
@@ -918,9 +920,11 @@ body.intro-active{ overflow:hidden; }
   color: var(--text);
 }
 .work-list-desc{
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
   font-family: 'Inter', sans-serif;
-  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.68rem;
   color: var(--text-faint);
   max-width: 40ch;
   transition: color 0.5s ease;
@@ -932,19 +936,22 @@ body.intro-active{ overflow:hidden; }
 .work-list-thumb-mobile{ display: none; }
 
 .work-list-media{
-  position: relative;
-  height: min(70vh, 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.work-list-media-row{
+  height: 5rem;
   overflow: hidden;
   background: var(--bg-elev);
+  opacity: 0.5;
+  transition: height 0.7s cubic-bezier(0.33,1,0.68,1), opacity 0.5s ease;
 }
-.work-list-media-img{
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.7s ease;
+.work-list-media-row.is-active{
+  height: 26rem;
+  opacity: 1;
 }
-.work-list-media-img.is-active{ opacity: 1; }
-.work-list-media-img img{
+.work-list-media-row img{
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -953,11 +960,10 @@ body.intro-active{ overflow:hidden; }
 @media (max-width: 900px){
   .work-list-grid{
     grid-template-columns: 1fr;
-    min-height: 0;
-    padding: 0 var(--page-pad);
+    padding: clamp(1.5rem, 5vw, 2.5rem) var(--page-pad) 0;
   }
   .work-list-media{ display: none; }
-  .work-list-name{ font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .work-list-name{ font-size: clamp(2.2rem, 11vw, 3.2rem); }
   .work-list-desc{ max-width: none; }
   .work-list-thumb-mobile{
     display: block;

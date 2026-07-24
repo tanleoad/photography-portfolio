@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portraits — Tanleo_</title>
+<meta name="description" content="Portrait photography by Tanleo_ — stories told through expression, presence and light, shot in Abu Dhabi and beyond.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-nav site-nav-centered">
+  <a href="index.html" class="brand">Tanleo<span>_</span></a>
+  <button class="menu-trigger" id="menuTrigger" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay">
+    <span class="menu-trigger-icon"><span></span><span></span></span>
+    <span class="menu-trigger-label">Menu</span>
+  </button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-overlay-left">
+    <button class="menu-close" id="menuClose" aria-label="Close menu">
+      <span class="menu-close-icon">&times;</span>
+      <span class="menu-close-label">Close</span>
+    </button>
+    <nav class="menu-overlay-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="menu-overlay-image">
+    <div class="menu-overlay-image-slide active" style="background-image:url('images/double-exposure-portrait.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/louvre-abudhabi.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/mystic-night-lamps.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/emirates-palace-staircase.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/blossom-terrace.jpg')"></div>
+  </div>
+</div>
+
+<main data-taxi>
+<div data-taxi-view="">
+
+<section class="cat-hero">
+  <p class="eyebrow">03 — Portraits</p>
+  <h1 class="cat-hero-title" data-flip-id="cat-portraits">Portraits</h1>
+  <p class="cat-hero-desc">Stories told through expression, presence and light.</p>
+</section>
+
+<section class="featured">
+
+  <figure class="plate reveal">
+    <img src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy">
+    <figcaption class="plate-num">01 / 01</figcaption>
+  </figure>
+
+</section>
+
+<section class="cat-more-note reveal">
+  <p>More from this series soon.</p>
+  <a href="projects.html" class="quiet-link">Back to the Work <span>&rarr;</span></a>
+</section>
+
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">tanleophotography</div>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-meta">
+      <span>&copy; 2026 tanleophotography. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@unseenco/e@2.5.0/dist/e.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@unseenco/taxi@1.4.0/dist/taxi.umd.js"></script>
+<script src="js/transitions.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
