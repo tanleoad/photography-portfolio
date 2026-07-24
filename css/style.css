@@ -989,12 +989,12 @@ body.intro-active{ overflow:hidden; }
 
 /* ---------------- Category pages: hero ----------------
    Shared by every dedicated body-of-work page (Street, and later
-   Architecture/Portraits/Retouching). The h1 here is the landing
-   spot for the Work index's Flip transition — the clicked category
-   name (see .work-list-name[data-flip-id] on the Work page) morphs
-   into this exact element, so its font-family and weight stay
-   identical to .work-list-name on purpose; only the size changes,
-   which GSAP Flip animates smoothly on its own. */
+   Architecture/Portraits/Retouching). Carries .reveal (see
+   js/script.js) so the eyebrow/title/description fade and slide up
+   into view right after the page-enter transition settles — the
+   font-family and weight still match .work-list-name on the Work
+   index on purpose, so the category name reads as the same piece of
+   type carrying through from one page to the next. */
 .cat-hero{
   min-height: 62vh;
   display: flex;
