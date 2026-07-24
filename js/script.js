@@ -296,6 +296,27 @@ document.addEventListener('DOMContentLoaded', () => {
       flashVeil.classList.remove('is-active');
       void flashVeil.offsetWidth; // restart the animation on rapid clicks
       flashVeil.classList.add('is-active');
+
+      // A click that jumps straight to another page swaps the whole
+      // page out before the flash has a chance to be seen. Hold real,
+      // same-page navigations back just long enough for the flash to
+      // register, then continue on to the link as normal. In-page
+      // anchors (#work, the carousel's own hash links), new-tab
+      // clicks, modified clicks, and mailto/tel links are left alone.
+      const link = e.target.closest('a[href]');
+      if (
+        link &&
+        !e.defaultPrevented &&
+        e.button === 0 &&
+        !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
+        link.target !== '_blank' &&
+        link.getAttribute('href').charAt(0) !== '#' &&
+        link.href.indexOf(window.location.origin) === 0
+      ) {
+        e.preventDefault();
+        const dest = link.href;
+        setTimeout(() => { window.location.href = dest; }, 200);
+      }
     });
 
     return { grow, shrink };
