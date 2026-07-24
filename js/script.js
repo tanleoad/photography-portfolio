@@ -176,6 +176,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---- Hero exit: scroll-tied zoom + fade ----
+     As you scroll from the hero into the statement below it, the hero
+     stays pinned in place for a short stretch (CSS position:sticky on
+     .chero inside the taller .chero-wrap) while it quietly zooms in
+     and fades to black — like a held shot before a cut — instead of
+     just scrolling away. Desktop only; skipped on touch/narrow screens
+     and when the visitor has motion reduction on, since .chero already
+     has a plain static mobile layout. */
+  const heroWrap = document.querySelector('.chero-wrap');
+  const heroEl = document.querySelector('.chero');
+  const heroExitEnabled = heroWrap && heroEl &&
+    window.matchMedia('(min-width: 781px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (heroExitEnabled) {
+    let heroTicking = false;
+    const updateHeroExit = () => {
+      heroTicking = false;
+      const pinRange = heroWrap.offsetHeight - window.innerHeight;
+      if (pinRange <= 0) { heroEl.style.transform = ''; heroEl.style.opacity = ''; return; }
+      const wrapTop = heroWrap.getBoundingClientRect().top + window.scrollY;
+      const scrollY = window.scrollY || window.pageYOffset;
+      const progress = Math.min(Math.max((scrollY - wrapTop) / pinRange, 0), 1);
+      heroEl.style.transform = `scale(${1 + progress * 0.08})`;
+      heroEl.style.opacity = String(1 - progress);
+    };
+    window.addEventListener('scroll', () => {
+      if (!heroTicking) { heroTicking = true; requestAnimationFrame(updateHeroExit); }
+    }, { passive: true });
+    window.addEventListener('resize', updateHeroExit);
+    updateHeroExit();
+  }
+
   /* ---- Scroll reveal ----
      Elements are visible by default in CSS. Only after we confirm
      IntersectionObserver works do we opt them into the pre-animation

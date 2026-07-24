@@ -363,8 +363,13 @@ body.intro-active{ overflow:hidden; }
 }
 
 /* ---------------- Cinematic hero + hover-reveal story index (merged, one viewport) ---------------- */
-.chero{
+.chero-wrap{
   position: relative;
+  height: 175vh;
+}
+.chero{
+  position: sticky;
+  top: 0;
   height: 100svh;
   min-height: 640px;
   overflow: hidden;
@@ -491,7 +496,8 @@ body.intro-active{ overflow:hidden; }
 }
 
 @media (max-width: 780px){
-  .chero{ height: auto; min-height: 0; display: block; }
+  .chero-wrap{ height: auto; }
+  .chero{ position: static; height: auto; min-height: 0; display: block; }
   .chero-media{ position: relative; height: 62vh; min-height: 340px; }
   .chero-base{ animation: none; }
   .chero-media .story-media{ display: none; }
@@ -514,6 +520,9 @@ body.intro-active{ overflow:hidden; }
 
 /* ---------------- Statement ---------------- */
 .statement{
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
   min-height: 92vh;
   display: flex;
   align-items: center;
