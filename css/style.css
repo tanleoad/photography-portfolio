@@ -868,77 +868,120 @@ body.intro-active{ overflow:hidden; }
   line-height: 1.6;
 }
 
-/* ---------------- Work: editorial index ---------------- */
-/* Each body of work gets one large, asymmetrical spread — photography
-   dominant and bleeding to the true edge of the screen on the left,
-   typography quietly inset on the right. No cards, no grid: this is
-   meant to read like the contents page of a printed monograph. */
-.work-index{ padding-bottom: clamp(2rem, 5vw, 4rem); }
-.work-entry{
-  position: relative;
+/* ---------------- Work: hover-reveal index ----------------
+   A stacked list of category names, dimmed by default — hovering one
+   brightens it and cross-fades in its photograph on the right, so the
+   list itself feels like the primary object rather than a row of
+   thumbnails. Direct reference: detroit.paris/projects. Each name sits
+   in its own [data-work] row; the matching photograph lives in
+   .work-list-media as a stack of absolutely-positioned images keyed by
+   [data-work-image], toggled via JS in initPageContent() since a hover
+   on one column needs to affect an unrelated element in the other. */
+.work-list{ padding-bottom: clamp(3rem, 6vw, 5rem); }
+.work-list-grid{
   display: grid;
-  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  grid-template-columns: minmax(0, 58%) minmax(0, 42%);
   align-items: center;
-  min-height: 92vh;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: 0 var(--page-pad);
+  min-height: 74vh;
+}
+.work-list-names{ display: flex; flex-direction: column; }
+.work-list-item{
+  display: block;
+  padding: clamp(1.1rem, 2.6vw, 1.9rem) 0;
   border-top: 1px solid var(--border);
   text-decoration: none;
+  cursor: pointer;
+}
+.work-list-item:last-child{ border-bottom: 1px solid var(--border); }
+.work-list-item.is-soon{ cursor: default; }
+.work-list-item-row{
+  display: flex;
+  align-items: baseline;
+  gap: 1.1rem;
+}
+.work-list-num{
+  font-family: 'Fraunces', serif;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  flex: none;
+}
+.work-list-name{
+  font-size: clamp(2.1rem, 5.6vw, 4.6rem);
+  line-height: 0.98;
+  color: var(--text-faint);
+  transition: color 0.5s ease;
+}
+.work-list-item:hover .work-list-name,
+.work-list-item.is-active .work-list-name{
   color: var(--text);
 }
-.work-entry:last-child{ border-bottom: 1px solid var(--border); }
-.work-entry-media{
-  height: min(78vh, 720px);
+.work-list-desc{
+  margin-top: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  max-width: 40ch;
+  transition: color 0.5s ease;
+}
+.work-list-item:hover .work-list-desc,
+.work-list-item.is-active .work-list-desc{
+  color: var(--text-dim);
+}
+.work-list-thumb-mobile{ display: none; }
+
+.work-list-media{
+  position: relative;
+  height: min(70vh, 640px);
   overflow: hidden;
   background: var(--bg-elev);
 }
-.work-entry-media img{
+.work-list-media-img{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.work-list-media-img.is-active{ opacity: 1; }
+.work-list-media-img img{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.12);
-  will-change: transform;
-}
-.work-entry-info{
-  padding: clamp(2rem, 4vw, 3rem) var(--page-pad) clamp(2rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem);
-}
-.work-entry-num{
-  display: block;
-  font-family: 'Fraunces', serif;
-  font-size: 0.85rem;
-  color: var(--text-faint);
-  margin-bottom: 1.1rem;
-}
-.work-entry-title{
-  font-size: clamp(2rem, 4.2vw, 3.4rem);
-  margin-bottom: 1rem;
-}
-.work-entry-desc{
-  color: var(--text-dim);
-  max-width: 34ch;
-  line-height: 1.6;
-  margin-bottom: 1.8rem;
-}
-.work-entry-link.is-disabled{
-  opacity: 0.5;
-  pointer-events: none;
+  transform: scale(1.06);
 }
 @media (max-width: 900px){
-  .work-entry{
+  .work-list-grid{
     grid-template-columns: 1fr;
     min-height: 0;
+    padding: 0 var(--page-pad);
   }
-  .work-entry-media{ height: 62vw; min-height: 260px; }
-  .work-entry-info{ padding: 1.8rem var(--page-pad) 2.6rem; }
-  .work-entry-desc{ max-width: none; }
+  .work-list-media{ display: none; }
+  .work-list-name{ font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .work-list-desc{ max-width: none; }
+  .work-list-thumb-mobile{
+    display: block;
+    margin-top: 1.2rem;
+    height: 56vw;
+    min-height: 220px;
+    overflow: hidden;
+    background: var(--bg-elev);
+  }
+  .work-list-thumb-mobile img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 /* ---------------- Category pages: hero ----------------
    Shared by every dedicated body-of-work page (Street, and later
    Architecture/Portraits/Retouching). The h1 here is the landing
    spot for the Work index's Flip transition — the clicked category
-   name (see .work-entry-title[data-flip-id] on the Work page)
-   morphs into this exact element, so its font-family and weight
-   stay identical to .work-entry-title on purpose; only the size
-   changes, which GSAP Flip animates smoothly on its own. */
+   name (see .work-list-name[data-flip-id] on the Work page) morphs
+   into this exact element, so its font-family and weight stay
+   identical to .work-list-name on purpose; only the size changes,
+   which GSAP Flip animates smoothly on its own. */
 .cat-hero{
   min-height: 62vh;
   display: flex;

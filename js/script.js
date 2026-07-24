@@ -9,8 +9,8 @@
 //    outside each page's [data-taxi-view] content, so they're never
 //    removed or remounted by a client-side page transition.
 //  - Per-page content behaviour (scroll reveals, the homepage hero
-//    exit, the Work index parallax, the hero's auto-cycling story
-//    list, work-entry cursor hovers) lives inside window.
+//    exit, the hero's auto-cycling story list, the Work index's
+//    hover-reveal photographs) lives inside window.
 //    initPageContent(). It runs once on first load, and again after
 //    every Taxi.js transition (see js/transitions.js), since that's
 //    the only thing that swaps in fresh page content without a full
@@ -190,15 +190,30 @@ function initPageContent() {
     updateParallax();
   }
 
-  /* ---- Work page: editorial index entries grow the camera cursor,
-     same as every other clickable photograph on the site. Cursor
+  /* ---- Work page: hover-reveal index ----
+     Hovering a category name brightens it (handled in CSS via
+     :hover) and cross-fades in its matching photograph over in
+     .work-list-media — two separate branches of the DOM, so the
+     image swap itself has to happen in JS. Leaving the whole list
+     reverts the photograph back to the first (Street) entry. Cursor
      itself is set up once, globally — see below — so it's always
      available here even right after a page transition. */
-  if (window.siteCursor) {
-    document.querySelectorAll('.work-entry:not(.work-entry-soon)').forEach(entry => {
-      entry.addEventListener('mouseenter', () => window.siteCursor.grow('Enter'));
-      entry.addEventListener('mouseleave', window.siteCursor.shrink);
+  const workListNames = document.querySelector('.work-list-names');
+  const workListItems = Array.from(document.querySelectorAll('.work-list-item'));
+  if (workListNames && workListItems.length) {
+    const mediaImgs = Array.from(document.querySelectorAll('.work-list-media-img'));
+    const showMedia = (key) => {
+      mediaImgs.forEach(m => m.classList.toggle('is-active', m.getAttribute('data-work-image') === key));
+    };
+    workListItems.forEach(item => {
+      const key = item.getAttribute('data-work');
+      item.addEventListener('mouseenter', () => {
+        showMedia(key);
+        if (window.siteCursor && !item.classList.contains('is-soon')) window.siteCursor.grow('Enter');
+      });
+      if (window.siteCursor) item.addEventListener('mouseleave', window.siteCursor.shrink);
     });
+    workListNames.addEventListener('mouseleave', () => showMedia(workListItems[0].getAttribute('data-work')));
   }
 }
 window.initPageContent = initPageContent;
