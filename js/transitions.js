@@ -66,7 +66,16 @@
       done();
     }
 
-    onEnter({ from, to, done }) {
+    onEnter({ to, done }) {
+      // Taxi's Renderer never actually passes `from` into onEnter
+      // (only onLeave gets it) — with removeOldContent:false both the
+      // outgoing and incoming [data-taxi-view] elements sit in the
+      // wrapper at this point, so the outgoing one is simply "whichever
+      // one isn't `to`". Confirmed against Taxi 1.4.0's own source and
+      // against how the reference site works around the exact same gap.
+      const views = Array.from(this.wrapper.querySelectorAll('[data-taxi-view]'));
+      const from = views.find(v => v !== to) || null;
+
       if (!from || prefersReducedMotion()) {
         gsap.set(to, { opacity: 0 });
         gsap.to(to, {
