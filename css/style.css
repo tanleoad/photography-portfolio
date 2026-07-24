@@ -930,6 +930,45 @@ body.intro-active{ overflow:hidden; }
   .work-entry-info{ padding: 1.8rem var(--page-pad) 2.6rem; }
   .work-entry-desc{ max-width: none; }
 }
+
+/* ---------------- Category pages: hero ----------------
+   Shared by every dedicated body-of-work page (Street, and later
+   Architecture/Portraits/Retouching). The h1 here is the landing
+   spot for the Work index's Flip transition — the clicked category
+   name (see .work-entry-title[data-flip-id] on the Work page)
+   morphs into this exact element, so its font-family and weight
+   stay identical to .work-entry-title on purpose; only the size
+   changes, which GSAP Flip animates smoothly on its own. */
+.cat-hero{
+  min-height: 62vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(7rem, 13vw, 10rem) var(--page-pad) clamp(3rem, 6vw, 4rem);
+}
+.cat-hero .eyebrow{ display: block; margin-bottom: 1.2rem; }
+.cat-hero-title{
+  font-size: clamp(4rem, 13vw, 9rem);
+  line-height: 0.95;
+}
+.cat-hero-desc{
+  margin-top: 1.8rem;
+  color: var(--text-dim);
+  max-width: 46ch;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.cat-more-note{
+  padding: clamp(3rem, 6vw, 4.5rem) var(--page-pad) clamp(5rem, 10vw, 7rem);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+.cat-more-note .quiet-link{ margin-top: 1.2rem; }
+@media (max-width: 780px){
+  .cat-hero{ min-height: 46vh; padding-top: 6.5rem; }
+}
 .carousel-scroll-wrapper{
   position:relative;
 }

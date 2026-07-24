@@ -1,6 +1,207 @@
 // ============================================================
 // Tania Khan Photography — shared behaviour
 // ============================================================
+//
+// Two kinds of setup happen here:
+//  - Persistent, site-wide behaviour (nav scroll state, the camera
+//    cursor, the click flash, the menu overlay, the homepage intro)
+//    runs once, on the very first real page load. These all live
+//    outside each page's [data-taxi-view] content, so they're never
+//    removed or remounted by a client-side page transition.
+//  - Per-page content behaviour (scroll reveals, the homepage hero
+//    exit, the Work index parallax, the hero's auto-cycling story
+//    list, work-entry cursor hovers) lives inside window.
+//    initPageContent(). It runs once on first load, and again after
+//    every Taxi.js transition (see js/transitions.js), since that's
+//    the only thing that swaps in fresh page content without a full
+//    reload — old listeners are torn down first so they don't pile
+//    up as someone clicks around the site.
+
+/* ---- Per-page content: state for teardown between transitions ---- */
+let _cheroCycleTimer = null;
+let _cheroCycleHandlers = null;
+let _heroExitScrollHandler = null;
+let _heroExitResizeHandler = null;
+let _parallaxScrollHandler = null;
+let _parallaxResizeHandler = null;
+let _revealObserver = null;
+let _revealSafetyTimeout = null;
+
+function teardownPageContent() {
+  if (_cheroCycleTimer) { clearInterval(_cheroCycleTimer); _cheroCycleTimer = null; }
+  _cheroCycleHandlers = null;
+
+  if (_heroExitScrollHandler) { window.removeEventListener('scroll', _heroExitScrollHandler); _heroExitScrollHandler = null; }
+  if (_heroExitResizeHandler) { window.removeEventListener('resize', _heroExitResizeHandler); _heroExitResizeHandler = null; }
+
+  if (_parallaxScrollHandler) { window.removeEventListener('scroll', _parallaxScrollHandler); _parallaxScrollHandler = null; }
+  if (_parallaxResizeHandler) { window.removeEventListener('resize', _parallaxResizeHandler); _parallaxResizeHandler = null; }
+
+  if (_revealObserver) { _revealObserver.disconnect(); _revealObserver = null; }
+  if (_revealSafetyTimeout) { clearTimeout(_revealSafetyTimeout); _revealSafetyTimeout = null; }
+}
+
+function initPageContent() {
+  teardownPageContent();
+
+  /* ---- Hero "Selected Stories" auto-cycle ----
+     Titles/images advance on their own every 4.5s. Pauses while the
+     visitor's mouse is over the list (real :hover takes over via CSS),
+     and only runs on devices with a real pointer — touch/mobile skips
+     this since those screens show every image inline already. */
+  const cheroList = document.querySelector('.chero-list');
+  if (cheroList && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const storyLinks = Array.from(cheroList.querySelectorAll('.story-link'));
+    const mediaByClass = {};
+    storyLinks.forEach(link => {
+      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
+      if (slug) mediaByClass[slug] = document.querySelector('.chero-media .story-media.' + slug);
+    });
+
+    let cycleIndex = 0;
+
+    const clearActive = () => {
+      storyLinks.forEach(l => l.classList.remove('is-active'));
+      Object.values(mediaByClass).forEach(m => m && m.classList.remove('is-active'));
+    };
+
+    const setActive = (i) => {
+      clearActive();
+      const link = storyLinks[i];
+      if (!link) return;
+      link.classList.add('is-active');
+      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
+      if (slug && mediaByClass[slug]) mediaByClass[slug].classList.add('is-active');
+    };
+
+    const startCycle = () => {
+      setActive(cycleIndex);
+      _cheroCycleTimer = setInterval(() => {
+        cycleIndex = (cycleIndex + 1) % storyLinks.length;
+        setActive(cycleIndex);
+      }, 4500);
+    };
+
+    const stopCycle = () => {
+      clearInterval(_cheroCycleTimer);
+      _cheroCycleTimer = null;
+      clearActive();
+    };
+
+    if (storyLinks.length) {
+      startCycle();
+      _cheroCycleHandlers = { startCycle, stopCycle };
+      cheroList.addEventListener('mouseenter', stopCycle);
+      cheroList.addEventListener('mouseleave', startCycle);
+    }
+  }
+
+  /* ---- Hero exit: scroll-tied zoom + fade ----
+     As you scroll from the hero into the statement below it, the hero
+     stays pinned in place for a short stretch (CSS position:sticky on
+     .chero inside the taller .chero-wrap) while it quietly zooms in
+     and fades to black — like a held shot before a cut — instead of
+     just scrolling away. Desktop only; skipped on touch/narrow screens
+     and when the visitor has motion reduction on, since .chero already
+     has a plain static mobile layout. */
+  const heroWrap = document.querySelector('.chero-wrap');
+  const heroEl = document.querySelector('.chero');
+  const heroExitEnabled = heroWrap && heroEl &&
+    window.matchMedia('(min-width: 781px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (heroExitEnabled) {
+    let heroTicking = false;
+    const updateHeroExit = () => {
+      heroTicking = false;
+      const pinRange = heroWrap.offsetHeight - window.innerHeight;
+      if (pinRange <= 0) { heroEl.style.transform = ''; heroEl.style.opacity = ''; return; }
+      const wrapTop = heroWrap.getBoundingClientRect().top + window.scrollY;
+      const scrollY = window.scrollY || window.pageYOffset;
+      const progress = Math.min(Math.max((scrollY - wrapTop) / pinRange, 0), 1);
+      heroEl.style.transform = `scale(${1 + progress * 0.08})`;
+      heroEl.style.opacity = String(1 - progress);
+    };
+    _heroExitScrollHandler = () => {
+      if (!heroTicking) { heroTicking = true; requestAnimationFrame(updateHeroExit); }
+    };
+    _heroExitResizeHandler = updateHeroExit;
+    window.addEventListener('scroll', _heroExitScrollHandler, { passive: true });
+    window.addEventListener('resize', _heroExitResizeHandler);
+    updateHeroExit();
+  }
+
+  /* ---- Scroll reveal ----
+     Elements are visible by default in CSS. Only after we confirm
+     IntersectionObserver works do we opt them into the pre-animation
+     (hidden) state, so a JS failure never hides real content. */
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && revealEls.length) {
+    revealEls.forEach(el => { el.classList.add('pre'); el.classList.remove('in'); });
+    _revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          entry.target.classList.remove('pre');
+          _revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => _revealObserver.observe(el));
+
+    // Safety net: if something never intersects (edge cases, fast scroll,
+    // odd viewport), force it visible after a few seconds regardless.
+    _revealSafetyTimeout = setTimeout(() => {
+      document.querySelectorAll('.reveal.pre').forEach(el => {
+        el.classList.add('in');
+        el.classList.remove('pre');
+      });
+    }, 4000);
+  }
+
+  /* ---- Work page: gentle image parallax ----
+     Each editorial photograph drifts slightly against the scroll —
+     the same "motion connects sections instead of cutting" idea as
+     the homepage hero exit, just applied here to keep every entry on
+     the Work page feeling alive rather than static. Desktop only,
+     respects reduced-motion, and every image is pre-scaled in CSS so
+     the drift never reveals an edge. */
+  const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
+  const parallaxEnabled = parallaxEls.length &&
+    window.matchMedia('(min-width: 901px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (parallaxEnabled) {
+    let parallaxTicking = false;
+    const updateParallax = () => {
+      parallaxTicking = false;
+      const viewportH = window.innerHeight;
+      parallaxEls.forEach(el => {
+        const r = el.getBoundingClientRect();
+        const centerOffset = (r.top + r.height / 2) - viewportH / 2;
+        const shift = Math.max(-1, Math.min(1, centerOffset / viewportH)) * 26;
+        el.style.transform = `scale(1.12) translateY(${shift}px)`;
+      });
+    };
+    _parallaxScrollHandler = () => {
+      if (!parallaxTicking) { parallaxTicking = true; requestAnimationFrame(updateParallax); }
+    };
+    _parallaxResizeHandler = updateParallax;
+    window.addEventListener('scroll', _parallaxScrollHandler, { passive: true });
+    window.addEventListener('resize', _parallaxResizeHandler);
+    updateParallax();
+  }
+
+  /* ---- Work page: editorial index entries grow the camera cursor,
+     same as every other clickable photograph on the site. Cursor
+     itself is set up once, globally — see below — so it's always
+     available here even right after a page transition. */
+  if (window.siteCursor) {
+    document.querySelectorAll('.work-entry:not(.work-entry-soon)').forEach(entry => {
+      entry.addEventListener('mouseenter', () => window.siteCursor.grow('Enter'));
+      entry.addEventListener('mouseleave', window.siteCursor.shrink);
+    });
+  }
+}
+window.initPageContent = initPageContent;
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -40,57 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
       current = (current + 1) % slides.length;
       slides[current].classList.add('active');
     }, 4500);
-  }
-
-  /* ---- Hero "Selected Stories" auto-cycle ----
-     Titles/images advance on their own every 4.5s. Pauses while the
-     visitor's mouse is over the list (real :hover takes over via CSS),
-     and only runs on devices with a real pointer — touch/mobile skips
-     this since those screens show every image inline already. */
-  const cheroList = document.querySelector('.chero-list');
-  if (cheroList && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const storyLinks = Array.from(cheroList.querySelectorAll('.story-link'));
-    const mediaByClass = {};
-    storyLinks.forEach(link => {
-      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
-      if (slug) mediaByClass[slug] = document.querySelector('.chero-media .story-media.' + slug);
-    });
-
-    let cycleIndex = 0;
-    let cycleTimer = null;
-
-    const clearActive = () => {
-      storyLinks.forEach(l => l.classList.remove('is-active'));
-      Object.values(mediaByClass).forEach(m => m && m.classList.remove('is-active'));
-    };
-
-    const setActive = (i) => {
-      clearActive();
-      const link = storyLinks[i];
-      if (!link) return;
-      link.classList.add('is-active');
-      const slug = Array.from(link.classList).find(c => c.startsWith('s-'));
-      if (slug && mediaByClass[slug]) mediaByClass[slug].classList.add('is-active');
-    };
-
-    const startCycle = () => {
-      setActive(cycleIndex);
-      cycleTimer = setInterval(() => {
-        cycleIndex = (cycleIndex + 1) % storyLinks.length;
-        setActive(cycleIndex);
-      }, 4500);
-    };
-
-    const stopCycle = () => {
-      clearInterval(cycleTimer);
-      clearActive();
-    };
-
-    if (storyLinks.length) {
-      startCycle();
-      cheroList.addEventListener('mouseenter', stopCycle);
-      cheroList.addEventListener('mouseleave', startCycle);
-    }
   }
 
   /* ---- Home: full-screen menu overlay ---- */
@@ -176,67 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ---- Hero exit: scroll-tied zoom + fade ----
-     As you scroll from the hero into the statement below it, the hero
-     stays pinned in place for a short stretch (CSS position:sticky on
-     .chero inside the taller .chero-wrap) while it quietly zooms in
-     and fades to black — like a held shot before a cut — instead of
-     just scrolling away. Desktop only; skipped on touch/narrow screens
-     and when the visitor has motion reduction on, since .chero already
-     has a plain static mobile layout. */
-  const heroWrap = document.querySelector('.chero-wrap');
-  const heroEl = document.querySelector('.chero');
-  const heroExitEnabled = heroWrap && heroEl &&
-    window.matchMedia('(min-width: 781px)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (heroExitEnabled) {
-    let heroTicking = false;
-    const updateHeroExit = () => {
-      heroTicking = false;
-      const pinRange = heroWrap.offsetHeight - window.innerHeight;
-      if (pinRange <= 0) { heroEl.style.transform = ''; heroEl.style.opacity = ''; return; }
-      const wrapTop = heroWrap.getBoundingClientRect().top + window.scrollY;
-      const scrollY = window.scrollY || window.pageYOffset;
-      const progress = Math.min(Math.max((scrollY - wrapTop) / pinRange, 0), 1);
-      heroEl.style.transform = `scale(${1 + progress * 0.08})`;
-      heroEl.style.opacity = String(1 - progress);
-    };
-    window.addEventListener('scroll', () => {
-      if (!heroTicking) { heroTicking = true; requestAnimationFrame(updateHeroExit); }
-    }, { passive: true });
-    window.addEventListener('resize', updateHeroExit);
-    updateHeroExit();
-  }
-
-  /* ---- Scroll reveal ----
-     Elements are visible by default in CSS. Only after we confirm
-     IntersectionObserver works do we opt them into the pre-animation
-     (hidden) state, so a JS failure never hides real content. */
-  const revealEls = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window && revealEls.length) {
-    revealEls.forEach(el => el.classList.add('pre'));
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          entry.target.classList.remove('pre');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach(el => io.observe(el));
-
-    // Safety net: if something never intersects (edge cases, fast scroll,
-    // odd viewport), force it visible after a few seconds regardless.
-    setTimeout(() => {
-      document.querySelectorAll('.reveal.pre').forEach(el => {
-        el.classList.add('in');
-        el.classList.remove('pre');
-      });
-    }, 4000);
-  }
-
-  /* ---- Homepage intro (index.html only, plays every time the page loads) ---- */
+  /* ---- Homepage intro (index.html only, plays only on a true fresh
+     load — a client-side page transition back to the homepage never
+     re-adds this markup, so it never replays mid-visit) ---- */
   const introOverlay = document.getElementById('introOverlay');
   if (introOverlay) {
     document.body.classList.add('intro-active');
@@ -253,14 +345,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---- Site-wide: tiny camera cursor + click flash ----
-     Runs on every page. On hover-capable, fine-pointer devices (desktop)
-     it swaps the native pointer for a small camera icon that grows and
-     turns gold over anything clickable — sections below call
-     cursor.grow(label)/cursor.shrink() for their own interactive
-     elements. Text fields keep their real caret cursor. The click
-     flash is separate from the cursor itself and fires on every click
-     anywhere on the page, including touch, since it's just a burst at
-     the click point. */
+     Runs once, on every page. On hover-capable, fine-pointer devices
+     (desktop) it swaps the native pointer for a small camera icon
+     that grows and turns gold over anything clickable — sections
+     call window.siteCursor.grow(label)/shrink() for their own
+     interactive elements, including after a page transition re-runs
+     initPageContent(). Text fields keep their real caret cursor. The
+     click flash is separate from the cursor itself and fires on
+     every click anywhere on the page, including touch, since it's
+     just a burst at the click point. */
   const cursor = (() => {
     let grow = () => {};
     let shrink = () => {};
@@ -296,10 +389,14 @@ document.addEventListener('DOMContentLoaded', () => {
       })();
 
       // A camera icon over a text field is confusing — hide it and
-      // let the real text caret show instead.
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        el.addEventListener('mouseenter', () => cam.classList.add('is-hidden'));
-        el.addEventListener('mouseleave', () => cam.classList.remove('is-hidden'));
+      // let the real text caret show instead. Delegated on document
+      // so it keeps working after a page transition swaps in a new
+      // page's form fields.
+      document.addEventListener('mouseover', (e) => {
+        if (e.target.closest('input, textarea, select')) cam.classList.add('is-hidden');
+      });
+      document.addEventListener('mouseout', (e) => {
+        if (e.target.closest('input, textarea, select')) cam.classList.remove('is-hidden');
       });
 
       grow = (label) => { cam.classList.add('is-grown'); camLabel.textContent = label || ''; };
@@ -332,9 +429,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // A click that jumps straight to another page swaps the whole
       // page out before the flash has a chance to be seen. Hold real,
       // same-page navigations back just long enough for the flash to
-      // register, then continue on to the link as normal. In-page
-      // anchors (#work, the carousel's own hash links), new-tab
-      // clicks, modified clicks, and mailto/tel links are left alone.
+      // register, then hand off to the page-transition router
+      // (js/transitions.js) so the destination swaps in smoothly
+      // instead of a hard reload. If that router never loaded (CDN
+      // blocked, offline), fall back to a normal navigation — the
+      // site works exactly the same either way, just without the
+      // swap animation. In-page anchors, new-tab clicks, modified
+      // clicks, and mailto/tel links are left alone.
       const link = e.target.closest('a[href]');
       if (
         link &&
@@ -347,12 +448,19 @@ document.addEventListener('DOMContentLoaded', () => {
       ) {
         e.preventDefault();
         const dest = link.href;
-        setTimeout(() => { window.location.href = dest; }, 200);
+        setTimeout(() => {
+          if (window.siteTaxi) {
+            window.siteTaxi.navigateTo(dest, undefined, link);
+          } else {
+            window.location.href = dest;
+          }
+        }, 200);
       }
     });
 
     return { grow, shrink };
   })();
+  window.siteCursor = cursor;
 
   /* ---- Homepage: Selected Works drifting gallery (index.html only) ----
      Duplicates the track once (not baked into the HTML) so the drift
@@ -369,43 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
       item.addEventListener('mouseleave', cursor.shrink);
     });
   }
-
-  /* ---- Work page: gentle image parallax ----
-     Each editorial photograph drifts slightly against the scroll —
-     the same "motion connects sections instead of cutting" idea as
-     the homepage hero exit, just applied here to keep every entry on
-     the Work page feeling alive rather than static. Desktop only,
-     respects reduced-motion, and every image is pre-scaled in CSS so
-     the drift never reveals an edge. */
-  const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
-  const parallaxEnabled = parallaxEls.length &&
-    window.matchMedia('(min-width: 901px)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (parallaxEnabled) {
-    let parallaxTicking = false;
-    const updateParallax = () => {
-      parallaxTicking = false;
-      const viewportH = window.innerHeight;
-      parallaxEls.forEach(el => {
-        const r = el.getBoundingClientRect();
-        const centerOffset = (r.top + r.height / 2) - viewportH / 2;
-        const shift = Math.max(-1, Math.min(1, centerOffset / viewportH)) * 26;
-        el.style.transform = `scale(1.12) translateY(${shift}px)`;
-      });
-    };
-    window.addEventListener('scroll', () => {
-      if (!parallaxTicking) { parallaxTicking = true; requestAnimationFrame(updateParallax); }
-    }, { passive: true });
-    window.addEventListener('resize', updateParallax);
-    updateParallax();
-  }
-
-  /* ---- Work page: editorial index entries grow the camera cursor,
-     same as every other clickable photograph on the site. */
-  document.querySelectorAll('.work-entry:not(.work-entry-soon)').forEach(entry => {
-    entry.addEventListener('mouseenter', () => cursor.grow('Enter'));
-    entry.addEventListener('mouseleave', cursor.shrink);
-  });
 
   /* ---- Projects page: scroll-driven carousel ----
      Desktop: vertical scroll through a tall wrapper drives horizontal
@@ -595,4 +666,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  initPageContent();
 });
