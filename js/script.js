@@ -208,6 +208,44 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHeroExit();
   }
 
+  /* ---- Featured Photographs: darkroom print reveal ----
+     Each plate resolves into full clarity, contrast and light as it
+     scrolls up through the centre of the screen — like a print slowly
+     surfacing in developer — instead of just fading in. Progress is
+     tied directly to scroll position rather than a one-time trigger,
+     so it reads as one continuous physical process. Runs on desktop
+     and mobile alike (this is the site's core visual idea), but is
+     skipped under reduced-motion, where every plate simply shows
+     fully resolved from the start. */
+  const darkroomEls = Array.from(document.querySelectorAll('[data-darkroom]'));
+  const darkroomEnabled = darkroomEls.length &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (darkroomEnabled) {
+    let darkroomTicking = false;
+    const updateDarkroom = () => {
+      darkroomTicking = false;
+      const viewportH = window.innerHeight;
+      darkroomEls.forEach(img => {
+        const r = img.getBoundingClientRect();
+        const center = r.top + r.height / 2;
+        // 0 while the plate is still low in the viewport (or below it),
+        // rising to 1 once its centre nears the vertical middle of the screen.
+        const raw = 1 - (center - viewportH * 0.32) / (viewportH * 0.62);
+        const progress = Math.max(0, Math.min(1, raw));
+        const brightness = 0.32 + progress * 0.68;
+        const contrast = 0.82 + progress * 0.18;
+        const saturate = 0.55 + progress * 0.45;
+        const blur = (1 - progress) * 5;
+        img.style.filter = `brightness(${brightness.toFixed(3)}) contrast(${contrast.toFixed(3)}) saturate(${saturate.toFixed(3)}) blur(${blur.toFixed(2)}px)`;
+      });
+    };
+    window.addEventListener('scroll', () => {
+      if (!darkroomTicking) { darkroomTicking = true; requestAnimationFrame(updateDarkroom); }
+    }, { passive: true });
+    window.addEventListener('resize', updateDarkroom);
+    updateDarkroom();
+  }
+
   /* ---- Scroll reveal ----
      Elements are visible by default in CSS. Only after we confirm
      IntersectionObserver works do we opt them into the pre-animation
