@@ -568,12 +568,6 @@ body.intro-active{ overflow:hidden; }
   height: auto;
   box-shadow: 0 40px 100px rgba(0,0,0,0.5);
 }
-/* Darkroom print reveal: filter is written per scroll-frame by JS (see
-   js/script.js). No CSS transition here on purpose — direct per-frame
-   assignment keeps the effect precisely scrubbed to scroll position
-   rather than lagging behind it. Without JS the image simply shows at
-   its normal, fully-resolved brightness — safe fallback either way. */
-.plate img[data-darkroom]{ will-change: filter; }
 .plate-num{
   position: absolute;
   bottom: clamp(1.4rem, 3.5vw, 2.2rem);
