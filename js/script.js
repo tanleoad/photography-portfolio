@@ -473,19 +473,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(flashVeil);
 
     document.addEventListener('click', (e) => {
-      const flash = document.createElement('div');
-      flash.className = 'cursor-flash';
-      flash.style.left = e.clientX + 'px';
-      flash.style.top = e.clientY + 'px';
-      document.body.appendChild(flash);
-      requestAnimationFrame(() => flash.classList.add('is-active'));
-      setTimeout(() => flash.remove(), 600);
+      // A click on one of the Work index's chapter photographs is
+      // about to trigger the photo-morph signature transition (see
+      // js/transitions.js) — that photograph visibly growing already
+      // reads clearly as "you clicked this," so the flash burst below
+      // would just be a bright pop sitting on top of, and briefly
+      // outlasting, the very start of that growth (the flash takes up
+      // to 600ms to fade; the morph starts within 200ms of the click).
+      // Skipped only for this one case — every other click on the site
+      // still gets the flash exactly as before.
+      const link = e.target.closest('a[href]');
+      const isMorphLink = !!(link && link.hasAttribute('data-work'));
 
-      // Whole-screen brightness pop so the flash reads clearly
-      // against both light and dark photos.
-      flashVeil.classList.remove('is-active');
-      void flashVeil.offsetWidth; // restart the animation on rapid clicks
-      flashVeil.classList.add('is-active');
+      if (!isMorphLink) {
+        const flash = document.createElement('div');
+        flash.className = 'cursor-flash';
+        flash.style.left = e.clientX + 'px';
+        flash.style.top = e.clientY + 'px';
+        document.body.appendChild(flash);
+        requestAnimationFrame(() => flash.classList.add('is-active'));
+        setTimeout(() => flash.remove(), 600);
+
+        // Whole-screen brightness pop so the flash reads clearly
+        // against both light and dark photos.
+        flashVeil.classList.remove('is-active');
+        void flashVeil.offsetWidth; // restart the animation on rapid clicks
+        flashVeil.classList.add('is-active');
+      }
 
       // A click that jumps straight to another page swaps the whole
       // page out before the flash has a chance to be seen. Hold real,
@@ -496,8 +510,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // blocked, offline), fall back to a normal navigation — the
       // site works exactly the same either way, just without the
       // swap animation. In-page anchors, new-tab clicks, modified
-      // clicks, and mailto/tel links are left alone.
-      const link = e.target.closest('a[href]');
+      // clicks, and mailto/tel links are left alone. Morph links skip
+      // the hold entirely, since there's no flash to wait for — the
+      // photograph starts growing the instant it's clicked, which
+      // reads as far more direct than the regular page-turn's brief
+      // pause.
       if (
         link &&
         !e.defaultPrevented &&
@@ -509,13 +526,18 @@ document.addEventListener('DOMContentLoaded', () => {
       ) {
         e.preventDefault();
         const dest = link.href;
-        setTimeout(() => {
+        const go = () => {
           if (window.siteTaxi) {
             window.siteTaxi.navigateTo(dest, undefined, link);
           } else {
             window.location.href = dest;
           }
-        }, 200);
+        };
+        if (isMorphLink) {
+          go();
+        } else {
+          setTimeout(go, 200);
+        }
       }
     });
 
