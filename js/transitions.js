@@ -26,21 +26,22 @@
 // Two transition styles, chosen automatically per click:
 //
 //  - The signature one: the photograph becomes the doorway. When the
-//    thing that was clicked is a Work-index chapter (Street,
-//    Architecture, Portraits), the small photograph sitting next to
-//    that chapter's name doesn't just sit there while the page
-//    changes around it — it grows, in place, directly into that
-//    chapter's own monumental hero photograph. Nothing else does a
-//    page-turn; the photo you clicked *is* the transition. Built with
-//    GSAP's Flip plugin: the row's on-screen position/size is
-//    captured the instant it's clicked (onLeave — the one lifecycle
-//    hook Taxi actually hands the clicked element to), and the big
-//    frame on the new page is animated from that captured state into
-//    its own natural position (onEnter). Both frames are plain
-//    overflow:hidden boxes with a filling <img> — never the <img>
-//    itself — so the crop stays correct at every size in between, not
-//    just the start and end (see the .cat-hero-photo / .rhythm-row-bg
-//    comments in style.css).
+//    thing that was clicked is the Work index's current chapter
+//    (Street, Architecture or Portraits — whichever monumental photo
+//    is on screen at the moment of the click), that photograph
+//    doesn't just sit there while the page changes around it — it
+//    grows, in place, directly into that chapter's own hero
+//    photograph. Nothing else does a page-turn; the photo you clicked
+//    *is* the transition. Built with GSAP's Flip plugin: the frame's
+//    on-screen position/size is captured the instant it's clicked
+//    (onLeave — the one lifecycle hook Taxi actually hands the
+//    clicked element to), and the big frame on the new page is
+//    animated from that captured state into its own natural position
+//    (onEnter). Both frames are plain overflow:hidden boxes with a
+//    filling <img> — never the <img> itself — so the crop stays
+//    correct at every size in between, not just the start and end
+//    (see the .cat-hero-photo / .stage-photo-frame comments in
+//    style.css).
 //
 //  - The fallback: for everything else — the nav, the footer, "Back
 //    to the Work", Home, About, Contact, browser back/forward — the
@@ -83,19 +84,21 @@
 
   // Given the clicked element, find the on-screen photograph frame
   // that should morph into the destination's hero photo, if any.
-  // Only Work-index chapter rows carry data-work, so this is a no-op
-  // (returns null) for every other link on the site — exactly the
-  // cases that should keep the plain page-rise instead. The photo
-  // sits inside the row itself now (.rhythm-row-bg, same element at
-  // every viewport width), so there's no separate desktop/mobile
-  // lookup to do — unlike the previous Work index layout, which kept
-  // the hover-grown photo in a sibling column on desktop only.
+  // Only the Work-index's stage link carries data-work, so this is a
+  // no-op (returns null) for every other link on the site — exactly
+  // the cases that should keep the plain page-rise instead. The Work
+  // index now shows one chapter at a time in a single persistent frame
+  // (.stage-photo-frame) rather than a separate row per chapter, so
+  // js/script.js keeps that frame's data-work and data-morph-id
+  // attributes in sync with whichever chapter is currently on screen
+  // — this function just reads whatever they currently say at the
+  // moment of the click.
   function findMorphSource(trigger) {
     if (!trigger || !trigger.getAttribute) return null;
     const workKey = trigger.getAttribute('data-work');
     if (!workKey) return null;
 
-    const bg = trigger.querySelector && trigger.querySelector('.rhythm-row-bg');
+    const bg = trigger.querySelector && trigger.querySelector('.stage-photo-frame');
     if (bg && bg.offsetParent !== null) {
       return { id: 'cat-' + workKey, el: bg };
     }

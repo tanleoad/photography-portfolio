@@ -29,8 +29,10 @@ let _parallaxScrollHandler = null;
 let _parallaxResizeHandler = null;
 let _revealObserver = null;
 let _revealSafetyTimeout = null;
+let _workStageKeydownHandler = null;
 
 function teardownPageContent() {
+  if (_workStageKeydownHandler) { document.removeEventListener('keydown', _workStageKeydownHandler); _workStageKeydownHandler = null; }
   if (_cheroCycleTimer) { clearInterval(_cheroCycleTimer); _cheroCycleTimer = null; }
   _cheroCycleHandlers = null;
 
@@ -236,22 +238,133 @@ function initPageContent() {
     updateParallax();
   }
 
-  /* ---- Work page: rhythm index ----
-     Brightening the row's photo and nudging its name sideways on
-     hover is handled entirely in CSS via :hover now — each row is
-     self-contained (photo and name together), unlike the previous
-     layout's separate name/photo columns, which needed JS to swap the
-     right-hand photo to match whichever name was hovered. All that's
-     left to do here is grow the camera cursor's label on real
-     (non "coming soon") rows. Cursor itself is set up once, globally
-     — see below — so it's always available here even right after a
-     page transition. */
-  const rhythmRows = Array.from(document.querySelectorAll('.rhythm-row:not(.is-soon)'));
-  if (window.siteCursor && rhythmRows.length) {
-    rhythmRows.forEach(row => {
-      row.addEventListener('mouseenter', () => window.siteCursor.grow('Enter'));
-      row.addEventListener('mouseleave', window.siteCursor.shrink);
+  /* ---- Work page: the editing table ----
+     One monumental photograph fills the screen at a time instead of a
+     list of rows. A single persistent frame (#stagePhotoFrame) stands
+     in for all four chapters in turn — cycling with the arrows or the
+     keyboard swaps its image, text and data-work/data-morph-id
+     attributes in place rather than navigating anywhere, so
+     findMorphSource() in js/transitions.js just reads whichever
+     chapter is currently loaded into that frame at the moment someone
+     actually clicks it. Four photographic behaviours carry the whole
+     system: the image develops in once, chemically, whenever a
+     chapter is freshly arrived at (see .work-stage.developed in
+     style.css); a light sweeps across it on hover, the way sunlight
+     moves through a room, and settles into a slow breathe if you
+     linger; moving between chapters closes and opens an aperture iris
+     rather than fading; and a small exposure-meter needle shows which
+     of the four you're on. Only real chapters are clickable/hoverable
+     — Photo Retouching stays inert exactly the way it was as a
+     "coming soon" rhythm row, just by having no href or data-work
+     while it's the current chapter. */
+  const workStage = document.getElementById('workStage');
+  if (workStage) {
+    const stageChapters = [
+      { key: 'street', num: '01', name: 'Street', desc: 'Observations from cities, people and the moments between them.', img: 'images/louvre-abudhabi.jpg', alt: 'Dappled light beneath the Louvre Abu Dhabi dome' },
+      { key: 'architecture', num: '02', name: 'Architecture', desc: 'Where geometry, light and silence meet.', img: 'images/badshahi-mosque.jpg', alt: 'Grand mosque domes and minarets glowing at golden hour' },
+      { key: 'portraits', num: '03', name: 'Portraits', desc: 'Stories told through expression, presence and light.', img: 'images/double-exposure-portrait.jpg', alt: 'Double exposure portrait blurred against the Abu Dhabi skyline' },
+      { key: 'retouching', num: '04', name: 'Photo Retouching', desc: 'Coming soon.', img: 'images/mystic-night-lamps.jpg', alt: 'Warmly retouched night scene along a palace driveway', soon: true }
+    ];
+    const meterAngles = [-68, -23, 23, 68];
+
+    const stageLink = document.getElementById('stageFrameLink');
+    const stagePhotoFrame = document.getElementById('stagePhotoFrame');
+    const stagePhoto = document.getElementById('stagePhoto');
+    const stageNum = document.getElementById('stageNum');
+    const stageName = document.getElementById('stageName');
+    const stageDesc = document.getElementById('stageDesc');
+    const stageCounterCurrent = document.getElementById('stageCounterCurrent');
+    const stageMeterNeedle = document.getElementById('stageMeterNeedle');
+    const stageIris = document.getElementById('stageIris');
+    const stagePrevBtn = document.getElementById('stagePrevBtn');
+    const stageNextBtn = document.getElementById('stageNextBtn');
+
+    let stageCurrent = 0;
+    let stageHoverTimer = null;
+    let stageDevelopTimer = null;
+    let stageBusy = false;
+
+    function renderStageChapter(index) {
+      const ch = stageChapters[index];
+      stagePhoto.src = ch.img;
+      stagePhoto.alt = ch.alt;
+      stageNum.textContent = ch.num;
+      stageName.textContent = ch.name;
+      stageDesc.textContent = ch.desc;
+      stageCounterCurrent.textContent = ch.num;
+      stageMeterNeedle.style.transform = 'rotate(' + meterAngles[index] + 'deg)';
+      stagePhotoFrame.setAttribute('data-morph-id', 'cat-' + ch.key);
+
+      if (ch.soon) {
+        stageLink.classList.add('is-soon');
+        stageLink.removeAttribute('href');
+        stageLink.removeAttribute('data-work');
+      } else {
+        stageLink.classList.remove('is-soon');
+        stageLink.setAttribute('href', ch.key + '.html');
+        stageLink.setAttribute('data-work', ch.key);
+      }
+
+      workStage.classList.remove('developed', 'sweeping', 'breathing');
+      clearTimeout(stageDevelopTimer);
+      clearTimeout(stageHoverTimer);
+
+      // Force a reflow so the negative resting state actually paints
+      // on its own before the develop-in transition starts a beat
+      // later, rather than risking both states landing in the same
+      // frame and the image just appearing already-developed.
+      void workStage.offsetHeight;
+      stageDevelopTimer = setTimeout(() => {
+        workStage.classList.add('developed');
+      }, 260);
+    }
+
+    function goToStageChapter(newIndex) {
+      if (stageBusy) return;
+      stageBusy = true;
+      const next = (newIndex + stageChapters.length) % stageChapters.length;
+      stageIris.classList.remove('opening');
+      stageIris.classList.add('closing');
+      setTimeout(() => {
+        stageCurrent = next;
+        renderStageChapter(stageCurrent);
+        stageIris.classList.remove('closing');
+        stageIris.classList.add('opening');
+        setTimeout(() => {
+          stageIris.classList.remove('opening');
+          stageBusy = false;
+        }, 760);
+      }, 640);
+    }
+
+    stagePrevBtn.addEventListener('click', () => goToStageChapter(stageCurrent - 1));
+    stageNextBtn.addEventListener('click', () => goToStageChapter(stageCurrent + 1));
+
+    _workStageKeydownHandler = (e) => {
+      if (e.key === 'ArrowRight') goToStageChapter(stageCurrent + 1);
+      if (e.key === 'ArrowLeft') goToStageChapter(stageCurrent - 1);
+    };
+    document.addEventListener('keydown', _workStageKeydownHandler);
+
+    stageLink.addEventListener('mouseenter', () => {
+      if (stageChapters[stageCurrent].soon) return;
+      if (!workStage.classList.contains('developed')) return;
+      if (window.siteCursor) window.siteCursor.grow('Enter');
+      workStage.classList.remove('breathing');
+      workStage.classList.add('sweeping');
+      clearTimeout(stageHoverTimer);
+      stageHoverTimer = setTimeout(() => {
+        workStage.classList.remove('sweeping');
+        workStage.classList.add('breathing');
+      }, 1300);
     });
+    stageLink.addEventListener('mouseleave', () => {
+      if (window.siteCursor) window.siteCursor.shrink();
+      clearTimeout(stageHoverTimer);
+      workStage.classList.remove('sweeping', 'breathing');
+    });
+
+    renderStageChapter(stageCurrent);
   }
 }
 window.initPageContent = initPageContent;

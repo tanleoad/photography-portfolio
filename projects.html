@@ -45,62 +45,50 @@
 <main data-taxi>
 <div data-taxi-view="">
 
-<section class="section archive-hero">
-  <div class="container">
-    <div class="archive-intro reveal">
-      <p class="eyebrow">The Archive</p>
-      <p class="archive-lead">Four bodies of work, each its own chapter.</p>
+<div class="work-stage" id="workStage">
+
+  <a href="street.html" class="stage-frame-link" id="stageFrameLink" data-work="street">
+    <div class="stage-photo-frame" id="stagePhotoFrame" data-morph-id="cat-street">
+      <img class="stage-photo" id="stagePhoto" src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome">
     </div>
+    <div class="light-sweep"></div>
+    <div class="stage-vignette"></div>
+  </a>
+
+  <div class="stage-eyebrow-group">
+    <span class="eyebrow">Work</span>
+    <span class="stage-counter"><span class="current" id="stageCounterCurrent">01</span> / 04</span>
   </div>
-</section>
 
-<section class="rhythm reveal">
-
-  <a href="street.html" class="rhythm-row" data-work="street">
-    <div class="rhythm-row-bg"><img src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome" loading="lazy"></div>
-    <div class="rhythm-row-content">
-      <div class="rhythm-left">
-        <span class="rhythm-num">01</span>
-        <h2 class="rhythm-name">Street</h2>
-      </div>
-      <p class="rhythm-desc">Observations from cities, people and the moments between them.</p>
+  <div class="stage-label">
+    <div class="stage-label-left">
+      <span class="stage-num" id="stageNum">01</span>
+      <h1 class="stage-name" id="stageName">Street</h1>
     </div>
-  </a>
-
-  <a href="architecture.html" class="rhythm-row" data-work="architecture">
-    <div class="rhythm-row-bg"><img src="images/badshahi-mosque.jpg" alt="Grand mosque domes and minarets glowing at golden hour" loading="lazy"></div>
-    <div class="rhythm-row-content">
-      <div class="rhythm-left">
-        <span class="rhythm-num">02</span>
-        <h2 class="rhythm-name">Architecture</h2>
-      </div>
-      <p class="rhythm-desc">Where geometry, light and silence meet.</p>
-    </div>
-  </a>
-
-  <a href="portraits.html" class="rhythm-row" data-work="portraits">
-    <div class="rhythm-row-bg"><img src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy"></div>
-    <div class="rhythm-row-content">
-      <div class="rhythm-left">
-        <span class="rhythm-num">03</span>
-        <h2 class="rhythm-name">Portraits</h2>
-      </div>
-      <p class="rhythm-desc">Stories told through expression, presence and light.</p>
-    </div>
-  </a>
-
-  <div class="rhythm-row is-soon" data-work="retouching">
-    <div class="rhythm-row-bg"><img src="images/mystic-night-lamps.jpg" alt="Warmly retouched night scene along a palace driveway" loading="lazy"></div>
-    <div class="rhythm-row-content">
-      <div class="rhythm-left">
-        <span class="rhythm-num">04</span>
-        <h2 class="rhythm-name">Photo Retouching</h2>
-      </div>
-      <p class="rhythm-desc">Coming soon.</p>
+    <div>
+      <p class="stage-desc" id="stageDesc">Observations from cities, people and the moments between them.</p>
     </div>
   </div>
 
-</section>
+  <button class="stage-nav-btn stage-nav-prev" id="stagePrevBtn" aria-label="Previous chapter">&#8249;</button>
+  <button class="stage-nav-btn stage-nav-next" id="stageNextBtn" aria-label="Next chapter">&#8250;</button>
+
+  <div class="stage-meter">
+    <svg viewBox="0 0 120 70" width="104" height="60">
+      <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="rgba(243,240,233,0.22)" stroke-width="1.5"/>
+      <line x1="18" y1="55" x2="23" y2="46" stroke="var(--text-faint)" stroke-width="1.5"/>
+      <line x1="42" y1="17" x2="45" y2="27" stroke="var(--text-faint)" stroke-width="1.5"/>
+      <line x1="78" y1="17" x2="75" y2="27" stroke="var(--text-faint)" stroke-width="1.5"/>
+      <line x1="102" y1="55" x2="97" y2="46" stroke="var(--text-faint)" stroke-width="1.5"/>
+      <line id="stageMeterNeedle" x1="60" y1="60" x2="60" y2="20" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="60" cy="60" r="3" fill="var(--accent)"/>
+    </svg>
+    <span class="stage-meter-label">Exposure</span>
+  </div>
+
+  <div class="stage-iris" id="stageIris"></div>
+
+</div>
 
 <section class="section cta-band reveal">
   <div class="container cta-inner">
