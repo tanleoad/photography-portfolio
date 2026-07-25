@@ -254,6 +254,11 @@ body.intro-active{ overflow:hidden; }
   transition: opacity 0.45s ease, transform 0.45s ease;
   pointer-events: auto;
 }
+/* Used when a menu link navigates away — see closeMenuInstant() in
+   js/script.js — so the overlay's own close fade never overlaps the
+   destination page's transition, which was already starting
+   underneath the overlay's (much higher) usual stacking layer. */
+.menu-overlay.no-transition{ transition: none !important; }
 .menu-overlay-left{
   width: 42%;
   min-width: 320px;

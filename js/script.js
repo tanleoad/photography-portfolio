@@ -340,9 +340,26 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.style.paddingRight = '';
       stopMenuSlideshow();
     };
+    // Used specifically when a menu link is about to navigate away.
+    // The overlay's normal close is a graceful 0.45s fade — fine when
+    // you're staying on the page (the X button, Escape), but the
+    // overlay sits at a much higher z-index than everything else so
+    // it can cover the page while open, and that fade was still
+    // running (and still on top) after the destination page's own
+    // transition had already started underneath it — the overlay
+    // visibly lingering over the incoming page rising into place. The
+    // whole page is about to be replaced anyway, so there's nothing to
+    // gain from the graceful fade here; closing instantly clears it
+    // before the page transition even begins.
+    const closeMenuInstant = () => {
+      menuOverlay.classList.add('no-transition');
+      closeMenu();
+      void menuOverlay.offsetWidth; // force the instant close to apply now
+      requestAnimationFrame(() => menuOverlay.classList.remove('no-transition'));
+    };
     menuTrigger.addEventListener('click', openMenu);
     if (menuClose) menuClose.addEventListener('click', closeMenu);
-    menuOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+    menuOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenuInstant));
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeMenu();
     });
