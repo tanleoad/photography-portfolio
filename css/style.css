@@ -108,10 +108,15 @@ h1,h2,h3,h4{
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: opacity 1.3s cubic-bezier(0.16,1,0.3,1);
+  transition: transform 1.3s cubic-bezier(0.16,1,0.3,1);
 }
 .intro-overlay.intro-hide{
-  opacity: 0;
+  /* Whole panel — name included — drags straight up and off the top
+     of the screen as one solid piece, revealing the homepage sitting
+     underneath, rather than fading out in place. inset:0 makes this
+     element exactly one viewport tall, so -100% is a clean, complete
+     exit with no gap or overshoot. */
+  transform: translateY(-100%);
   pointer-events: none;
 }
 .intro-name{

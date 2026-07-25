@@ -444,11 +444,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const introLastDelay = (introLetters.length - 1) * 150;
     const introLetterDuration = 700;
     const introHoldTime = 600;
-    const introFadeTime = 1300;
+    // How long the whole panel takes to drag itself up and off the top
+    // of the screen (see .intro-overlay.intro-hide in css/style.css) —
+    // matches that CSS transition's duration so the element isn't
+    // removed from the DOM until it's actually finished leaving.
+    const introSlideTime = 1300;
     setTimeout(() => {
       introOverlay.classList.add('intro-hide');
       document.body.classList.remove('intro-active');
-      setTimeout(() => introOverlay.remove(), introFadeTime);
+      setTimeout(() => introOverlay.remove(), introSlideTime);
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
