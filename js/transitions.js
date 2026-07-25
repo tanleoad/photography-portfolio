@@ -123,6 +123,25 @@
     }
 
     onEnter({ to, done }) {
+      // Hide this page's reveal-marked content (headings, intro text,
+      // image plates — see the .reveal system in js/script.js) the
+      // instant it exists in the DOM, before any of it has been shown
+      // on screen. Previously this only happened once the transition
+      // had *finished* (via NAVIGATE_END -> initPageContent(), further
+      // below in this file's flow) — which meant the incoming page's
+      // text sat fully visible the entire time it rose/morphed into
+      // place, then popped invisible in a single frame the instant the
+      // animation completed, before fading back in a moment later. That
+      // pop was a visible glitch right as the page settled. Doing it
+      // here means the content is already sitting in its hidden,
+      // pre-reveal state before it's ever painted, so all that's left
+      // to happen once the transition ends is the intended fade-up —
+      // nothing left to pop.
+      to.querySelectorAll('.reveal').forEach(el => {
+        el.classList.add('pre');
+        el.classList.remove('in');
+      });
+
       // Taxi's Renderer never actually passes `from` into onEnter
       // (only onLeave gets it) — with removeOldContent:false both the
       // outgoing and incoming [data-taxi-view] elements sit in the
