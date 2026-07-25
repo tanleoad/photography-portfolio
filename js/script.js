@@ -22,6 +22,9 @@ let _cheroCycleTimer = null;
 let _cheroCycleHandlers = null;
 let _heroExitScrollHandler = null;
 let _heroExitResizeHandler = null;
+let _heroTiltEl = null;
+let _heroTiltMoveHandler = null;
+let _heroTiltLeaveHandler = null;
 let _parallaxScrollHandler = null;
 let _parallaxResizeHandler = null;
 let _revealObserver = null;
@@ -33,6 +36,12 @@ function teardownPageContent() {
 
   if (_heroExitScrollHandler) { window.removeEventListener('scroll', _heroExitScrollHandler); _heroExitScrollHandler = null; }
   if (_heroExitResizeHandler) { window.removeEventListener('resize', _heroExitResizeHandler); _heroExitResizeHandler = null; }
+
+  if (_heroTiltEl) {
+    if (_heroTiltMoveHandler) _heroTiltEl.removeEventListener('mousemove', _heroTiltMoveHandler);
+    if (_heroTiltLeaveHandler) _heroTiltEl.removeEventListener('mouseleave', _heroTiltLeaveHandler);
+  }
+  _heroTiltEl = null; _heroTiltMoveHandler = null; _heroTiltLeaveHandler = null;
 
   if (_parallaxScrollHandler) { window.removeEventListener('scroll', _parallaxScrollHandler); _parallaxScrollHandler = null; }
   if (_parallaxResizeHandler) { window.removeEventListener('resize', _parallaxResizeHandler); _parallaxResizeHandler = null; }
@@ -94,6 +103,43 @@ function initPageContent() {
       cheroList.addEventListener('mouseenter', stopCycle);
       cheroList.addEventListener('mouseleave', startCycle);
     }
+  }
+
+  /* ---- Hero: cursor-tilt parallax ----
+     As the pointer moves anywhere over the hero — not just hovering a
+     title — the whole photograph tilts very slightly toward it, like
+     looking through a window as you walk past. This deliberately
+     transforms .chero-media as one rigid block (photo + its darkening
+     scrim together) rather than tracking which individual story photo
+     is currently revealed, so it works automatically no matter which
+     one CSS is currently showing via the existing hover-reveal (see
+     the .chero:has(...) rules in style.css) — nothing about that
+     reveal mechanic itself is touched. Desktop/hover-capable only,
+     and off entirely if the visitor has motion reduction on or GSAP
+     failed to load. */
+  const cheroMedia = document.querySelector('.chero-media');
+  const cheroEl = document.querySelector('.chero');
+  const heroTiltEnabled = cheroMedia && cheroEl &&
+    typeof window.gsap !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (heroTiltEnabled) {
+    const MAX_TILT = 2.4; // degrees — subtle, not a gimmick
+    gsap.set(cheroMedia, { transformPerspective: 1000, transformOrigin: 'center center' });
+    const setTiltY = gsap.quickTo(cheroMedia, 'rotationY', { duration: 1, ease: 'power3' });
+    const setTiltX = gsap.quickTo(cheroMedia, 'rotationX', { duration: 1, ease: 'power3' });
+
+    _heroTiltEl = cheroEl;
+    _heroTiltMoveHandler = (e) => {
+      const r = cheroEl.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      setTiltY(px * MAX_TILT * 2);
+      setTiltX(-py * MAX_TILT * 2);
+    };
+    _heroTiltLeaveHandler = () => { setTiltY(0); setTiltX(0); };
+    cheroEl.addEventListener('mousemove', _heroTiltMoveHandler);
+    cheroEl.addEventListener('mouseleave', _heroTiltLeaveHandler);
   }
 
   /* ---- Hero exit: scroll-tied zoom + fade ----
