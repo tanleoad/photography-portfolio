@@ -251,12 +251,23 @@
       gsap.to(clipper, {
         y: window.innerHeight * -0.2,
         duration: 1.6,
-        ease: 'expo.inOut',
+        ease: 'power3.out',
         force3D: true
       });
 
       // The incoming page starts pinned just below the bottom edge
       // of the viewport, full-screen, then rises up to cover it.
+      // Deliberately an "out" ease (starts at full speed, settles
+      // gently) rather than the "inOut" this used previously — inOut
+      // spends its first ~500ms of the 1.6s barely moving at all
+      // before it visibly picks up, since the incoming page starts
+      // fully below the viewport and stays there almost motionless
+      // during that slow ease-in. That read as the click having done
+      // nothing for a beat — "stuck for a second, then it opens" —
+      // rather than an intentionally unhurried motion. Starting at
+      // full speed means the page is visibly moving the instant the
+      // transition begins, while still decelerating smoothly into
+      // place at the end rather than stopping abruptly.
       gsap.set(to, {
         position: 'fixed',
         top: 0,
@@ -270,7 +281,7 @@
       gsap.to(to, {
         y: '0%',
         duration: 1.6,
-        ease: 'expo.inOut',
+        ease: 'power3.out',
         onComplete: () => {
           // Snap the real scroll position back to the top BEFORE
           // handing the incoming page back to normal document flow.

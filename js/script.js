@@ -266,6 +266,36 @@ window.initPageContent = initPageContent;
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* ---- Prefetch every internal page shortly after load ----
+     Taxi's own navigateTo() (js/transitions.js) fetches a destination
+     page's HTML fresh over the network the moment a link is clicked —
+     prefetching is deliberately off there (see that file's comments)
+     since it's tied to a link selector Taxi never actually sees. On a
+     slow or just-cold connection, that fetch can visibly take a
+     second or two, during which nothing happens on screen: the flash
+     fires, then the site just sits there looking stuck, until the
+     response finally lands and the transition suddenly continues.
+     Warming the browser's own HTTP cache for every internal page
+     during idle time after load means that fetch almost always
+     resolves instantly from cache instead, no matter which link ends
+     up getting clicked. Runs once, globally, on the real page load —
+     the warmed cache stays useful for every Taxi transition
+     afterward, not just the first one. */
+  (function prefetchInternalPages() {
+    const pages = ['index.html', 'projects.html', 'about.html', 'contact.html', 'street.html', 'architecture.html', 'portraits.html'];
+    const current = window.location.pathname.split('/').pop() || 'index.html';
+    const run = () => {
+      pages.filter(p => p !== current).forEach(p => {
+        fetch(p, { credentials: 'same-origin' }).catch(() => {});
+      });
+    };
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(run, { timeout: 3000 });
+    } else {
+      setTimeout(run, 1500);
+    }
+  })();
+
   /* ---- Nav scroll state ---- */
   const nav = document.querySelector('.site-nav');
   const onScroll = () => {
