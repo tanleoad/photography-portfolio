@@ -530,9 +530,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // reads clearly as "you clicked this," so the flash burst below
       // would just be a bright pop sitting on top of, and briefly
       // outlasting, the very start of that growth (the flash takes up
-      // to 600ms to fade; the morph starts within 200ms of the click).
-      // Skipped only for this one case — every other click on the site
-      // still gets the flash exactly as before.
+      // to 600ms to fade; the morph starts the instant navigation
+      // below fires). Skipped only for this one case — every other
+      // click on the site still gets the flash exactly as before.
       const link = e.target.closest('a[href]');
       const isMorphLink = !!(link && link.hasAttribute('data-work'));
 
@@ -552,20 +552,26 @@ document.addEventListener('DOMContentLoaded', () => {
         flashVeil.classList.add('is-active');
       }
 
-      // A click that jumps straight to another page swaps the whole
-      // page out before the flash has a chance to be seen. Hold real,
-      // same-page navigations back just long enough for the flash to
-      // register, then hand off to the page-transition router
-      // (js/transitions.js) so the destination swaps in smoothly
-      // instead of a hard reload. If that router never loaded (CDN
-      // blocked, offline), fall back to a normal navigation — the
-      // site works exactly the same either way, just without the
-      // swap animation. In-page anchors, new-tab clicks, modified
-      // clicks, and mailto/tel links are left alone. Morph links skip
-      // the hold entirely, since there's no flash to wait for — the
-      // photograph starts growing the instant it's clicked, which
-      // reads as far more direct than the regular page-turn's brief
-      // pause.
+      // Hands off to the page-transition router (js/transitions.js) so
+      // the destination swaps in smoothly instead of a hard reload. If
+      // that router never loaded (CDN blocked, offline), falls back to
+      // a normal navigation — the site works exactly the same either
+      // way, just without the swap animation. In-page anchors, new-tab
+      // clicks, modified clicks, and mailto/tel links are left alone.
+      //
+      // This used to be held back by an artificial 200ms delay so the
+      // flash above had "time to register" before the page swapped —
+      // reasonable-sounding, but it meant every single click on the
+      // site paused for a fifth of a second before anything visibly
+      // happened, which read as the site being unresponsive rather
+      // than deliberate (most noticeable right after closing the menu,
+      // since that's already one click removed from seeing the actual
+      // destination). The flash and the page-rise were never actually
+      // in conflict — the old page stays fully visible through the
+      // start of the rise regardless of when navigation begins, the
+      // same reason the photo-morph transition was always able to
+      // start immediately. Every click now navigates the instant it's
+      // clicked, flash included.
       if (
         link &&
         !e.defaultPrevented &&
@@ -577,17 +583,10 @@ document.addEventListener('DOMContentLoaded', () => {
       ) {
         e.preventDefault();
         const dest = link.href;
-        const go = () => {
-          if (window.siteTaxi) {
-            window.siteTaxi.navigateTo(dest, undefined, link);
-          } else {
-            window.location.href = dest;
-          }
-        };
-        if (isMorphLink) {
-          go();
+        if (window.siteTaxi) {
+          window.siteTaxi.navigateTo(dest, undefined, link);
         } else {
-          setTimeout(go, 200);
+          window.location.href = dest;
         }
       }
     });
