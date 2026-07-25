@@ -83,6 +83,7 @@
           duration: 0.45,
           ease: 'power1.out',
           onComplete: () => {
+            window.scrollTo(0, 0);
             if (from && from.parentNode) from.parentNode.removeChild(from);
             done();
           }
@@ -90,19 +91,28 @@
         return;
       }
 
-      // Pin the outgoing page exactly where it currently sits on
-      // screen, then let it drift upward and out of the way.
+      // Clip the outgoing page to a viewport-sized window rather than
+      // pinning its full (often much taller — a long homepage can run
+      // several thousand pixels) scrollable height directly. A small
+      // fixed "clipper" holds the real content at its original
+      // on-screen offset, so only one viewport's worth ever needs to
+      // be painted/composited while it drifts — this is what was
+      // making the transition feel janky, especially leaving longer
+      // pages.
       const fromRect = from.getBoundingClientRect();
+      const clipper = document.createElement('div');
+      clipper.style.cssText =
+        'position:fixed; top:0; left:0; width:100%; height:100vh; overflow:hidden; z-index:8; pointer-events:none;';
+      from.parentNode.insertBefore(clipper, from);
+      clipper.appendChild(from);
       gsap.set(from, {
-        position: 'fixed',
+        position: 'absolute',
         top: fromRect.top,
         left: fromRect.left,
         width: fromRect.width,
-        height: fromRect.height,
-        y: 0,
-        zIndex: 8
+        y: 0
       });
-      gsap.to(from, {
+      gsap.to(clipper, {
         y: window.innerHeight * -0.2,
         duration: 1.6,
         ease: 'expo.inOut',
@@ -117,6 +127,7 @@
         left: 0,
         width: '100%',
         height: '100vh',
+        overflow: 'hidden',
         y: '100%',
         zIndex: 10
       });
@@ -125,8 +136,21 @@
         duration: 1.6,
         ease: 'expo.inOut',
         onComplete: () => {
-          gsap.set(to, { clearProps: 'position,top,left,width,height,y,zIndex' });
-          if (from.parentNode) from.parentNode.removeChild(from);
+          // Snap the real scroll position back to the top BEFORE
+          // handing the incoming page back to normal document flow.
+          // Doing it the other way round (clearProps first) leaves a
+          // window where `to` is laid out normally but the browser is
+          // still scrolled to wherever the visitor was on the old
+          // page — for a frame or two, whatever section of the new
+          // page happens to line up with that old scroll offset
+          // flashes on screen before the real scrollTo(0,0) (further
+          // down, in NAVIGATE_END) catches up. That stray flash is
+          // what was reading as a "glitch" — most noticeably on the
+          // Work page, since its category descriptions sit roughly
+          // mid-page and were exactly what lined up.
+          window.scrollTo(0, 0);
+          gsap.set(to, { clearProps: 'position,top,left,width,height,overflow,y,zIndex' });
+          if (clipper.parentNode) clipper.parentNode.removeChild(clipper);
           done();
         }
       });
