@@ -878,123 +878,114 @@ body.intro-active{ overflow:hidden; }
   line-height: 1.6;
 }
 
-/* ---------------- Work: hover-reveal index ----------------
-   Direct reference: detroit.paris/projects. Every category name is
-   huge, all the time — not just on hover — dimmed by default and
-   brightening on hover/active. On the right, every category has its
-   own photograph already stacked in place, small by default; the
-   hovered one grows tall and pushes the rest of the stack down,
-   rather than one image simply swapping for another. Each name sits
-   in its own [data-work] row; the matching photograph lives in
-   .work-list-media as a column of rows keyed by [data-work-image],
-   toggled via JS in initPageContent() since a hover on one column
-   needs to affect an unrelated element in the other. */
-.work-list{ padding-bottom: clamp(3rem, 6vw, 5rem); }
-.work-list-grid{
-  display: grid;
-  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
-  align-items: start;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  padding: clamp(2rem, 5vw, 3.5rem) var(--page-pad) 0;
-}
-.work-list-names{ display: flex; flex-direction: column; }
-.work-list-item{
+/* ---------------- Work: rhythm index ----------------
+   Rebuilt 2026-07-25 from directly measuring detroit.paris/projects'
+   own rendered page (not just eyeballing it) — its actual signature
+   turned out to be a tight, perfectly even beat: every project row
+   there sits at exactly the same height with zero gap between rows,
+   nothing but a hairline border marking each one off from the next.
+   The confidence comes from that steady repetition, not from any row
+   being bigger than another — the opposite of the big/small collage
+   tried first, which read as busy rather than assured. Adapted here
+   at four rows instead of dozens: each is a full-width photograph
+   band at a fixed, modest height, with the chapter's name and number
+   overlaid directly on it rather than in a separate column, and a
+   hairline border is the only space between one and the next. Hover
+   brings that row's photograph up to full color and nudges its name
+   sideways slightly; everything else stays exactly where it is. */
+.rhythm{ border-top: 1px solid var(--border); }
+.rhythm-row{
+  position: relative;
   display: block;
-  padding: clamp(0.6rem, 1.6vw, 1.1rem) 0;
-  border-top: 1px solid var(--border);
+  height: clamp(140px, 20vh, 220px);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
   text-decoration: none;
+  color: inherit;
   cursor: pointer;
 }
-.work-list-item:last-child{ border-bottom: 1px solid var(--border); }
-.work-list-item.is-soon{ cursor: default; }
-.work-list-item-row{
-  display: flex;
-  align-items: baseline;
-  gap: 1.1rem;
-}
-.work-list-num{
-  font-family: 'Fraunces', serif;
-  font-size: 0.8rem;
-  color: var(--text-faint);
-  flex: none;
-}
-.work-list-name{
-  font-size: clamp(3rem, 8.5vw, 7.5rem);
-  line-height: 0.88;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  transition: color 0.5s ease;
-}
-.work-list-item:hover .work-list-name,
-.work-list-item.is-active .work-list-name{
-  color: var(--text);
-}
-.work-list-desc{
-  margin-top: 0.3rem;
-  font-family: 'Inter', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.68rem;
-  color: var(--text-faint);
-  max-width: 40ch;
-  transition: color 0.5s ease;
-}
-.work-list-item:hover .work-list-desc,
-.work-list-item.is-active .work-list-desc{
-  color: var(--text-dim);
-}
-.work-list-thumb-mobile{ display: none; }
-
-.work-list-media{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.6rem;
-}
-.work-list-media-row{
-  /* Kept at roughly the same portrait aspect ratio (~4:5) at every
-     size — width and height grow together — so a hover never forces
-     one of Tanleo's portrait-oriented photos into an ugly wide, thin
-     crop the way changing height alone did. */
-  width: 30%;
-  height: 8.5rem;
+.rhythm-row.is-soon{ cursor: default; }
+.rhythm-row-bg{
+  /* This is the shared-element morph target on this page — see
+     findMorphSource() in js/transitions.js and the .cat-hero-photo
+     comment further down. Self-clipping on its own, independent of
+     the row's own overflow:hidden, since Flip transforms this exact
+     element and a clip that only lived on an ancestor wouldn't travel
+     with it mid-flight. */
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  background: var(--bg-elev);
-  opacity: 0.55;
-  transition: width 0.7s cubic-bezier(0.33,1,0.68,1), height 0.7s cubic-bezier(0.33,1,0.68,1), opacity 0.5s ease;
 }
-.work-list-media-row.is-active{
-  width: 100%;
-  height: 28rem;
-  opacity: 1;
-}
-.work-list-media-row img{
+.rhythm-row-bg img{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.06);
+  filter: grayscale(1) brightness(0.5);
+  transform: scale(1.02);
+  transition: filter 0.5s ease, transform 8s cubic-bezier(0.16,1,0.3,1);
 }
-@media (max-width: 900px){
-  .work-list-grid{
-    grid-template-columns: 1fr;
-    padding: clamp(1.5rem, 5vw, 2.5rem) var(--page-pad) 0;
-  }
-  .work-list-media{ display: none; }
-  .work-list-name{ font-size: clamp(2.2rem, 11vw, 3.2rem); }
-  .work-list-desc{ max-width: none; }
-  .work-list-thumb-mobile{
-    display: block;
-    margin-top: 1.2rem;
-    height: 56vw;
-    min-height: 220px;
-    overflow: hidden;
-    background: var(--bg-elev);
-  }
-  .work-list-thumb-mobile img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.rhythm-row:hover .rhythm-row-bg img{
+  filter: grayscale(0) brightness(0.72);
+  transform: scale(1.08);
+}
+.rhythm-row.is-soon:hover .rhythm-row-bg img{
+  filter: grayscale(1) brightness(0.32);
+  transform: scale(1.02);
+}
+.rhythm-row-content{
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 var(--page-pad);
+}
+.rhythm-left{
+  display: flex;
+  align-items: baseline;
+  gap: clamp(1rem, 3vw, 2.2rem);
+  overflow: hidden;
+  min-width: 0;
+}
+.rhythm-num{
+  font-family: 'Fraunces', serif;
+  font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+  color: var(--text-faint);
+  flex: none;
+  transition: color 0.4s ease;
+}
+.rhythm-row:hover .rhythm-num{ color: var(--accent); }
+.rhythm-row.is-soon:hover .rhythm-num{ color: var(--text-faint); }
+.rhythm-name{
+  font-family: 'Fraunces', serif;
+  text-transform: uppercase;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+  line-height: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.rhythm-row:hover .rhythm-name{ transform: translateX(10px); }
+.rhythm-row.is-soon:hover .rhythm-name{ transform: none; }
+.rhythm-desc{
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: rgba(243,240,233,0.65);
+  max-width: 26ch;
+  text-align: right;
+  flex: none;
+  display: none;
+}
+@media (min-width: 700px){
+  .rhythm-desc{ display: block; }
+}
+@media (max-width: 560px){
+  .rhythm-row{ height: clamp(120px, 26vh, 180px); }
+  .rhythm-name{ font-size: clamp(1.8rem, 9vw, 2.6rem); }
 }
 
 /* ---------------- Category pages: hero ----------------
@@ -1002,9 +993,9 @@ body.intro-active{ overflow:hidden; }
    Architecture/Portraits/Retouching). Carries .reveal (see
    js/script.js) so the eyebrow/title/description fade and slide up
    into view right after the page-enter transition settles — the
-   font-family and weight still match .work-list-name on the Work
-   index on purpose, so the category name reads as the same piece of
-   type carrying through from one page to the next. */
+   font-family and weight still match .rhythm-name on the Work index
+   on purpose, so the category name reads as the same piece of type
+   carrying through from one page to the next. */
 .cat-hero{
   min-height: 62vh;
   display: flex;
@@ -1028,10 +1019,10 @@ body.intro-active{ overflow:hidden; }
    Sits directly beneath the text hero, full-bleed and tall — the "one
    enormous hero photograph" every chapter deserves. This exact element
    is also the shared-element morph target: on the Work index, the same
-   photograph sits inside .work-list-media-row / .work-list-thumb-mobile
-   (both already self-clipping boxes with an object-fit:cover image
-   filling them, same pattern as here) — clicking through animates that
-   small frame directly into this big one via GSAP Flip (see
+   photograph sits inside .rhythm-row-bg (also a self-clipping box with
+   an object-fit:cover image filling it, same pattern as here) —
+   clicking through animates that row's photo directly into this big
+   one via GSAP Flip (see
    js/transitions.js), so the photograph itself is the page transition
    rather than the whole page just changing beneath it. Deliberately a
    plain overflow:hidden box with a filling <img>, not a transformed

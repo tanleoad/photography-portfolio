@@ -236,30 +236,22 @@ function initPageContent() {
     updateParallax();
   }
 
-  /* ---- Work page: hover-reveal index ----
-     Hovering a category name brightens it (handled in CSS via
-     :hover) and grows its matching photograph in .work-list-media —
-     two separate branches of the DOM, so the row swap itself has to
-     happen in JS. Leaving the whole list reverts the stack back to
-     the first (Street) entry. Cursor itself is set up once, globally
+  /* ---- Work page: rhythm index ----
+     Brightening the row's photo and nudging its name sideways on
+     hover is handled entirely in CSS via :hover now — each row is
+     self-contained (photo and name together), unlike the previous
+     layout's separate name/photo columns, which needed JS to swap the
+     right-hand photo to match whichever name was hovered. All that's
+     left to do here is grow the camera cursor's label on real
+     (non "coming soon") rows. Cursor itself is set up once, globally
      — see below — so it's always available here even right after a
      page transition. */
-  const workListNames = document.querySelector('.work-list-names');
-  const workListItems = Array.from(document.querySelectorAll('.work-list-item'));
-  if (workListNames && workListItems.length) {
-    const mediaImgs = Array.from(document.querySelectorAll('.work-list-media-row'));
-    const showMedia = (key) => {
-      mediaImgs.forEach(m => m.classList.toggle('is-active', m.getAttribute('data-work-image') === key));
-    };
-    workListItems.forEach(item => {
-      const key = item.getAttribute('data-work');
-      item.addEventListener('mouseenter', () => {
-        showMedia(key);
-        if (window.siteCursor && !item.classList.contains('is-soon')) window.siteCursor.grow('Enter');
-      });
-      if (window.siteCursor) item.addEventListener('mouseleave', window.siteCursor.shrink);
+  const rhythmRows = Array.from(document.querySelectorAll('.rhythm-row:not(.is-soon)'));
+  if (window.siteCursor && rhythmRows.length) {
+    rhythmRows.forEach(row => {
+      row.addEventListener('mouseenter', () => window.siteCursor.grow('Enter'));
+      row.addEventListener('mouseleave', window.siteCursor.shrink);
     });
-    workListNames.addEventListener('mouseleave', () => showMedia(workListItems[0].getAttribute('data-work')));
   }
 }
 window.initPageContent = initPageContent;

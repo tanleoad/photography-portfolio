@@ -32,15 +32,15 @@
 //    changes around it — it grows, in place, directly into that
 //    chapter's own monumental hero photograph. Nothing else does a
 //    page-turn; the photo you clicked *is* the transition. Built with
-//    GSAP's Flip plugin: the small frame's on-screen position/size is
+//    GSAP's Flip plugin: the row's on-screen position/size is
 //    captured the instant it's clicked (onLeave — the one lifecycle
 //    hook Taxi actually hands the clicked element to), and the big
 //    frame on the new page is animated from that captured state into
 //    its own natural position (onEnter). Both frames are plain
 //    overflow:hidden boxes with a filling <img> — never the <img>
 //    itself — so the crop stays correct at every size in between, not
-//    just the start and end (see the .cat-hero-photo / .work-list-
-//    media-row / .work-list-thumb-mobile comments in style.css).
+//    just the start and end (see the .cat-hero-photo / .rhythm-row-bg
+//    comments in style.css).
 //
 //  - The fallback: for everything else — the nav, the footer, "Back
 //    to the Work", Home, About, Contact, browser back/forward — the
@@ -83,24 +83,21 @@
 
   // Given the clicked element, find the on-screen photograph frame
   // that should morph into the destination's hero photo, if any.
-  // Only Work-index chapter links carry data-work, so this is a
-  // no-op (returns null) for every other link on the site — exactly
-  // the cases that should keep the plain page-rise instead.
+  // Only Work-index chapter rows carry data-work, so this is a no-op
+  // (returns null) for every other link on the site — exactly the
+  // cases that should keep the plain page-rise instead. The photo
+  // sits inside the row itself now (.rhythm-row-bg, same element at
+  // every viewport width), so there's no separate desktop/mobile
+  // lookup to do — unlike the previous Work index layout, which kept
+  // the hover-grown photo in a sibling column on desktop only.
   function findMorphSource(trigger) {
     if (!trigger || !trigger.getAttribute) return null;
     const workKey = trigger.getAttribute('data-work');
     if (!workKey) return null;
 
-    // Desktop: the hover-grown photo sits in a sibling column, not
-    // inside the clicked link itself, matched by data-work-image.
-    const desktopEl = document.querySelector('.work-list-media-row[data-work-image="' + workKey + '"]');
-    if (desktopEl && desktopEl.offsetParent !== null) {
-      return { id: 'cat-' + workKey, el: desktopEl };
-    }
-    // Mobile: the static thumbnail sits inside the clicked link.
-    const mobileEl = trigger.querySelector && trigger.querySelector('.work-list-thumb-mobile');
-    if (mobileEl && mobileEl.offsetParent !== null) {
-      return { id: 'cat-' + workKey, el: mobileEl };
+    const bg = trigger.querySelector && trigger.querySelector('.rhythm-row-bg');
+    if (bg && bg.offsetParent !== null) {
+      return { id: 'cat-' + workKey, el: bg };
     }
     return null;
   }
