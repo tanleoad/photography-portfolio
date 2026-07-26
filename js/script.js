@@ -247,13 +247,14 @@ function initPageContent() {
      findMorphSource() in js/transitions.js just reads whichever
      chapter is currently loaded into that frame at the moment someone
      actually clicks it. Four photographic behaviours carry the whole
-     system: the image develops in once, chemically, whenever a
-     chapter is freshly arrived at (see .work-stage.developed in
-     style.css); a light sweeps across it on hover, the way sunlight
-     moves through a room, and settles into a slow breathe if you
-     linger; moving between chapters closes and opens an aperture iris
-     rather than fading; and a small exposure-meter needle shows which
-     of the four you're on. Only real chapters are clickable/hoverable
+     system: the image develops in once, chemically, whenever the page
+     is freshly arrived at (see .work-stage.developed in style.css); a
+     light sweeps across it on hover, the way sunlight moves through a
+     room, and settles into a slow breathe if you linger; moving
+     between chapters reveals the next photograph through a growing
+     aperture iris — it's already sitting there behind the mask, never
+     hidden behind black — and a small exposure-meter needle shows
+     which of the four you're on. Only real chapters are clickable/hoverable
      — Photo Retouching stays inert exactly the way it was as a
      "coming soon" rhythm row, just by having no href or data-work
      while it's the current chapter. */
@@ -270,12 +271,12 @@ function initPageContent() {
     const stageLink = document.getElementById('stageFrameLink');
     const stagePhotoFrame = document.getElementById('stagePhotoFrame');
     const stagePhoto = document.getElementById('stagePhoto');
+    const stagePhotoIncoming = document.getElementById('stagePhotoIncoming');
     const stageNum = document.getElementById('stageNum');
     const stageName = document.getElementById('stageName');
     const stageDesc = document.getElementById('stageDesc');
     const stageCounterCurrent = document.getElementById('stageCounterCurrent');
     const stageMeterNeedle = document.getElementById('stageMeterNeedle');
-    const stageIris = document.getElementById('stageIris');
     const stagePrevBtn = document.getElementById('stagePrevBtn');
     const stageNextBtn = document.getElementById('stageNextBtn');
 
@@ -284,7 +285,10 @@ function initPageContent() {
     let stageDevelopTimer = null;
     let stageBusy = false;
 
-    function renderStageChapter(index) {
+    // Text, attributes and the base photo for whichever chapter is
+    // now current — shared by the first-arrival render and by the
+    // moment a chapter-to-chapter reveal finishes.
+    function updateStageMeta(index) {
       const ch = stageChapters[index];
       stagePhoto.src = ch.img;
       stagePhoto.alt = ch.alt;
@@ -304,6 +308,15 @@ function initPageContent() {
         stageLink.setAttribute('href', ch.key + '.html');
         stageLink.setAttribute('data-work', ch.key);
       }
+    }
+
+    function renderStageChapter(index) {
+      // First arrival at the page only: paints the negative resting
+      // state, then chemically develops into color a beat later.
+      // Chapter-to-chapter navigation after this never re-triggers it
+      // — see goToStageChapter, which keeps the frame developed and
+      // uses the aperture reveal instead.
+      updateStageMeta(index);
 
       workStage.classList.remove('developed', 'sweeping', 'breathing');
       clearTimeout(stageDevelopTimer);
@@ -323,18 +336,32 @@ function initPageContent() {
       if (stageBusy) return;
       stageBusy = true;
       const next = (newIndex + stageChapters.length) % stageChapters.length;
-      stageIris.classList.remove('opening');
-      stageIris.classList.add('closing');
+      const nextCh = stageChapters[next];
+
+      clearTimeout(stageHoverTimer);
+      clearTimeout(stageDevelopTimer);
+      workStage.classList.remove('sweeping', 'breathing');
+      if (window.siteCursor) window.siteCursor.shrink();
+
+      // The incoming chapter's photo goes into the frame right now,
+      // already sitting there behind a closed circular mask — nothing
+      // swaps to black first.
+      stagePhotoIncoming.src = nextCh.img;
+      stagePhotoIncoming.alt = nextCh.alt;
+      void workStage.offsetHeight;
+      workStage.classList.add('revealing');
+
       setTimeout(() => {
+        // The mask has fully grown and covers the frame — swap the
+        // base photo underneath and collapse the mask back to zero in
+        // the same tick, so nothing visibly changes right now.
         stageCurrent = next;
-        renderStageChapter(stageCurrent);
-        stageIris.classList.remove('closing');
-        stageIris.classList.add('opening');
-        setTimeout(() => {
-          stageIris.classList.remove('opening');
-          stageBusy = false;
-        }, 760);
-      }, 640);
+        updateStageMeta(stageCurrent);
+        workStage.classList.add('developed');
+        workStage.classList.remove('revealing');
+        stagePhotoIncoming.removeAttribute('src');
+        stageBusy = false;
+      }, 1080);
     }
 
     stagePrevBtn.addEventListener('click', () => goToStageChapter(stageCurrent - 1));
