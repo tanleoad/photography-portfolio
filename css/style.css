@@ -1055,20 +1055,69 @@ body.intro-active{ overflow:hidden; }
   .stage-nav-btn{ width: 42px; height: 42px; }
 }
 
-/* ---------------- Category pages: hero ----------------
-   Shared by every dedicated body-of-work page (Street, and later
-   Architecture/Portraits/Retouching). Carries .reveal (see
+/* ---------------- Category pages: monumental hero photograph ----------------
+   Now the very first thing on the page — one huge photograph, nothing
+   else, before any text. This exact element is also the shared-element
+   morph target: on the Work index, the same photograph sits inside
+   .stage-photo-frame (also a self-clipping box with an object-fit:cover
+   image filling it, same pattern as here) — clicking through animates
+   that chapter's developed photo directly into this big one via GSAP
+   Flip (see js/transitions.js), so the photograph itself is the page
+   transition rather than the whole page just changing beneath it.
+   Deliberately a plain overflow:hidden box with a filling <img>, not a
+   transformed <img> on its own, so the crop stays correct at every size
+   Flip passes through mid-flight, not just at the start and end.
+
+   Arrival: by default this is simply visible immediately, so a JS
+   failure never hides the page's primary content. Two things opt it
+   into a held-still-then-fade-in entrance instead — both toggled by
+   the same .intro-pending class, added in js/transitions.js (onEnter,
+   before the incoming page is ever painted) and released in
+   js/script.js (initPageContent, after a brief pause):
+     - arriving normally (nav, footer, a direct/hard link) — the page
+       holds still for a beat, then the photograph settles in, giving
+       the arrival its own quiet pace rather than looking like loading.
+     - arriving via the Work-index photo-morph above gets none of this:
+       Flip is already growing this exact photograph into place, which
+       is its own arrival moment, so .intro-pending is deliberately
+       left off in that case. */
+.cat-hero-photo{
+  width: 100%;
+  height: 100vh;
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--bg-elev);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference){
+  .cat-hero-photo{ transition: opacity 1.4s ease; }
+}
+.cat-hero-photo.intro-pending{ opacity: 0; }
+.cat-hero-photo img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@media (max-width: 780px){
+  .cat-hero-photo{ height: 100svh; min-height: 420px; }
+}
+
+/* ---------------- Category pages: hero text ----------------
+   Now sits below the monumental photograph rather than above it —
+   the visitor scrolls past the photograph first, and only then does
+   the category name/description arrive. Carries .reveal (see
    js/script.js) so the eyebrow/title/description fade and slide up
-   into view right after the page-enter transition settles — the
-   font-family and weight still match .stage-name on the Work index
-   on purpose, so the category name reads as the same piece of type
-   carrying through from one page to the next. */
+   into view as this section reaches the viewport — the font-family
+   and weight still match .stage-name on the Work index on purpose, so
+   the category name reads as the same piece of type carrying through
+   from one page to the next. */
 .cat-hero{
   min-height: 62vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: clamp(7rem, 13vw, 10rem) var(--page-pad) clamp(3rem, 6vw, 4rem);
+  padding: clamp(5rem, 10vw, 7rem) var(--page-pad) clamp(3rem, 6vw, 4rem);
 }
 .cat-hero .eyebrow{ display: block; margin-bottom: 1.2rem; }
 .cat-hero-title{
@@ -1082,35 +1131,6 @@ body.intro-active{ overflow:hidden; }
   font-size: 1.05rem;
   line-height: 1.6;
 }
-/* ---------------- Category pages: monumental hero photograph ----------------
-   Sits directly beneath the text hero, full-bleed and tall — the "one
-   enormous hero photograph" every chapter deserves. This exact element
-   is also the shared-element morph target: on the Work index, the same
-   photograph sits inside .stage-photo-frame (also a self-clipping box
-   with an object-fit:cover image filling it, same pattern as here) —
-   clicking through animates that chapter's developed photo directly
-   into this big one via GSAP Flip (see
-   js/transitions.js), so the photograph itself is the page transition
-   rather than the whole page just changing beneath it. Deliberately a
-   plain overflow:hidden box with a filling <img>, not a transformed
-   <img> on its own, so the crop stays correct at every size Flip
-   passes through mid-flight, not just at the start and end. */
-.cat-hero-photo{
-  width: 100%;
-  height: min(84vh, 920px);
-  min-height: 420px;
-  overflow: hidden;
-  background: var(--bg-elev);
-}
-.cat-hero-photo img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-@media (max-width: 780px){
-  .cat-hero-photo{ height: 62vh; min-height: 320px; }
-}
 
 .cat-more-note{
   padding: clamp(3rem, 6vw, 4.5rem) var(--page-pad) clamp(5rem, 10vw, 7rem);
@@ -1121,7 +1141,7 @@ body.intro-active{ overflow:hidden; }
 }
 .cat-more-note .quiet-link{ margin-top: 1.2rem; }
 @media (max-width: 780px){
-  .cat-hero{ min-height: 46vh; padding-top: 6.5rem; }
+  .cat-hero{ min-height: 46vh; }
 }
 .carousel-scroll-wrapper{
   position:relative;

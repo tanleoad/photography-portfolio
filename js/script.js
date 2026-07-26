@@ -30,6 +30,8 @@ let _parallaxResizeHandler = null;
 let _revealObserver = null;
 let _revealSafetyTimeout = null;
 let _workStageKeydownHandler = null;
+let _introPhotoTimeout = null;
+let _introPhotoSafetyTimeout = null;
 
 function teardownPageContent() {
   if (_workStageKeydownHandler) { document.removeEventListener('keydown', _workStageKeydownHandler); _workStageKeydownHandler = null; }
@@ -50,6 +52,9 @@ function teardownPageContent() {
 
   if (_revealObserver) { _revealObserver.disconnect(); _revealObserver = null; }
   if (_revealSafetyTimeout) { clearTimeout(_revealSafetyTimeout); _revealSafetyTimeout = null; }
+
+  if (_introPhotoTimeout) { clearTimeout(_introPhotoTimeout); _introPhotoTimeout = null; }
+  if (_introPhotoSafetyTimeout) { clearTimeout(_introPhotoSafetyTimeout); _introPhotoSafetyTimeout = null; }
 }
 
 function initPageContent() {
@@ -204,6 +209,26 @@ function initPageContent() {
         el.classList.remove('pre');
       });
     }, 4000);
+  }
+
+  /* ---- Category pages: release the held-still opening photograph ----
+     js/transitions.js already decided, before this page was painted,
+     whether the big opening photograph should hold still first (see
+     the .intro-pending comment on .cat-hero-photo in style.css). If it
+     did, this is what ends the pause and lets the photograph fade in.
+     A genuine hard/direct load never runs that transitions.js code at
+     all, so .intro-pending won't be present here — the photograph is
+     simply visible right away on that path, the same trade-off already
+     accepted for .reveal above. */
+  const introPhoto = document.querySelector('.cat-hero-photo.intro-pending');
+  if (introPhoto) {
+    _introPhotoTimeout = setTimeout(() => {
+      introPhoto.classList.remove('intro-pending');
+    }, 2600);
+    // Safety net, same idea as the .reveal one above.
+    _introPhotoSafetyTimeout = setTimeout(() => {
+      introPhoto.classList.remove('intro-pending');
+    }, 6000);
   }
 
   /* ---- Work page: gentle image parallax ----

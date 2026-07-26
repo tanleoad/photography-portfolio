@@ -156,6 +156,20 @@
         ? to.querySelector('[data-morph-id="' + pendingMorphId + '"]')
         : null;
 
+      // Category pages: hold the big opening photograph invisible until
+      // js/script.js releases it after a brief pause (see the
+      // .intro-pending comment on .cat-hero-photo in style.css) —
+      // unless it's the very element Flip is about to grow into place,
+      // or motion is reduced, in which case it should just be visible.
+      const introPhoto = to.querySelector('.cat-hero-photo');
+      if (introPhoto) {
+        if (introPhoto === morphTarget || reduceMotion) {
+          introPhoto.classList.remove('intro-pending');
+        } else {
+          introPhoto.classList.add('intro-pending');
+        }
+      }
+
       if (!from || reduceMotion) {
         pendingMorphId = null;
         pendingMorphState = null;
