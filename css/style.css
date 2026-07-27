@@ -1786,13 +1786,50 @@ body.has-custom-cursor .cursor-cam{ display: flex; }
   .service-row{ grid-template-columns: 1fr; gap: 0.6rem; }
 }
 
+/* ---------------- Contact: full-bleed photo hero ----------------
+   See the comment in contact.html for the reasoning — one moody photo
+   fills the section, everything else sits on top of it behind a dark
+   scrim for legibility, same layering pattern as .page-banner and
+   .chero-media elsewhere on the site. */
+.contact-hero{
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: clamp(7rem, 15vw, 10rem) 0 clamp(4rem, 8vw, 6rem);
+}
+.contact-hero-bg{
+  position: absolute; inset: 0;
+  z-index: 0;
+}
+.contact-hero-bg img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.contact-hero-scrim{
+  position: absolute; inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(to bottom, rgba(8,7,6,0.8) 0%, rgba(8,7,6,0.5) 32%, rgba(8,7,6,0.6) 72%, rgba(8,7,6,0.85) 100%);
+}
+.contact-hero-inner{
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+@media (max-width: 780px){
+  .contact-hero{ min-height: 0; padding-top: clamp(6rem, 20vw, 7.5rem); }
+}
+
 /* ---------------- Contact ---------------- */
 .contact-split{
   display:grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: clamp(2.5rem, 6vw, 6rem);
 }
-.contact-info h2{
+.contact-info h1{
   font-size: clamp(1.9rem, 3.6vw, 2.6rem);
   margin: 0.6rem 0 1.2rem;
 }

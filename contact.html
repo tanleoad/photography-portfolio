@@ -45,20 +45,30 @@
 <main data-taxi>
 <div data-taxi-view="">
 
-<section class="page-banner" style="background-image:url('images/mystic-night-lamps.jpg')">
-  <div class="page-banner-inner reveal">
-    <p class="eyebrow">Get In Touch</p>
-    <h1>Contact</h1>
+<!-- ============ Contact: full-bleed photo behind everything ============
+     Replaces the old small banner-strip + plain dark section below it.
+     Tanleo referenced another photographer's contact page: one moody
+     photograph filling the whole page, with the contact details and
+     form sitting directly on top of it rather than below a separate
+     banner. Kept her own dark card-style form fields and colour
+     language rather than copying that reference's white input boxes —
+     same principle as the Street page redesign: borrow the layout
+     idea, keep the site's own look. The photo sits in its own
+     absolutely-positioned layer behind a dark scrim (same pattern as
+     .page-banner/.chero-media elsewhere) so the text and form stay
+     easily readable no matter how busy the photo underneath is. -->
+<section class="contact-hero">
+  <div class="contact-hero-bg">
+    <img src="images/mystic-night-lamps.jpg" alt="Warmly lit lamps along a misty palace driveway at night" loading="lazy">
   </div>
-</section>
+  <div class="contact-hero-scrim"></div>
 
-<section class="section">
-  <div class="container">
+  <div class="container contact-hero-inner">
     <div class="contact-split">
 
       <div class="contact-info reveal">
         <p class="eyebrow">Let's talk</p>
-        <h2>Tell me about your project</h2>
+        <h1>Tell me about your project</h1>
         <p class="contact-lead">Whether it's a street series, a portrait sitting, an architectural shoot, or a set of images that need careful retouching — I'd love to hear about it. I typically reply within 1–2 business days.</p>
 
         <div class="contact-detail">
