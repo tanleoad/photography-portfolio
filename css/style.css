@@ -510,21 +510,22 @@ body.intro-active{ overflow:hidden; }
   .chero{ position: static; height: auto; min-height: 0; display: block; }
   .chero-media{ position: relative; height: 62vh; min-height: 340px; }
   .chero-base{ animation: none; }
-  .chero-media .story-media{ display: none; }
+  /* Previously display:none here, with each story's photo shown
+     inline instead (.story-media-m below). Now left visible so the
+     same auto-cycling background used on desktop (js/script.js,
+     "Hero Selected Stories auto-cycle") also drives this banner on
+     phones — touch screens have no hover to trigger the swap, so the
+     photo just changes on its own every 4.5s instead. */
   .chero-content{ padding-top: clamp(2.4rem, 7vw, 3.4rem); }
   .chero-list{ max-width: none; border-top: 1px solid var(--border); }
   .story-row{ border-bottom: 1px solid var(--border); }
   .story-link{ flex-direction: column; padding: clamp(1.2rem, 4vw, 1.8rem) 0 0; }
   .story-title{ text-shadow: none; }
   .story-tag{ margin-top: 0.2rem; }
-  .story-media-m{
-    display: block;
-    width: 100%;
-    height: 58vw;
-    min-height: 220px;
-    object-fit: cover;
-    margin: 1rem 0 1.6rem;
-  }
+  /* No longer needed now the big banner above cycles through the same
+     photos on its own — keeping both would just repeat each photo
+     twice on the page. */
+  .story-media-m{ display: none; }
   .hero-scroll{ display: none; }
 }
 
@@ -1189,6 +1190,9 @@ body.intro-active{ overflow:hidden; }
   margin-top: 1.8rem;
   color: var(--text-dim);
   max-width: 46ch;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
   font-size: 1.05rem;
   line-height: 1.6;
 }
@@ -1203,6 +1207,60 @@ body.intro-active{ overflow:hidden; }
 .cat-more-note .quiet-link{ margin-top: 1.2rem; }
 @media (max-width: 780px){
   .cat-hero{ min-height: 46vh; }
+}
+
+/* ---------------- Category pages: photo grid ----------------
+   The dense, asymmetric wall of photographs Tanleo referenced with a
+   screenshot for the Street page, extended to Architecture and
+   Portraits too so all three category pages share one visual
+   language (per her explicit "same grid style for street,
+   architecture and portraits"). Built as a plain CSS multi-column
+   layout rather than a JS masonry library — this is exactly the
+   technique that handles a genuine mix of portrait and landscape
+   source photos gracefully: each photo simply takes its own natural
+   height inside its column, so tall and wide frames interlock without
+   any image needing to be cropped to fit a fixed cell. Gutters are
+   kept thin on purpose, echoing the "packed tight" feel of her
+   reference — just re-colored to the site's dark background instead
+   of the white one in the screenshot, per her instruction to keep the
+   site's existing look and only borrow the concept.
+   Sits below .cat-hero (title + statement), replacing the old
+   one-plate-at-a-time .featured/.plate sequence on these three pages
+   specifically — .featured/.plate itself is untouched since the
+   homepage's Featured Photographs section still uses it.
+   Reality check: with only 1–2 photos per category today, this will
+   look sparse rather than "dense" until more photographs are added —
+   the grid is built to fill in over time, not to look finished on
+   day one. */
+.cat-grid{
+  column-count: 3;
+  column-gap: 6px;
+  padding: 0 var(--page-pad) clamp(3rem, 6vw, 5rem);
+}
+.cat-grid-item{
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 6px;
+  overflow: hidden;
+  background: var(--card);
+}
+.cat-grid-item img{
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), filter 0.7s ease;
+  filter: grayscale(0.06);
+}
+.cat-grid-item:hover img{
+  transform: scale(1.035);
+  filter: grayscale(0);
+}
+@media (max-width: 900px){
+  .cat-grid{ column-count: 2; }
+}
+@media (max-width: 560px){
+  .cat-grid{ column-count: 1; column-gap: 0; padding-left: 0; padding-right: 0; }
+  .cat-grid-item{ margin-bottom: 4px; }
 }
 .carousel-scroll-wrapper{
   position:relative;

@@ -61,12 +61,18 @@ function initPageContent() {
   teardownPageContent();
 
   /* ---- Hero "Selected Stories" auto-cycle ----
-     Titles/images advance on their own every 4.5s. Pauses while the
-     visitor's mouse is over the list (real :hover takes over via CSS),
-     and only runs on devices with a real pointer — touch/mobile skips
-     this since those screens show every image inline already. */
+     Titles/images advance on their own every 4.5s. On devices with a
+     real pointer, it also pauses while the visitor's mouse is over the
+     list (real :hover takes over via CSS). On touch/mobile there's no
+     hover to pause on, so it just keeps cycling continuously — this is
+     also what drives the full-bleed background photo behind the story
+     list on mobile now (see .chero-media .story-media in style.css,
+     no longer display:none under 780px), replacing the old static
+     inline thumbnail per row with the same big-photo-changes-on-its-
+     own effect desktop visitors see. */
   const cheroList = document.querySelector('.chero-list');
-  if (cheroList && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const cheroHoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (cheroList) {
     const storyLinks = Array.from(cheroList.querySelectorAll('.story-link'));
     const mediaByClass = {};
     storyLinks.forEach(link => {
@@ -107,8 +113,10 @@ function initPageContent() {
     if (storyLinks.length) {
       startCycle();
       _cheroCycleHandlers = { startCycle, stopCycle };
-      cheroList.addEventListener('mouseenter', stopCycle);
-      cheroList.addEventListener('mouseleave', startCycle);
+      if (cheroHoverCapable) {
+        cheroList.addEventListener('mouseenter', stopCycle);
+        cheroList.addEventListener('mouseleave', startCycle);
+      }
     }
   }
 
@@ -495,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
      the warmed cache stays useful for every Taxi transition
      afterward, not just the first one. */
   (function prefetchInternalPages() {
-    const pages = ['index.html', 'projects.html', 'about.html', 'contact.html', 'street.html', 'architecture.html', 'portraits.html'];
+    const pages = ['index.html', 'portfolio.html', 'about.html', 'contact.html', 'street.html', 'architecture.html', 'portraits.html'];
     const current = window.location.pathname.split('/').pop() || 'index.html';
     const run = () => {
       pages.filter(p => p !== current).forEach(p => {

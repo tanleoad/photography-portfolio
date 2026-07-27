@@ -71,7 +71,7 @@
   // new <title> tag on its own — keyed by filename.
   const PAGE_TITLES = {
     'index.html': 'Tanleo_ — Street, Portrait & Architectural Photography, Abu Dhabi',
-    'projects.html': 'Projects — Tanleo_',
+    'portfolio.html': 'Portfolio — Tanleo_',
     'about.html': 'About — Tanleo_',
     'contact.html': 'Contact — Tanleo_',
     'street.html': 'Street — Tanleo_',
