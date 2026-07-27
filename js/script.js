@@ -315,7 +315,27 @@ function initPageContent() {
     const stageSoonTag = document.getElementById('stageSoonTag');
     const stageDots = Array.from(document.querySelectorAll('.stage-dot'));
 
+    // Which chapter to open on: normally Street (index 0), but if the
+    // visitor is coming back to this page having already looked at a
+    // chapter this session — most commonly by clicking "Back to the
+    // Portfolio" on a category page — pick up from there instead of
+    // snapping back to the start every time. Without this, someone
+    // moving Street -> back -> Architecture -> back -> Portraits keeps
+    // landing on Street again on every return, so the "next chapter"
+    // arrow/dot they just used now points at a chapter they already
+    // saw instead of the next new one — which is exactly what reads as
+    // stuck/not-progressing rather than a smooth run through all three.
+    // sessionStorage (not localStorage) on purpose: this should only
+    // persist for the current visit, not linger forever across future
+    // visits to the site.
     let stageCurrent = 0;
+    try {
+      const savedKey = sessionStorage.getItem('tanleoStageChapter');
+      if (savedKey) {
+        const savedIndex = stageChapters.findIndex(c => c.key === savedKey);
+        if (savedIndex !== -1) stageCurrent = savedIndex;
+      }
+    } catch (e) { /* sessionStorage unavailable (private mode etc.) — just start at Street */ }
     let stageHoverTimer = null;
     let stageDevelopTimer = null;
     let stageBusy = false;
@@ -335,6 +355,7 @@ function initPageContent() {
       stagePhotoFrame.setAttribute('data-morph-id', 'cat-' + ch.key);
       stageSoonTag.classList.toggle('visible', !!ch.soon);
       stageDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+      try { sessionStorage.setItem('tanleoStageChapter', ch.key); } catch (e) { /* ignore */ }
 
       if (ch.soon) {
         stageLink.classList.add('is-soon');
