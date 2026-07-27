@@ -2,7 +2,7 @@
    Tania Khan Photography — base styles
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Playfair+Display:wght@500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root{
   --bg: #0a0908;
@@ -553,6 +553,27 @@ body.intro-active{ overflow:hidden; }
 }
 @media (max-width: 780px){
   .statement{ min-height: 60vh; }
+}
+
+/* ---------------- "Selected Works" title card ----------------
+   A single large display line between the manifesto and the Featured
+   Photographs sequence, in Playfair Display rather than the site's
+   usual Fraunces — a deliberate one-off, matching a specific reference
+   image Tanleo pointed to (a tall, high-contrast serif, wide letter
+   spacing, all caps). Kept to this one heading rather than adopted
+   site-wide, the same way a printed exhibition catalogue sometimes
+   sets one title page in a different display face from its body type. */
+.selected-works-heading{
+  background: var(--bg);
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: clamp(2.2rem, 6vw, 4.6rem);
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  padding: 0 var(--page-pad) clamp(3rem, 7vw, 5rem);
+  margin: 0;
 }
 
 /* ---------------- Featured Photographs ---------------- */
