@@ -1086,29 +1086,32 @@ body.intro-active{ overflow:hidden; }
 .stage-meter-label{ font-size: 0.6rem; letter-spacing: 0.2em; color: var(--text-faint); text-transform: uppercase; }
 #stageMeterNeedle{ transform-origin: 60px 60px; transition: transform 1.1s cubic-bezier(0.16,1,0.3,1); }
 
-/* ---- aperture iris, between chapters: circle reveal ----
-   The incoming chapter's photo is placed into the frame the moment you
-   click, sitting there already behind a closed circular mask. The mask
-   grows from the centre outward, so the next photograph is visibly
-   there and expanding the whole time — never hidden behind a black
-   hand-off. Once the mask fully covers the frame, the base photo swaps
-   underneath and the mask collapses back to zero in the same tick, so
-   nothing visibly changes at the moment of the actual swap. */
+/* ---- between chapters: plain crossfade ----
+   Previously a circular "aperture iris" mask that grew from the centre
+   outward — replaced per Tanleo's request, since that effect visibly
+   sat the incoming photograph on top of the outgoing one as a
+   partial, growing patch rather than a clean full-frame change. Now
+   the incoming chapter's photo is placed into the frame the moment
+   you click and simply fades in over the outgoing one, evenly across
+   the whole frame — no shape, no partial coverage mid-transition.
+   Once fully faded in, the base photo swaps underneath and this layer
+   drops back to invisible in the same tick, so nothing visibly
+   changes at the moment of the actual swap. Same idea for Street,
+   Architecture, Portraits and Photo Retouching alike, since this is
+   one shared mechanism for moving between any two chapters. */
 .stage-photo-incoming{
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  clip-path: circle(0% at 50% 50%);
-  transform: scale(1.1);
+  opacity: 0;
   pointer-events: none;
 }
 .work-stage.revealing .stage-photo-incoming{
-  animation: stageIrisReveal 1.05s cubic-bezier(0.65,0,0.12,1) forwards;
+  animation: stageCrossfade 1.05s ease forwards;
 }
-@keyframes stageIrisReveal{
-  from{ clip-path: circle(0% at 50% 50%); transform: scale(1.1); }
-  62%{ transform: scale(1.025); }
-  to{ clip-path: circle(75% at 50% 50%); transform: scale(1.01); }
+@keyframes stageCrossfade{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
 }
 
 @media (max-width: 780px){
