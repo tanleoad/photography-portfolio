@@ -972,6 +972,38 @@ body.intro-active{ overflow:hidden; }
 .stage-counter{ font-family: 'Fraunces', serif; font-size: 0.85rem; color: var(--text-dim); }
 .stage-counter .current{ color: var(--accent); }
 
+/* ---- dot indicators: jump straight to any chapter ----
+   Sits under the "01/04" counter, giving the same position-in-sequence
+   information at a glance (four dots, so it's obvious there are four
+   chapters even before reading the counter) plus a way to jump
+   straight to one rather than only stepping one at a time with the
+   arrows. The rest of .stage-eyebrow-group is deliberately
+   pointer-events:none (it's just informational text sitting over the
+   photograph) — re-enabled here since these dots are the one
+   interactive part of that cluster. */
+.stage-dots{
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 20px;
+  /* Same translucent-dark backing as .stage-nav-btn, below — without
+     it these small dots read fine against a dark photo but nearly
+     vanish against a bright one (confirmed while testing: barely
+     visible against a light golden-hour photograph). */
+  background: rgba(10,9,8,0.35);
+  pointer-events: auto;
+}
+.stage-dot{
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(243,240,233,0.45);
+  border: none; padding: 0; cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.stage-dot:hover{ background: rgba(243,240,233,0.75); }
+.stage-dot.active{ background: var(--accent); transform: scale(1.35); }
+
 /* ---- chapter label ---- */
 .stage-label{
   position: fixed; left: 0; right: 0; bottom: clamp(2rem, 6vw, 3.2rem);
@@ -980,7 +1012,7 @@ body.intro-active{ overflow:hidden; }
   padding: 0 var(--page-pad);
   pointer-events: none;
 }
-.stage-label-left{ display: flex; align-items: baseline; gap: clamp(1rem, 3vw, 2rem); }
+.stage-label-left{ display: flex; align-items: baseline; gap: clamp(1rem, 3vw, 2rem); flex-wrap: wrap; }
 .stage-num{ font-family: 'Fraunces', serif; font-size: clamp(0.9rem, 1.4vw, 1.1rem); color: var(--accent); }
 .stage-name{
   font-family: 'Fraunces', serif;
@@ -993,11 +1025,19 @@ body.intro-active{ overflow:hidden; }
   color: rgba(243,240,233,0.7);
   max-width: 26ch; text-align: right;
 }
+/* Only shown for Photo Retouching (toggled via JS in js/script.js).
+   Deliberately its own element rather than living inside .stage-desc,
+   since .stage-desc is hidden entirely on narrow/mobile screens below
+   — this tag stays visible there, which is exactly the gap that
+   prompted adding it: a mobile visitor swiping to this chapter
+   previously had no "coming soon" signal at all. */
 .stage-soon-tag{
+  display: none;
   font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint);
   border: 1px solid var(--border); padding: 0.3rem 0.6rem; border-radius: 2px;
-  display: inline-block; margin-top: 0.5rem;
+  margin-top: 0.5rem;
 }
+.stage-soon-tag.visible{ display: inline-block; }
 
 /* ---- nav arrows ---- */
 .stage-nav-btn{

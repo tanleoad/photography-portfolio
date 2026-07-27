@@ -304,6 +304,8 @@ function initPageContent() {
     const stageMeterNeedle = document.getElementById('stageMeterNeedle');
     const stagePrevBtn = document.getElementById('stagePrevBtn');
     const stageNextBtn = document.getElementById('stageNextBtn');
+    const stageSoonTag = document.getElementById('stageSoonTag');
+    const stageDots = Array.from(document.querySelectorAll('.stage-dot'));
 
     let stageCurrent = 0;
     let stageHoverTimer = null;
@@ -323,6 +325,8 @@ function initPageContent() {
       stageCounterCurrent.textContent = ch.num;
       stageMeterNeedle.style.transform = 'rotate(' + meterAngles[index] + 'deg)';
       stagePhotoFrame.setAttribute('data-morph-id', 'cat-' + ch.key);
+      stageSoonTag.classList.toggle('visible', !!ch.soon);
+      stageDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
 
       if (ch.soon) {
         stageLink.classList.add('is-soon');
@@ -392,11 +396,63 @@ function initPageContent() {
     stagePrevBtn.addEventListener('click', () => goToStageChapter(stageCurrent - 1));
     stageNextBtn.addEventListener('click', () => goToStageChapter(stageCurrent + 1));
 
+    // Dot indicators: jump straight to any chapter, rather than only
+    // stepping one at a time with the arrows/keyboard.
+    stageDots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        if (i === stageCurrent) return;
+        goToStageChapter(i);
+      });
+    });
+
     _workStageKeydownHandler = (e) => {
       if (e.key === 'ArrowRight') goToStageChapter(stageCurrent + 1);
       if (e.key === 'ArrowLeft') goToStageChapter(stageCurrent - 1);
     };
     document.addEventListener('keydown', _workStageKeydownHandler);
+
+    // Swipe to move between chapters (touch only) — the arrows and
+    // keyboard already do this; a phone visitor reaches for a swipe
+    // instead. Only counts as a swipe once the gesture is clearly
+    // horizontal and past a real distance, so an ordinary vertical
+    // scroll (to reach the "Have a story worth telling?" section
+    // below) is never mistaken for one. When a swipe IS detected, the
+    // tap-to-open-this-chapter click that would otherwise fire on the
+    // link right after lifting your finger is suppressed, so swiping
+    // never accidentally also navigates into the chapter you swiped
+    // away from.
+    let stageTouchStartX = null;
+    let stageTouchStartY = null;
+    let stageTouchIsSwipe = false;
+    stageLink.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      stageTouchStartX = t.clientX;
+      stageTouchStartY = t.clientY;
+      stageTouchIsSwipe = false;
+    }, { passive: true });
+    stageLink.addEventListener('touchmove', (e) => {
+      if (stageTouchStartX === null) return;
+      const t = e.touches[0];
+      const dx = t.clientX - stageTouchStartX;
+      const dy = t.clientY - stageTouchStartY;
+      if (Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)) stageTouchIsSwipe = true;
+    }, { passive: true });
+    stageLink.addEventListener('touchend', (e) => {
+      if (stageTouchStartX === null) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - stageTouchStartX;
+      stageTouchStartX = null;
+      stageTouchStartY = null;
+      if (stageTouchIsSwipe && Math.abs(dx) > 40) {
+        goToStageChapter(stageCurrent + (dx < 0 ? 1 : -1));
+      }
+    });
+    stageLink.addEventListener('click', (e) => {
+      if (stageTouchIsSwipe) {
+        e.preventDefault();
+        stageTouchIsSwipe = false;
+      }
+    });
 
     stageLink.addEventListener('mouseenter', () => {
       if (stageChapters[stageCurrent].soon) return;
