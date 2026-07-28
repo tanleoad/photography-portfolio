@@ -32,6 +32,10 @@ let _revealSafetyTimeout = null;
 let _workStageKeydownHandler = null;
 let _introPhotoTimeout = null;
 let _introPhotoSafetyTimeout = null;
+let _stageDevelopTimer = null;
+let _stageDevelopSafetyTimeout = null;
+let _stageRevealTimer = null;
+let _stageRevealSafetyTimeout = null;
 
 function teardownPageContent() {
   if (_workStageKeydownHandler) { document.removeEventListener('keydown', _workStageKeydownHandler); _workStageKeydownHandler = null; }
@@ -55,6 +59,11 @@ function teardownPageContent() {
 
   if (_introPhotoTimeout) { clearTimeout(_introPhotoTimeout); _introPhotoTimeout = null; }
   if (_introPhotoSafetyTimeout) { clearTimeout(_introPhotoSafetyTimeout); _introPhotoSafetyTimeout = null; }
+
+  if (_stageDevelopTimer) { clearTimeout(_stageDevelopTimer); _stageDevelopTimer = null; }
+  if (_stageDevelopSafetyTimeout) { clearTimeout(_stageDevelopSafetyTimeout); _stageDevelopSafetyTimeout = null; }
+  if (_stageRevealTimer) { clearTimeout(_stageRevealTimer); _stageRevealTimer = null; }
+  if (_stageRevealSafetyTimeout) { clearTimeout(_stageRevealSafetyTimeout); _stageRevealSafetyTimeout = null; }
 }
 
 function initPageContent() {
@@ -334,7 +343,6 @@ function initPageContent() {
         if (savedIndex !== -1) stageCurrent = savedIndex;
       }
     } catch (e) { /* sessionStorage unavailable (private mode etc.) — just start at Street */ }
-    let stageDevelopTimer = null;
     let stageBusy = false;
 
     // Text, attributes and the base photo for whichever chapter is
@@ -375,16 +383,27 @@ function initPageContent() {
       updateStageMeta(index);
 
       workStage.classList.remove('developed');
-      clearTimeout(stageDevelopTimer);
+      clearTimeout(_stageDevelopTimer);
+      clearTimeout(_stageDevelopSafetyTimeout);
 
       // Force a reflow so the resting state actually paints on its own
       // before the settle-in transition starts a beat later, rather
       // than risking both states landing in the same frame and the
       // image just appearing already-settled.
       void workStage.offsetHeight;
-      stageDevelopTimer = setTimeout(() => {
+      _stageDevelopTimer = setTimeout(() => {
         workStage.classList.add('developed');
       }, 260);
+
+      // Safety net, same idea as the .reveal system and the category-page
+      // intro photo further up this file: the photograph must never be
+      // able to stay invisible forever just because one timer got delayed
+      // or dropped (a backgrounded tab throttling JS timers is the
+      // realistic way that happens) — force it visible after a few
+      // seconds regardless of what the primary timer did.
+      _stageDevelopSafetyTimeout = setTimeout(() => {
+        workStage.classList.add('developed');
+      }, 4000);
     }
 
     function goToStageChapter(newIndex) {
@@ -393,7 +412,10 @@ function initPageContent() {
       const next = (newIndex + stageChapters.length) % stageChapters.length;
       const nextCh = stageChapters[next];
 
-      clearTimeout(stageDevelopTimer);
+      clearTimeout(_stageDevelopTimer);
+      clearTimeout(_stageDevelopSafetyTimeout);
+      clearTimeout(_stageRevealTimer);
+      clearTimeout(_stageRevealSafetyTimeout);
 
       // The incoming chapter's photo goes into the frame right now,
       // already sitting there behind a closed circular mask — nothing
@@ -403,7 +425,12 @@ function initPageContent() {
       void workStage.offsetHeight;
       workStage.classList.add('revealing');
 
-      setTimeout(() => {
+      const finishReveal = () => {
+        // Whichever timer got here first (the real one, or the safety
+        // net below) cancels the other, so this only ever runs once.
+        clearTimeout(_stageRevealTimer);
+        clearTimeout(_stageRevealSafetyTimeout);
+
         // The mask has fully grown and covers the frame — swap the
         // base photo underneath and collapse the mask back to zero in
         // the same tick, so nothing visibly changes right now.
@@ -413,7 +440,13 @@ function initPageContent() {
         workStage.classList.remove('revealing');
         stagePhotoIncoming.removeAttribute('src');
         stageBusy = false;
-      }, 1080);
+      };
+
+      _stageRevealTimer = setTimeout(finishReveal, 1080);
+      // Safety net: never leave the frame stuck mid-transition — masked,
+      // unclickable, chapter half-swapped — if the primary timer above
+      // is ever delayed or dropped. Same reasoning as renderStageChapter.
+      _stageRevealSafetyTimeout = setTimeout(finishReveal, 4000);
     }
 
     stagePrevBtn.addEventListener('click', () => goToStageChapter(stageCurrent - 1));
