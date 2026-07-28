@@ -299,7 +299,6 @@ function initPageContent() {
       { key: 'portraits', num: '03', name: 'Portraits', desc: 'Stories told through expression, presence and light.', img: 'images/double-exposure-portrait.jpg', alt: 'Double exposure portrait blurred against the Abu Dhabi skyline' },
       { key: 'retouching', num: '04', name: 'Photo Retouching', desc: 'Coming soon.', img: 'images/mystic-night-lamps.jpg', alt: 'Warmly retouched night scene along a palace driveway', soon: true }
     ];
-    const meterAngles = [-68, -23, 23, 68];
 
     const stageLink = document.getElementById('stageFrameLink');
     const stagePhotoFrame = document.getElementById('stagePhotoFrame');
@@ -309,7 +308,6 @@ function initPageContent() {
     const stageName = document.getElementById('stageName');
     const stageDesc = document.getElementById('stageDesc');
     const stageCounterCurrent = document.getElementById('stageCounterCurrent');
-    const stageMeterNeedle = document.getElementById('stageMeterNeedle');
     const stagePrevBtn = document.getElementById('stagePrevBtn');
     const stageNextBtn = document.getElementById('stageNextBtn');
     const stageSoonTag = document.getElementById('stageSoonTag');
@@ -336,7 +334,6 @@ function initPageContent() {
         if (savedIndex !== -1) stageCurrent = savedIndex;
       }
     } catch (e) { /* sessionStorage unavailable (private mode etc.) — just start at Street */ }
-    let stageHoverTimer = null;
     let stageDevelopTimer = null;
     let stageBusy = false;
 
@@ -351,7 +348,6 @@ function initPageContent() {
       stageName.textContent = ch.name;
       stageDesc.textContent = ch.desc;
       stageCounterCurrent.textContent = ch.num;
-      stageMeterNeedle.style.transform = 'rotate(' + meterAngles[index] + 'deg)';
       stagePhotoFrame.setAttribute('data-morph-id', 'cat-' + ch.key);
       stageSoonTag.classList.toggle('visible', !!ch.soon);
       stageDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
@@ -369,21 +365,22 @@ function initPageContent() {
     }
 
     function renderStageChapter(index) {
-      // First arrival at the page only: paints the negative resting
-      // state, then chemically develops into color a beat later.
-      // Chapter-to-chapter navigation after this never re-triggers it
-      // — see goToStageChapter, which keeps the frame developed and
-      // uses the aperture reveal instead.
+      // First arrival at the page only: the photograph holds still,
+      // slightly veiled, then settles into full clarity a beat later —
+      // the same quiet arrival pattern used for each category page's
+      // own opening photograph, rather than a bespoke effect just for
+      // this page. Chapter-to-chapter navigation after this never
+      // re-triggers it — see goToStageChapter, which keeps the frame
+      // settled and uses the crossfade instead.
       updateStageMeta(index);
 
-      workStage.classList.remove('developed', 'sweeping', 'breathing');
+      workStage.classList.remove('developed');
       clearTimeout(stageDevelopTimer);
-      clearTimeout(stageHoverTimer);
 
-      // Force a reflow so the negative resting state actually paints
-      // on its own before the develop-in transition starts a beat
-      // later, rather than risking both states landing in the same
-      // frame and the image just appearing already-developed.
+      // Force a reflow so the resting state actually paints on its own
+      // before the settle-in transition starts a beat later, rather
+      // than risking both states landing in the same frame and the
+      // image just appearing already-settled.
       void workStage.offsetHeight;
       stageDevelopTimer = setTimeout(() => {
         workStage.classList.add('developed');
@@ -396,10 +393,7 @@ function initPageContent() {
       const next = (newIndex + stageChapters.length) % stageChapters.length;
       const nextCh = stageChapters[next];
 
-      clearTimeout(stageHoverTimer);
       clearTimeout(stageDevelopTimer);
-      workStage.classList.remove('sweeping', 'breathing');
-      if (window.siteCursor) window.siteCursor.shrink();
 
       // The incoming chapter's photo goes into the frame right now,
       // already sitting there behind a closed circular mask — nothing
@@ -481,24 +475,6 @@ function initPageContent() {
         e.preventDefault();
         stageTouchIsSwipe = false;
       }
-    });
-
-    stageLink.addEventListener('mouseenter', () => {
-      if (stageChapters[stageCurrent].soon) return;
-      if (!workStage.classList.contains('developed')) return;
-      if (window.siteCursor) window.siteCursor.grow('Enter');
-      workStage.classList.remove('breathing');
-      workStage.classList.add('sweeping');
-      clearTimeout(stageHoverTimer);
-      stageHoverTimer = setTimeout(() => {
-        workStage.classList.remove('sweeping');
-        workStage.classList.add('breathing');
-      }, 1300);
-    });
-    stageLink.addEventListener('mouseleave', () => {
-      if (window.siteCursor) window.siteCursor.shrink();
-      clearTimeout(stageHoverTimer);
-      workStage.classList.remove('sweeping', 'breathing');
     });
 
     renderStageChapter(stageCurrent);
@@ -698,144 +674,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
-  /* ---- Site-wide: tiny camera cursor + click flash ----
-     Runs once, on every page. On hover-capable, fine-pointer devices
-     (desktop) it swaps the native pointer for a small camera icon
-     that grows and turns gold over anything clickable — sections
-     call window.siteCursor.grow(label)/shrink() for their own
-     interactive elements, including after a page transition re-runs
-     initPageContent(). Text fields keep their real caret cursor. The
-     click flash is separate from the cursor itself and fires on
-     every click anywhere on the page, including touch, since it's
-     just a burst at the click point. */
-  const cursor = (() => {
-    let grow = () => {};
-    let shrink = () => {};
-
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      document.body.classList.add('has-custom-cursor');
-
-      const cam = document.createElement('div');
-      cam.className = 'cursor-cam';
-      cam.innerHTML =
-        '<span class="cursor-cam-icon">' +
-          '<svg viewBox="0 0 32 24" xmlns="http://www.w3.org/2000/svg">' +
-            '<defs><mask id="camRingMask">' +
-              '<rect x="0" y="0" width="32" height="24" fill="#fff"/>' +
-              '<circle cx="16" cy="14" r="4.1" fill="#000"/>' +
-            '</mask></defs>' +
-            '<path d="M11 1.6h10a2.2 2.2 0 0 1 2.2 2.2v2.3H8.8V3.8A2.2 2.2 0 0 1 11 1.6Z" fill="currentColor"/>' +
-            '<rect x="2" y="6" width="28" height="16.4" rx="4" fill="currentColor"/>' +
-            '<circle cx="16" cy="14" r="6.3" fill="#fff" mask="url(#camRingMask)"/>' +
-          '</svg>' +
-        '</span>' +
-        '<span class="cursor-cam-label"></span>';
-      document.body.appendChild(cam);
-      const camLabel = cam.querySelector('.cursor-cam-label');
-
-      let mx = window.innerWidth / 2, my = window.innerHeight / 2, cx = mx, cy = my;
-      window.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
-      (function tickCursor() {
-        cx += (mx - cx) * 0.2;
-        cy += (my - cy) * 0.2;
-        cam.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
-        requestAnimationFrame(tickCursor);
-      })();
-
-      // A camera icon over a text field is confusing — hide it and
-      // let the real text caret show instead. Delegated on document
-      // so it keeps working after a page transition swaps in a new
-      // page's form fields.
-      document.addEventListener('mouseover', (e) => {
-        if (e.target.closest('input, textarea, select')) cam.classList.add('is-hidden');
-      });
-      document.addEventListener('mouseout', (e) => {
-        if (e.target.closest('input, textarea, select')) cam.classList.remove('is-hidden');
-      });
-
-      grow = (label) => { cam.classList.add('is-grown'); camLabel.textContent = label || ''; };
-      shrink = () => cam.classList.remove('is-grown');
-
-      // Tiny shutter-press squeeze on the icon itself when you click.
-      document.addEventListener('mousedown', () => cam.classList.add('is-clicked'));
-      document.addEventListener('mouseup', () => cam.classList.remove('is-clicked'));
-    }
-
-    const flashVeil = document.createElement('div');
-    flashVeil.className = 'flash-veil';
-    document.body.appendChild(flashVeil);
-
-    document.addEventListener('click', (e) => {
-      // A click on one of the Work index's chapter photographs is
-      // about to trigger the photo-morph signature transition (see
-      // js/transitions.js) — that photograph visibly growing already
-      // reads clearly as "you clicked this," so the flash burst below
-      // would just be a bright pop sitting on top of, and briefly
-      // outlasting, the very start of that growth (the flash takes up
-      // to 600ms to fade; the morph starts the instant navigation
-      // below fires). Skipped only for this one case — every other
-      // click on the site still gets the flash exactly as before.
-      const link = e.target.closest('a[href]');
-      const isMorphLink = !!(link && link.hasAttribute('data-work'));
-
-      if (!isMorphLink) {
-        const flash = document.createElement('div');
-        flash.className = 'cursor-flash';
-        flash.style.left = e.clientX + 'px';
-        flash.style.top = e.clientY + 'px';
-        document.body.appendChild(flash);
-        requestAnimationFrame(() => flash.classList.add('is-active'));
-        setTimeout(() => flash.remove(), 600);
-
-        // Whole-screen brightness pop so the flash reads clearly
-        // against both light and dark photos.
-        flashVeil.classList.remove('is-active');
-        void flashVeil.offsetWidth; // restart the animation on rapid clicks
-        flashVeil.classList.add('is-active');
-      }
-
-      // Hands off to the page-transition router (js/transitions.js) so
-      // the destination swaps in smoothly instead of a hard reload. If
-      // that router never loaded (CDN blocked, offline), falls back to
-      // a normal navigation — the site works exactly the same either
-      // way, just without the swap animation. In-page anchors, new-tab
-      // clicks, modified clicks, and mailto/tel links are left alone.
-      //
-      // This used to be held back by an artificial 200ms delay so the
-      // flash above had "time to register" before the page swapped —
-      // reasonable-sounding, but it meant every single click on the
-      // site paused for a fifth of a second before anything visibly
-      // happened, which read as the site being unresponsive rather
-      // than deliberate (most noticeable right after closing the menu,
-      // since that's already one click removed from seeing the actual
-      // destination). The flash and the page-rise were never actually
-      // in conflict — the old page stays fully visible through the
-      // start of the rise regardless of when navigation begins, the
-      // same reason the photo-morph transition was always able to
-      // start immediately. Every click now navigates the instant it's
-      // clicked, flash included.
-      if (
-        link &&
-        !e.defaultPrevented &&
-        e.button === 0 &&
-        !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
-        link.target !== '_blank' &&
-        link.getAttribute('href').charAt(0) !== '#' &&
-        link.href.indexOf(window.location.origin) === 0
-      ) {
-        e.preventDefault();
-        const dest = link.href;
-        if (window.siteTaxi) {
-          window.siteTaxi.navigateTo(dest, undefined, link);
-        } else {
-          window.location.href = dest;
-        }
-      }
-    });
-
-    return { grow, shrink };
-  })();
+  /* ---- Site-wide: click-to-navigate router ----
+     Runs once, on every page. Used to also drive a custom camera-
+     shaped cursor and a click-flash burst — removed per the site's
+     design philosophy ("every interaction should make a photograph
+     feel closer, nothing should explain its own theme"): a cursor
+     literally shaped like a camera, and a synthetic flash of light on
+     every click, were both charming but literal — decoration *about*
+     photography rather than the photograph itself getting closer, and
+     the flash in particular was competing for attention with real
+     light already inside the photographs (lamps, sun flare, golden
+     hour) on every single click, the whole visit through. grow()/
+     shrink() are kept as harmless no-ops so the rest of the site's
+     code — several sections call them on hover — doesn't need to
+     change. What's left here is just the click router: it hands
+     internal link clicks off to the page-transition system (js/
+     transitions.js) so the destination swaps in smoothly instead of a
+     hard reload, and falls back to a normal navigation if that router
+     never loaded (CDN blocked, offline) — the site works exactly the
+     same either way, just without the swap animation. In-page
+     anchors, new-tab clicks, modified clicks, and mailto/tel links are
+     left alone. */
+  const cursor = { grow: () => {}, shrink: () => {} };
   window.siteCursor = cursor;
+
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (
+      link &&
+      !e.defaultPrevented &&
+      e.button === 0 &&
+      !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey &&
+      link.target !== '_blank' &&
+      link.getAttribute('href').charAt(0) !== '#' &&
+      link.href.indexOf(window.location.origin) === 0
+    ) {
+      e.preventDefault();
+      const dest = link.href;
+      if (window.siteTaxi) {
+        window.siteTaxi.navigateTo(dest, undefined, link);
+      } else {
+        window.location.href = dest;
+      }
+    }
+  });
 
   /* ---- Homepage: Selected Works drifting gallery (index.html only) ----
      Duplicates the track once (not baked into the HTML) so the drift
