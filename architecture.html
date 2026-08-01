@@ -42,6 +42,63 @@
   </div>
 </div>
 
+<nav class="glass-nav" id="glassNav" data-state="home">
+  <a href="portfolio.html" class="glass-nav__back" aria-label="Back to portfolio">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+  <span class="glass-nav__label" id="glassNavLabel"></span>
+  <div class="glass-nav__items">
+    <a href="street.html" class="glass-nav__item" data-key="street" data-name="Street" style="--ga:#998c72;--gb:#6f5742;--gc:#473629;--gd:#1e221b;">
+      <span class="glass-nav__item-glow" style="background: radial-gradient(circle, var(--ga), var(--gc));"></span>
+      <img src="images/louvre-abudhabi.jpg" alt="Street" loading="lazy">
+    </a>
+    <a href="architecture.html" class="glass-nav__item" data-key="architecture" data-name="Architecture" style="--ga:#d8dbe1;--gb:#c6c9d4;--gc:#8c5824;--gd:#513822;">
+      <span class="glass-nav__item-glow" style="background: radial-gradient(circle, var(--ga), var(--gc));"></span>
+      <img src="images/badshahi-mosque.jpg" alt="Architecture" loading="lazy">
+    </a>
+    <a href="portraits.html" class="glass-nav__item" data-key="portraits" data-name="Portraits" style="--ga:#abae96;--gb:#313c38;--gc:#20221e;--gd:#171615;">
+      <span class="glass-nav__item-glow" style="background: radial-gradient(circle, var(--ga), var(--gc));"></span>
+      <img src="images/double-exposure-portrait.jpg" alt="Portraits" loading="lazy">
+    </a>
+    <a href="portfolio.html" class="glass-nav__item" data-key="retouching" data-name="Photo Retouching" style="--ga:#553820;--gb:#422e1f;--gc:#302218;--gd:#1e1a16;">
+      <span class="glass-nav__item-glow" style="background: radial-gradient(circle, var(--ga), var(--gc));"></span>
+      <img src="images/mystic-night-lamps.jpg" alt="Photo Retouching" loading="lazy">
+    </a>
+  </div>
+</nav>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0015 0.006" numOctaves="1" seed="24" result="turbulence"></feTurbulence>
+    <feComponentTransfer in="turbulence" result="mapped">
+      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"></feFuncR>
+      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0"></feFuncG>
+      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"></feFuncB>
+    </feComponentTransfer>
+    <feGaussianBlur in="turbulence" stdDeviation="8" result="softMap"></feGaussianBlur>
+    <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
+      <fePointLight x="-200" y="-200" z="200"></fePointLight>
+    </feSpecularLighting>
+    <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"></feComposite>
+    <feDisplacementMap in="SourceGraphic" in2="softMap" scale="72" xChannelSelector="R" yChannelSelector="A" result="disp1"></feDisplacementMap>
+    <feOffset in="softMap" dx="0.35" dy="0" result="softMapCA"></feOffset>
+    <feDisplacementMap in="SourceGraphic" in2="softMapCA" scale="72" xChannelSelector="R" yChannelSelector="A" result="dispCA"></feDisplacementMap>
+    <feColorMatrix in="dispCA" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="caRed"></feColorMatrix>
+    <feColorMatrix in="dispCA" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="caGreen"></feColorMatrix>
+    <feColorMatrix in="dispCA" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="caBlue"></feColorMatrix>
+    <feOffset in="caRed" dx="1.1" dy="0" result="caRedOffset"></feOffset>
+    <feOffset in="caGreen" dx="-1" dy="0" result="caGreenOffset"></feOffset>
+    <feOffset in="caBlue" dx="-1.1" dy="0" result="caBlueOffset"></feOffset>
+    <feBlend in="caRedOffset" in2="caGreenOffset" mode="screen" result="caMix1"></feBlend>
+    <feBlend in="caMix1" in2="caBlueOffset" mode="screen" result="caFinal"></feBlend>
+    <feGaussianBlur in="caFinal" stdDeviation="0.25" result="caSoft"></feGaussianBlur>
+    <feComposite in="caSoft" in2="SourceGraphic" operator="in" result="caClipped"></feComposite>
+    <feBlend in="disp1" in2="caClipped" mode="lighten" result="finalGlass"></feBlend>
+  </filter>
+</svg>
+
 <main data-taxi>
 <div data-taxi-view="">
 

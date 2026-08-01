@@ -347,5 +347,6 @@
 
     window.scrollTo(0, 0);
     if (typeof window.initPageContent === 'function') window.initPageContent();
+    if (typeof window.updateGlassNav === 'function') window.updateGlassNav();
   });
 })();

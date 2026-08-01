@@ -646,6 +646,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---- Site-wide: floating glass nav state ----
+     The nav markup itself (.glass-nav) sits outside [data-taxi-view],
+     same as .site-nav and .menu-overlay above, so Taxi never tears it
+     down between pages — real <a href> clicks inside it already go
+     through the site-wide click router further down this file, no
+     extra listeners needed here. What DOES need to happen on every
+     navigation is swapping which of its two states is showing, so
+     this runs once on first load (below) and again after every Taxi
+     transition (see the updateGlassNav() call in js/transitions.js's
+     NAVIGATE_END handler, right next to where it updates the
+     menu-overlay's own active link). */
+  // projects.html is a legacy redirect stub to portfolio.html, not a
+  // real destination — there is no standalone retouching page yet
+  // (see the "soon" chapter on the Work stage), so it's deliberately
+  // left out of this map; that thumbnail links to portfolio.html.
+  const CATEGORY_PAGES = { 'street.html': 'street', 'architecture.html': 'architecture', 'portraits.html': 'portraits' };
+  window.updateGlassNav = function updateGlassNav() {
+    const glassNav = document.querySelector('.glass-nav');
+    if (!glassNav) return;
+    const path = window.location.pathname.split('/').pop() || 'index.html';
+    const categoryKey = CATEGORY_PAGES[path];
+    const items = glassNav.querySelectorAll('.glass-nav__item');
+    const label = glassNav.querySelector('.glass-nav__label');
+    if (categoryKey) {
+      glassNav.setAttribute('data-state', 'section');
+      let activeItem = null;
+      items.forEach(item => {
+        const isActive = item.getAttribute('data-key') === categoryKey;
+        item.classList.toggle('--active', isActive);
+        if (isActive) activeItem = item;
+      });
+      if (label && activeItem) label.textContent = activeItem.dataset.name || '';
+    } else {
+      glassNav.setAttribute('data-state', 'home');
+      items.forEach(item => item.classList.remove('--active'));
+    }
+  };
+
   /* ---- Projects: horizontal drag-to-scroll lineup (mouse/trackpad) ----
      Touch and trackpad swipe already scroll the row natively via
      overflow-x + scroll-snap in CSS; this just adds click-and-drag
@@ -957,4 +995,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initPageContent();
+  if (typeof window.updateGlassNav === 'function') window.updateGlassNav();
 });
