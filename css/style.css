@@ -397,6 +397,73 @@ body.intro-active{ overflow:hidden; }
   .nav-toggle.open span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); }
 }
 
+/* ---------------- Persistent left-side navigation ----------------
+   Added 2026-08-15 alongside the single-continuous-scroll rebuild of
+   index.html (see claude/continuous-scroll-architecture-proposal.md).
+   Replaces the hamburger-triggered .menu-overlay on this page only —
+   the four destinations (Home/Projects/About/Contact) are always on
+   screen instead of summoned, matching Tan's brief directly. Visual
+   language borrows the same restrained pattern used everywhere else
+   on the site for "you are here": a small accent-gold dot that scales
+   in on the active item, the same way .stage-dot.active already works
+   on the Work stage, rather than inventing a new indicator style.
+   js/script.js (see "Persistent side nav: scroll-spy" in
+   initPageContent()) toggles .active as the visitor scrolls; this
+   file only defines what .active looks like. services.html and
+   workshops.html are untouched and keep the older hamburger/overlay
+   pattern above, since they're still separate, unmerged pages. */
+.side-nav{
+  position: fixed;
+  left: clamp(1rem, 3vw, 2.2rem);
+  /* Anchored just under the fixed top header rather than vertically
+     centered — checked empirically (Playwright screenshots) against
+     every section: Home's title list, the About heading and the
+     Contact form all sit lower on the screen, so this band stays
+     clear of them everywhere, which a true vertical center did not
+     (it collided with more than one section's own content). */
+  top: calc(var(--nav-h) + clamp(1.4rem, 3vw, 2.4rem));
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.1rem, 2.4vw, 1.6rem);
+}
+.side-nav a{
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  color: var(--text-faint);
+  position: relative;
+  display: inline-block;
+  padding-left: 1.1rem;
+  transition: color 0.35s ease;
+}
+.side-nav a::before{
+  content:"";
+  position:absolute; left:0; top:50%;
+  width:5px; height:5px; border-radius:50%;
+  transform: translateY(-50%) scale(0.001);
+  background: var(--accent);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.side-nav a:hover{ color: var(--text-dim); }
+.side-nav a.active{ color: var(--text); }
+.side-nav a.active::before{ transform: translateY(-50%) scale(1); }
+@media (max-width: 780px){
+  .side-nav{ left: 0.85rem; gap: 0.85rem; }
+  .side-nav a{ font-size: 0.6rem; letter-spacing: 0.12em; padding-left: 0.9rem; }
+}
+
+/* The four nav destinations plus the chapter sections folded in
+   underneath "Projects" (Street/Architecture/Portraits) all need
+   scroll-margin so the fixed header never covers the top of whatever
+   was just scrolled to — same reasoning as .category-block already
+   used elsewhere on this site. */
+#home, #projects, #street, #architecture, #portraits, #about, #contact{
+  scroll-margin-top: var(--nav-h);
+}
+
 /* ---------------- Cinematic hero + hover-reveal story index (merged, one viewport) ---------------- */
 .chero-wrap{
   position: relative;
@@ -983,10 +1050,22 @@ body.intro-active{ overflow:hidden; }
 .work-stage.developed .stage-photo{
   opacity: 1;
 }
-/* ---- eyebrow / counter, sitting under the fixed nav ---- */
+/* ---- eyebrow / counter, sitting under the fixed nav ----
+   Changed from position:fixed to position:absolute on 2026-08-15,
+   when Projects stopped being its own standalone page and became one
+   section of the single continuous-scroll document (see claude/
+   continuous-scroll-architecture-proposal.md). Fixed-to-viewport only
+   ever looked right because the Work stage previously WAS the whole
+   page below the nav — once Street/About/Contact/etc. share this same
+   scrollable document, a fixed position here would stay pinned on
+   screen no matter which section someone had actually scrolled to.
+   Absolute (relative to .work-stage, which is position:relative and
+   still exactly 100vh tall) reproduces the identical on-screen look
+   while scrolled to Projects, and correctly scrolls away with the
+   rest of that section otherwise. */
 .stage-eyebrow-group{
-  position: fixed;
-  top: calc(var(--nav-h) + 0.6rem);
+  position: absolute;
+  top: 0.6rem;
   right: var(--page-pad);
   z-index: 400;
   text-align: right;
@@ -1028,9 +1107,11 @@ body.intro-active{ overflow:hidden; }
 .stage-dot:hover{ background: rgba(243,240,233,0.75); }
 .stage-dot.active{ background: var(--accent); transform: scale(1.35); }
 
-/* ---- chapter label ---- */
+/* ---- chapter label ----
+   Also switched fixed -> absolute 2026-08-15, same reasoning as
+   .stage-eyebrow-group above. */
 .stage-label{
-  position: fixed; left: 0; right: 0; bottom: clamp(2rem, 6vw, 3.2rem);
+  position: absolute; left: 0; right: 0; bottom: clamp(2rem, 6vw, 3.2rem);
   z-index: 400;
   display: flex; align-items: flex-end; justify-content: space-between;
   padding: 0 var(--page-pad);
@@ -1063,9 +1144,11 @@ body.intro-active{ overflow:hidden; }
 }
 .stage-soon-tag.visible{ display: inline-block; }
 
-/* ---- nav arrows ---- */
+/* ---- nav arrows ----
+   Also switched fixed -> absolute 2026-08-15, same reasoning as
+   .stage-eyebrow-group above. */
 .stage-nav-btn{
-  position: fixed; top: 50%; transform: translateY(-50%); z-index: 400;
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 400;
   width: 52px; height: 52px; border-radius: 50%;
   border: 1px solid var(--border); background: rgba(10,9,8,0.35);
   color: var(--text); font-size: 1.3rem; line-height: 1;

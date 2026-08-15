@@ -17,36 +17,27 @@
 </div>
 
 <header class="site-nav site-nav-centered">
-  <a href="index.html" class="brand">Tanleo<span>_</span></a>
-  <button class="menu-trigger" id="menuTrigger" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay">
-    <span class="menu-trigger-icon"><span></span><span></span></span>
-    <span class="menu-trigger-label">Menu</span>
-  </button>
+  <a href="#home" class="brand">Tanleo<span>_</span></a>
 </header>
 
-<div class="menu-overlay" id="menuOverlay">
-  <div class="menu-overlay-left">
-    <button class="menu-close" id="menuClose" aria-label="Close menu">
-      <span class="menu-close-icon">&times;</span>
-      <span class="menu-close-label">Close</span>
-    </button>
-    <nav class="menu-overlay-nav">
-      <ul>
-        <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="portfolio.html">Portfolio</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </nav>
-  </div>
-  <div class="menu-overlay-image">
-    <div class="menu-overlay-image-slide active" style="background-image:url('images/double-exposure-portrait.jpg')"></div>
-    <div class="menu-overlay-image-slide" style="background-image:url('images/louvre-abudhabi.jpg')"></div>
-    <div class="menu-overlay-image-slide" style="background-image:url('images/mystic-night-lamps.jpg')"></div>
-    <div class="menu-overlay-image-slide" style="background-image:url('images/emirates-palace-staircase.jpg')"></div>
-    <div class="menu-overlay-image-slide" style="background-image:url('images/blossom-terrace.jpg')"></div>
-  </div>
-</div>
+<!-- ============ Persistent left-side navigation ============
+     Replaces the hamburger-triggered full-screen overlay on this page
+     specifically — always visible, not summoned. Four destinations,
+     one continuous document: clicking any of them relies on nothing
+     but a plain in-page anchor (html{scroll-behavior:smooth} is
+     already set globally in css/style.css) and the site-wide click
+     router in js/script.js already leaves any href starting with "#"
+     alone, so no extra navigation JS was needed for the scrolling
+     itself. What IS new: js/script.js watches these four section ids
+     with an IntersectionObserver and toggles .active on whichever
+     link matches the section currently centered in the viewport — see
+     "Persistent side nav: scroll-spy" in initPageContent(). -->
+<nav class="side-nav" id="sideNav" aria-label="Section navigation">
+  <a href="#home">Home</a>
+  <a href="#projects">Projects</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+</nav>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
@@ -81,7 +72,10 @@
 <main data-taxi>
 <div data-taxi-view="">
 
-<div class="chero-wrap">
+<!-- ============================================================
+     HOME
+     ============================================================ -->
+<div class="chero-wrap" id="home">
 <section class="chero">
   <div class="chero-media">
     <div class="chero-base" style="background-image:url('images/qasr-al-watan.jpg')"></div>
@@ -96,31 +90,31 @@
   <div class="chero-content">
     <ul class="chero-list">
       <li class="story-row">
-        <a href="portfolio.html" class="story-link s-light">
+        <a href="#projects" class="story-link s-light">
           <span class="story-title">Light</span>
         </a>
         <img class="story-media-m" src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome" loading="lazy">
       </li>
       <li class="story-row">
-        <a href="portfolio.html" class="story-link s-people">
+        <a href="#projects" class="story-link s-people">
           <span class="story-title">People</span>
         </a>
         <img class="story-media-m" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" loading="lazy">
       </li>
       <li class="story-row">
-        <a href="portfolio.html" class="story-link s-motion">
+        <a href="#projects" class="story-link s-motion">
           <span class="story-title">Motion</span>
         </a>
         <img class="story-media-m" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy">
       </li>
       <li class="story-row">
-        <a href="portfolio.html" class="story-link s-stillness">
+        <a href="#projects" class="story-link s-stillness">
           <span class="story-title">Stillness</span>
         </a>
         <img class="story-media-m" src="images/souq-al-mina-arches.jpg" alt="Quiet arched corridor at Souq Al Mina" loading="lazy">
       </li>
       <li class="story-row">
-        <a href="portfolio.html" class="story-link s-colour">
+        <a href="#projects" class="story-link s-colour">
           <span class="story-title">Colour</span>
         </a>
         <img class="story-media-m" src="images/blossom-terrace.jpg" alt="Candid restaurant scene framed through blossoming branches" loading="lazy">
@@ -169,11 +163,298 @@
 
 </section>
 
-<!-- ============ Quiet closing ============ -->
+<!-- ============ Quiet closing / handoff into Projects ============ -->
 <section class="closing reveal" id="closing">
   <div class="container">
     <blockquote>These are a few frames from a longer story.</blockquote>
-    <a href="portfolio.html" class="quiet-link">Continue to the Portfolio <span>&rarr;</span></a>
+    <a href="#projects" class="quiet-link">Continue to the Portfolio <span>&rarr;</span></a>
+  </div>
+</section>
+
+<!-- ============================================================
+     PROJECTS
+     Unchanged from how it works today (portfolio.html) — Tan hasn't
+     decided what this section becomes yet and wants reference
+     examples first (see claude/continuous-scroll-architecture-
+     proposal.md, "Decided 2026-08-15"). The only change here is
+     mechanical: the big photo used to link to a separate page
+     (street.html etc.) — it now links to that chapter's in-page
+     section further down instead (see updateStageMeta() in
+     js/script.js). Nothing about the look or the preview-cycling
+     behaviour has been touched.
+     ============================================================ -->
+<div id="projects">
+
+<div class="work-stage" id="workStage">
+
+  <a href="street.html" class="stage-frame-link" id="stageFrameLink" data-work="street">
+    <div class="stage-photo-frame" id="stagePhotoFrame" data-morph-id="cat-street">
+      <img class="stage-photo" id="stagePhoto" src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome">
+      <img class="stage-photo stage-photo-incoming" id="stagePhotoIncoming" alt="">
+    </div>
+  </a>
+
+  <div class="stage-eyebrow-group">
+    <span class="eyebrow">Portfolio</span>
+    <span class="stage-counter"><span class="current" id="stageCounterCurrent">01</span> / 04</span>
+    <div class="stage-dots" id="stageDots" role="tablist" aria-label="Jump to a chapter">
+      <button class="stage-dot active" type="button" data-index="0" aria-label="Street"></button>
+      <button class="stage-dot" type="button" data-index="1" aria-label="Architecture"></button>
+      <button class="stage-dot" type="button" data-index="2" aria-label="Portraits"></button>
+      <button class="stage-dot" type="button" data-index="3" aria-label="Photo Retouching"></button>
+    </div>
+  </div>
+
+  <div class="stage-label">
+    <div class="stage-label-left">
+      <span class="stage-num" id="stageNum">01</span>
+      <h1 class="stage-name" id="stageName">Street</h1>
+      <span class="stage-soon-tag" id="stageSoonTag">Coming Soon</span>
+    </div>
+    <div>
+      <p class="stage-desc" id="stageDesc">Observations from cities, people and the moments between them.</p>
+    </div>
+  </div>
+
+  <button class="stage-nav-btn stage-nav-prev" id="stagePrevBtn" aria-label="Previous chapter">&#8249;</button>
+  <button class="stage-nav-btn stage-nav-next" id="stageNextBtn" aria-label="Next chapter">&#8250;</button>
+
+</div>
+
+<section class="section cta-band reveal">
+  <div class="container cta-inner">
+    <h2>Have a story worth telling?</h2>
+    <p>Available for street, portrait, architectural and commercial shoots across Abu Dhabi and the UAE.</p>
+    <a href="#contact" class="btn btn-solid">Get In Touch</a>
+  </div>
+</section>
+
+</div>
+
+<!-- ============================================================
+     STREET (was street.html — content unmodified, only the
+     "back to Portfolio" link now points at #projects instead of
+     loading a separate page)
+     ============================================================ -->
+<section id="street" class="chapter-block">
+
+  <div class="cat-hero-photo" data-morph-id="cat-street">
+    <img src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome" loading="lazy">
+  </div>
+
+  <section class="cat-hero reveal">
+    <p class="eyebrow">01 — Street</p>
+    <h1 class="cat-hero-title">Street</h1>
+    <p class="cat-hero-desc">Observations from cities, people and the moments between them.</p>
+  </section>
+
+  <section class="featured">
+
+    <figure class="plate reveal">
+      <img src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" loading="lazy">
+      <figcaption class="plate-num">01 / 02</figcaption>
+    </figure>
+
+    <figure class="plate reveal">
+      <img src="images/souq-al-mina-arches.jpg" alt="Quiet arched corridor at Souq Al Mina" loading="lazy">
+      <figcaption class="plate-num">02 / 02</figcaption>
+    </figure>
+
+  </section>
+
+  <section class="cat-more-note reveal">
+    <p>More from this series soon.</p>
+    <a href="#projects" class="quiet-link">Back to Projects <span>&rarr;</span></a>
+  </section>
+
+</section>
+
+<!-- ============================================================
+     ARCHITECTURE (was architecture.html — content unmodified)
+     ============================================================ -->
+<section id="architecture" class="chapter-block">
+
+  <div class="cat-hero-photo" data-morph-id="cat-architecture">
+    <img src="images/badshahi-mosque.jpg" alt="Badshahi Mosque glowing at golden hour, Lahore, Pakistan" loading="lazy">
+  </div>
+
+  <section class="cat-hero reveal">
+    <p class="eyebrow">02 — Architecture</p>
+    <h1 class="cat-hero-title">Architecture</h1>
+    <p class="cat-hero-desc">Where geometry, light and silence meet.</p>
+  </section>
+
+  <section class="featured">
+
+    <figure class="plate reveal">
+      <img src="images/qasr-al-watan.jpg" alt="Grand interior hall with ornate domed ceiling at Qasr Al Watan" loading="lazy">
+      <figcaption class="plate-num">01 / 02</figcaption>
+    </figure>
+
+    <figure class="plate reveal">
+      <img src="images/emirates-palace-corridor.jpg" alt="Long symmetrical corridor at Emirates Palace" loading="lazy">
+      <figcaption class="plate-num">02 / 02</figcaption>
+    </figure>
+
+  </section>
+
+  <section class="cat-more-note reveal">
+    <p>More from this series soon.</p>
+    <a href="#projects" class="quiet-link">Back to Projects <span>&rarr;</span></a>
+  </section>
+
+</section>
+
+<!-- ============================================================
+     PORTRAITS (was portraits.html — content unmodified)
+     ============================================================ -->
+<section id="portraits" class="chapter-block">
+
+  <div class="cat-hero-photo" data-morph-id="cat-portraits">
+    <img src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy">
+  </div>
+
+  <section class="cat-hero reveal">
+    <p class="eyebrow">03 — Portraits</p>
+    <h1 class="cat-hero-title">Portraits</h1>
+    <p class="cat-hero-desc">Stories told through expression, presence and light.</p>
+  </section>
+
+  <section class="cat-more-note reveal">
+    <p>The first frame in this series. More to come.</p>
+    <a href="#projects" class="quiet-link">Back to Projects <span>&rarr;</span></a>
+  </section>
+
+</section>
+
+<!-- ============================================================
+     ABOUT (was about.html — content unmodified)
+     ============================================================ -->
+<section class="page-banner" id="about" style="background-image:url('images/louvre-abudhabi.jpg')">
+  <div class="page-banner-inner reveal">
+    <p class="eyebrow">The Photographer</p>
+    <h1>About</h1>
+  </div>
+</section>
+
+<section class="section" style="padding-bottom: 2.5rem;">
+  <div class="container">
+    <div class="intro-split reveal">
+      <div class="intro-split-image">
+        <img src="images/tania-portrait.jpg" alt="Portrait of Tania Khan">
+      </div>
+      <div class="intro-split-text">
+        <p class="eyebrow">Abu Dhabi, UAE</p>
+        <h2>Tanleo_</h2>
+        <p style="margin-top:1rem;">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading. Her work explores the relationship between light, mood, and color, transforming everyday scenes into intentional visual narratives.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section recognition reveal">
+  <div class="container">
+    <p class="eyebrow" style="text-align:center;">Exhibited &amp; Featured</p>
+    <div class="recognition-grid">
+      <div class="recognition-item">
+        <span class="recognition-title">Fulle Galleria</span>
+        <span class="recognition-sub">International Exhibition, Argentina</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">Spaces of Light</span>
+        <span class="recognition-sub">Sheikh Zayed Grand Mosque Competition</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">Qasr Al Hosn</span>
+        <span class="recognition-sub">Official Instagram Feature</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">Cultural Foundation</span>
+        <span class="recognition-sub">Official Instagram Feature</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">Film Abu Dhabi Commission</span>
+        <span class="recognition-sub">Official Instagram Feature</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">Ethara / Abu Dhabi Grand Prix</span>
+        <span class="recognition-sub">Corporate Suite Photography</span>
+      </div>
+      <div class="recognition-item">
+        <span class="recognition-title">What's On Abu Dhabi</span>
+        <span class="recognition-sub">Published Feature</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section cta-band reveal">
+  <div class="container cta-inner">
+    <h2>Let's create something intentional.</h2>
+    <p>Available for street, portrait, architectural and commercial shoots across Abu Dhabi and the UAE.</p>
+    <a href="#contact" class="btn btn-solid">Get In Touch</a>
+  </div>
+</section>
+
+<!-- ============================================================
+     CONTACT (was contact.html — content unmodified)
+     ============================================================ -->
+<section class="contact-hero" id="contact">
+  <div class="contact-hero-bg">
+    <img src="images/mystic-night-lamps.jpg" alt="Warmly lit lamps along a misty palace driveway at night" loading="lazy">
+  </div>
+  <div class="contact-hero-scrim"></div>
+
+  <div class="container contact-hero-inner">
+    <div class="contact-split">
+
+      <div class="contact-info reveal">
+        <p class="eyebrow">Let's talk</p>
+        <h1>Tell me about your project</h1>
+        <p class="contact-lead">Whether it's a street series, a portrait sitting, an architectural shoot, or a set of images that need careful retouching — I'd love to hear about it. I typically reply within 1–2 business days.</p>
+
+        <div class="contact-detail">
+          <span class="contact-label">Email</span>
+          <a href="mailto:tanleoad@gmail.com" class="contact-value">tanleoad@gmail.com</a>
+        </div>
+        <div class="contact-detail">
+          <span class="contact-label">Instagram</span>
+          <a href="https://www.instagram.com/tanleo_/" target="_blank" rel="noopener" class="contact-value">@tanleo_</a>
+        </div>
+        <div class="contact-detail">
+          <span class="contact-label">Based In</span>
+          <span class="contact-value">Abu Dhabi, UAE</span>
+        </div>
+      </div>
+
+      <form class="contact-form reveal" action="https://formspree.io/f/mvzedoyb" method="POST">
+        <div class="form-row">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-row">
+          <label for="service">What are you interested in?</label>
+          <select id="service" name="service">
+            <option value="Street Photography">Street Photography</option>
+            <option value="Portrait Photography">Portrait Photography</option>
+            <option value="Architectural Photography">Architectural Photography</option>
+            <option value="Face Retouching">Face Retouching</option>
+            <option value="Color Grading Workshop">Color Grading Workshop</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-solid" style="width:100%; justify-content:center;">Send Message</button>
+      </form>
+
+    </div>
   </div>
 </section>
 
@@ -185,10 +466,10 @@
     <div class="footer-inner">
       <div class="footer-brand">tanleophotography</div>
       <ul class="footer-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="portfolio.html">Portfolio</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#projects">Portfolio</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
       </ul>
     </div>
     <div class="footer-meta">

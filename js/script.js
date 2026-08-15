@@ -471,8 +471,21 @@ function initPageContent() {
         stageLink.removeAttribute('href');
         stageLink.removeAttribute('data-work');
       } else {
+        // Street/Architecture/Portraits now live as sections further
+        // down this same document (single continuous-scroll page,
+        // 2026-08-15 — see claude/continuous-scroll-architecture-
+        // proposal.md) rather than as separate pages, so this is an
+        // in-page anchor rather than a page URL. The site-wide click
+        // router (document click handler, further down this file)
+        // already leaves any "#"-prefixed href alone — it never calls
+        // siteTaxi.navigateTo() for these — so clicking the big photo
+        // simply smooth-scrolls to that chapter's section
+        // (html{scroll-behavior:smooth} is already set globally in
+        // css/style.css). data-work/data-morph-id are left in place;
+        // they're harmless now that nothing triggers a Taxi/Flip morph
+        // for an in-page anchor.
         stageLink.classList.remove('is-soon');
-        stageLink.setAttribute('href', ch.key + '.html');
+        stageLink.setAttribute('href', '#' + ch.key);
         stageLink.setAttribute('data-work', ch.key);
       }
     }
@@ -631,6 +644,45 @@ function initPageContent() {
 
     renderStageChapter(stageCurrent);
   }
+
+  /* ---- Persistent side nav: scroll-spy ----
+     Added 2026-08-15 alongside the single-continuous-scroll rebuild
+     (see claude/continuous-scroll-architecture-proposal.md). Reuses
+     the exact same technique as the .reveal system just above —
+     IntersectionObserver, opt-in, nothing hidden if it fails to run —
+     just aimed at the four section boundaries instead of individual
+     elements. rootMargin shrinks the observed viewport to a thin band
+     around its vertical center, so a section only counts as "current"
+     once it's actually crossed roughly the middle of the screen,
+     rather than the instant its top edge appears — avoids flicker
+     right at a section boundary. Runs once per page load/transition;
+     harmless no-op on any page without a #sideNav (i.e. every page
+     except this one). */
+  const sideNav = document.getElementById('sideNav');
+  if (sideNav) {
+    const sideNavLinks = Array.from(sideNav.querySelectorAll('a[href^="#"]'));
+    const sideNavSections = sideNavLinks
+      .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+      .filter(Boolean);
+    const setActiveSideNav = (id) => {
+      sideNavLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+    };
+    if ('IntersectionObserver' in window && sideNavSections.length) {
+      const sideNavObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveSideNav(entry.target.id);
+        });
+      }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+      sideNavSections.forEach(sec => sideNavObserver.observe(sec));
+    }
+    // Mark the clicked destination active immediately, rather than
+    // waiting for the smooth-scroll animation to finish and the
+    // observer to catch up — avoids a brief flicker/lag on click.
+    sideNavLinks.forEach(a => {
+      a.addEventListener('click', () => setActiveSideNav(a.getAttribute('href').slice(1)));
+    });
+    setActiveSideNav('home');
+  }
 }
 window.initPageContent = initPageContent;
 
@@ -652,7 +704,13 @@ document.addEventListener('DOMContentLoaded', () => {
      the warmed cache stays useful for every Taxi transition
      afterward, not just the first one. */
   (function prefetchInternalPages() {
-    const pages = ['index.html', 'portfolio.html', 'about.html', 'contact.html', 'street.html', 'architecture.html', 'portraits.html'];
+    // portfolio/about/contact/street/architecture/portraits.html were
+    // merged into index.html as in-page sections on 2026-08-15 (see
+    // claude/continuous-scroll-architecture-proposal.md) and are now
+    // just thin redirect stubs — nothing left worth prefetching there.
+    // services.html/workshops.html stay out of this list, same as
+    // before: they're still on the older, unmerged template.
+    const pages = ['index.html'];
     const current = window.location.pathname.split('/').pop() || 'index.html';
     const run = () => {
       pages.filter(p => p !== current).forEach(p => {
