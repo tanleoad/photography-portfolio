@@ -960,17 +960,16 @@ body.intro-active{ overflow:hidden; }
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  /* Always visible by default — same reasoning as .cat-hero-photo on
-     each category page ("a JS failure never hides the page's primary
-     content"). Previously started at opacity:0 and only became
-     visible once js/script.js added .work-stage.developed further
-     down; if anything upstream of that point ever failed to run to
-     completion, the photo stayed invisible indefinitely with no
-     visible error. The .work-stage.developed rule below is now
-     redundant but harmless (opacity:1 on top of opacity:1), so the
-     JS-driven chapter-to-chapter crossfade (js/script.js,
-     goToStageChapter) is unaffected. */
-  opacity: 1;
+  /* Quiet hold-then-settle: the photograph waits, faintly veiled, then
+     settles into full presence a beat later. Same pacing idea as
+     .cat-hero-photo/.intro-pending on each category page, rather than
+     a bespoke effect just for this page — previously a film-negative
+     colour simulation (inverted/blurred, "developing" into clarity)
+     plus a hover light-sweep and idle "breathing" animation, all
+     retired: each was decoration about photography rather than the
+     photograph itself getting closer, which is the one thing every
+     interaction on this site is now judged against. */
+  opacity: 0;
   transition: opacity 1.8s cubic-bezier(0.16,1,0.3,1);
 }
 .stage-photo-webgl{

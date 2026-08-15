@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Tanleo_</title>
+<meta name="description" content="A collection of street, architecture and fashion photography, plus retouching work, by Tanleo_, shot across Abu Dhabi and beyond.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-nav site-nav-centered">
+  <a href="index.html" class="brand">Tanleo<span>_</span></a>
+  <button class="menu-trigger" id="menuTrigger" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay">
+    <span class="menu-trigger-icon"><span></span><span></span></span>
+    <span class="menu-trigger-label">Menu</span>
+  </button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-overlay-left">
+    <button class="menu-close" id="menuClose" aria-label="Close menu">
+      <span class="menu-close-icon">&times;</span>
+      <span class="menu-close-label">Close</span>
+    </button>
+    <nav class="menu-overlay-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="portfolio.html" class="active">Portfolio</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="menu-overlay-image">
+    <div class="menu-overlay-image-slide active" style="background-image:url('images/double-exposure-portrait.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/louvre-abudhabi.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/mystic-night-lamps.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/emirates-palace-staircase.jpg')"></div>
+    <div class="menu-overlay-image-slide" style="background-image:url('images/blossom-terrace.jpg')"></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0015 0.006" numOctaves="1" seed="24" result="turbulence"></feTurbulence>
+    <feComponentTransfer in="turbulence" result="mapped">
+      <feFuncR type="gamma" amplitude="1" exponent="10" offset="0.5"></feFuncR>
+      <feFuncG type="gamma" amplitude="0" exponent="1" offset="0"></feFuncG>
+      <feFuncB type="gamma" amplitude="0" exponent="1" offset="0.5"></feFuncB>
+    </feComponentTransfer>
+    <feGaussianBlur in="turbulence" stdDeviation="8" result="softMap"></feGaussianBlur>
+    <feSpecularLighting in="softMap" surfaceScale="5" specularConstant="1" specularExponent="100" lighting-color="white" result="specLight">
+      <fePointLight x="-200" y="-200" z="200"></fePointLight>
+    </feSpecularLighting>
+    <feComposite in="specLight" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litImage"></feComposite>
+    <feDisplacementMap in="SourceGraphic" in2="softMap" scale="72" xChannelSelector="R" yChannelSelector="A" result="disp1"></feDisplacementMap>
+    <feOffset in="softMap" dx="0.35" dy="0" result="softMapCA"></feOffset>
+    <feDisplacementMap in="SourceGraphic" in2="softMapCA" scale="72" xChannelSelector="R" yChannelSelector="A" result="dispCA"></feDisplacementMap>
+    <feColorMatrix in="dispCA" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="caRed"></feColorMatrix>
+    <feColorMatrix in="dispCA" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="caGreen"></feColorMatrix>
+    <feColorMatrix in="dispCA" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="caBlue"></feColorMatrix>
+    <feOffset in="caRed" dx="1.1" dy="0" result="caRedOffset"></feOffset>
+    <feOffset in="caGreen" dx="-1" dy="0" result="caGreenOffset"></feOffset>
+    <feOffset in="caBlue" dx="-1.1" dy="0" result="caBlueOffset"></feOffset>
+    <feBlend in="caRedOffset" in2="caGreenOffset" mode="screen" result="caMix1"></feBlend>
+    <feBlend in="caMix1" in2="caBlueOffset" mode="screen" result="caFinal"></feBlend>
+    <feGaussianBlur in="caFinal" stdDeviation="0.25" result="caSoft"></feGaussianBlur>
+    <feComposite in="caSoft" in2="SourceGraphic" operator="in" result="caClipped"></feComposite>
+    <feBlend in="disp1" in2="caClipped" mode="lighten" result="finalGlass"></feBlend>
+  </filter>
+</svg>
+
+<main data-taxi>
+<div data-taxi-view="">
+
+<div class="work-stage" id="workStage">
+
+  <a href="street.html" class="stage-frame-link" id="stageFrameLink" data-work="street">
+    <div class="stage-photo-frame" id="stagePhotoFrame" data-morph-id="cat-street">
+      <img class="stage-photo" id="stagePhoto" src="images/louvre-abudhabi.jpg" alt="Dappled light beneath the Louvre Abu Dhabi dome">
+      <img class="stage-photo stage-photo-incoming" id="stagePhotoIncoming" alt="">
+    </div>
+  </a>
+
+  <div class="stage-eyebrow-group">
+    <span class="eyebrow">Portfolio</span>
+    <span class="stage-counter"><span class="current" id="stageCounterCurrent">01</span> / 04</span>
+    <div class="stage-dots" id="stageDots" role="tablist" aria-label="Jump to a chapter">
+      <button class="stage-dot active" type="button" data-index="0" aria-label="Street"></button>
+      <button class="stage-dot" type="button" data-index="1" aria-label="Architecture"></button>
+      <button class="stage-dot" type="button" data-index="2" aria-label="Portraits"></button>
+      <button class="stage-dot" type="button" data-index="3" aria-label="Photo Retouching"></button>
+    </div>
+  </div>
+
+  <div class="stage-label">
+    <div class="stage-label-left">
+      <span class="stage-num" id="stageNum">01</span>
+      <h1 class="stage-name" id="stageName">Street</h1>
+      <span class="stage-soon-tag" id="stageSoonTag">Coming Soon</span>
+    </div>
+    <div>
+      <p class="stage-desc" id="stageDesc">Observations from cities, people and the moments between them.</p>
+    </div>
+  </div>
+
+  <button class="stage-nav-btn stage-nav-prev" id="stagePrevBtn" aria-label="Previous chapter">&#8249;</button>
+  <button class="stage-nav-btn stage-nav-next" id="stageNextBtn" aria-label="Next chapter">&#8250;</button>
+
+</div>
+
+<section class="section cta-band reveal">
+  <div class="container cta-inner">
+    <h2>Have a story worth telling?</h2>
+    <p>Available for street, portrait, architectural and commercial shoots across Abu Dhabi and the UAE.</p>
+    <a href="contact.html" class="btn btn-solid">Get In Touch</a>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">tanleophotography</div>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="portfolio.html">Portfolio</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-meta">
+      <span>&copy; 2026 tanleophotography. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@unseenco/e@2.5.0/dist/e.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@unseenco/taxi@1.4.0/dist/taxi.umd.js"></script>
+<script src="js/transitions.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

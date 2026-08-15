@@ -500,19 +500,10 @@ function initPageContent() {
         workStage.classList.add('developed');
       }, 260);
 
-      // The WebGL "curved opening" effect (playStageSurfaceOpening,
-      // above) is disabled here. It was a short-lived decorative
-      // surface meant to fade itself out and remove itself within
-      // ~1.5s, but if its render loop ever threw or stalled partway
-      // (backgrounded tab, a GPU/driver quirk, anything not caught by
-      // the function's own guards), the canvas it creates sits at
-      // z-index:2 directly on top of the real photo and never gets
-      // removed — a permanent black cover with no visible error,
-      // which is exactly the "photo blinks in, then goes black"
-      // symptom this line previously caused. The real, accessible
-      // <img> underneath (opacity:1 by default, see .stage-photo in
-      // css/style.css) is what should always be shown; this optional
-      // surface was never worth the risk of silently hiding it.
+      // Wait for the HTML image to be decoded where supported; if decoding is
+      // unavailable or fails, the ordinary image opening simply continues.
+      if (stagePhoto.decode) stagePhoto.decode().then(playStageSurfaceOpening).catch(() => {});
+      else if (stagePhoto.complete) playStageSurfaceOpening();
 
       // Safety net, same idea as the .reveal system and the category-page
       // intro photo further up this file: the photograph must never be
