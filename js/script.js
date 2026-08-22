@@ -298,17 +298,19 @@ function initPageContent() {
      between chapters reveals the next photograph through a growing
      aperture iris — it's already sitting there behind the mask, never
      hidden behind black — and a small exposure-meter needle shows
-     which of the four you're on. Only real chapters are clickable/hoverable
-     — Photo Retouching stays inert exactly the way it was as a
-     "coming soon" rhythm row, just by having no href or data-work
-     while it's the current chapter. */
+     which of the four you're on. Street/Architecture/Portraits are
+     in-page anchors (see the "else" branch below); Photo Retouching
+     (2026-08-22) is the first chapter to point at a real standalone
+     page — the Beauty Archive corridor (retouching.html) — via its
+     own `page` property, rather than an in-page anchor or the old
+     "coming soon" inert state. */
   const workStage = document.getElementById('workStage');
   if (workStage) {
     const stageChapters = [
       { key: 'street', num: '01', name: 'Street', desc: 'Observations from cities, people and the moments between them.', img: 'images/louvre-abudhabi.jpg', alt: 'Dappled light beneath the Louvre Abu Dhabi dome' },
       { key: 'architecture', num: '02', name: 'Architecture', desc: 'Where geometry, light and silence meet.', img: 'images/badshahi-mosque.jpg', alt: 'Grand mosque domes and minarets glowing at golden hour' },
       { key: 'portraits', num: '03', name: 'Portraits', desc: 'Stories told through expression, presence and light.', img: 'images/double-exposure-portrait.jpg', alt: 'Double exposure portrait blurred against the Abu Dhabi skyline' },
-      { key: 'retouching', num: '04', name: 'Photo Retouching', desc: 'Coming soon.', img: 'images/mystic-night-lamps.jpg', alt: 'Warmly retouched night scene along a palace driveway', soon: true }
+      { key: 'retouching', num: '04', name: 'Photo Retouching', desc: 'A corridor of finished images, and the care behind them.', img: 'images/mystic-night-lamps.jpg', alt: 'Warmly retouched night scene along a palace driveway', page: 'retouching.html' }
     ];
 
     const stageLink = document.getElementById('stageFrameLink');
@@ -484,8 +486,15 @@ function initPageContent() {
         // css/style.css). data-work/data-morph-id are left in place;
         // they're harmless now that nothing triggers a Taxi/Flip morph
         // for an in-page anchor.
+        //
+        // A chapter with its own `page` (Photo Retouching) is a real
+        // standalone destination rather than an in-page section, so it
+        // gets a normal page href instead — the click router above
+        // does NOT skip these (no leading "#"), so it hands off to
+        // window.siteTaxi.navigateTo() like any other real page link,
+        // same swap-transition behavior as the rest of the site.
         stageLink.classList.remove('is-soon');
-        stageLink.setAttribute('href', '#' + ch.key);
+        stageLink.setAttribute('href', ch.page || ('#' + ch.key));
         stageLink.setAttribute('data-work', ch.key);
       }
     }
@@ -835,9 +844,12 @@ document.addEventListener('DOMContentLoaded', () => {
      NAVIGATE_END handler, right next to where it updates the
      menu-overlay's own active link). */
   // projects.html is a legacy redirect stub to portfolio.html, not a
-  // real destination — there is no standalone retouching page yet
-  // (see the "soon" chapter on the Work stage), so it's deliberately
-  // left out of this map; that thumbnail links to portfolio.html.
+  // real destination, so it's deliberately left out of this map; that
+  // thumbnail links to portfolio.html. retouching.html (2026-08-22,
+  // the Beauty Archive corridor) is also left out here on purpose —
+  // this map is only for the .glass-nav component's own section
+  // state on street.html/architecture.html/portraits.html, which
+  // retouching.html doesn't use.
   const CATEGORY_PAGES = { 'street.html': 'street', 'architecture.html': 'architecture', 'portraits.html': 'portraits' };
   window.updateGlassNav = function updateGlassNav() {
     const glassNav = document.querySelector('.glass-nav');
