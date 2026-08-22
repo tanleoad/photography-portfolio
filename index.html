@@ -167,6 +167,20 @@
     </div>
   </a>
 
+  <!-- Spatial WebGL presentation of the same four chapters, added
+       2026-08-21 (see claude/reference-forensic-analysis-v1.md and
+       Tan's Aikawa Kenichi reference brief). The chapters exist as
+       real 3D surfaces arranged around a shared cylindrical volume —
+       one facing the viewer, the rest turning away into depth —
+       instead of the flat single-photo frame above. That frame and
+       its two <img> elements are left completely untouched underneath:
+       if WebGL isn't available (initStageRing bails out early) this
+       canvas is simply never created and the site behaves exactly as
+       it did before this change. Sits above .stage-photo-frame
+       (z-index, see css/style.css) and below the eyebrow/label/nav
+       chrome, which stays exactly as it was. -->
+  <canvas class="stage-ring-canvas" id="stageRingCanvas" aria-hidden="true"></canvas>
+
   <div class="stage-eyebrow-group">
     <span class="eyebrow">Portfolio</span>
     <span class="stage-counter"><span class="current" id="stageCounterCurrent">01</span> / 04</span>

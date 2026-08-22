@@ -1050,6 +1050,28 @@ body.intro-active{ overflow:hidden; }
 .work-stage.developed .stage-photo{
   opacity: 1;
 }
+/* ---- Projects-page spatial WebGL (Aikawa Kenichi reference) ----
+   Added 2026-08-21. Real 3D presentation of the four chapters as
+   surfaces on a shared cylindrical volume, replacing the flat
+   .stage-photo-frame above as the primary visual once it's ready to
+   draw (see initStageRing, js/script.js). Sits above the photo frame
+   (z-index 10 vs. the frame's own stacking context) but below every
+   piece of UI chrome (eyebrow/dots/label/nav-btn, all z-index 400),
+   which is untouched and keeps working exactly as before. Starts
+   transparent and only reaches opacity:1 once initStageRing confirms
+   WebGL actually initialized and its first frame is ready to show —
+   if it never does (no WebGL, a context-creation failure, anything),
+   the canvas stays invisible and the flat photo frame underneath is
+   what the visitor sees, same as it always was. */
+.stage-ring-canvas{
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1);
+  cursor: pointer;
+}
+.stage-ring-canvas.ready{ opacity: 1; }
 /* ---- eyebrow / counter, sitting under the fixed nav ----
    Changed from position:fixed to position:absolute on 2026-08-15,
    when Projects stopped being its own standalone page and became one
