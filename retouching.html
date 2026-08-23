@@ -189,6 +189,98 @@ const uShade = gl.getUniformLocation(prog, 'uShade');
 const uFog = gl.getUniformLocation(prog, 'uFog');
 const uBgTint = gl.getUniformLocation(prog, 'uBgTint');
 
+// ---- environmental gallery-light pass (atmosphere-only addition) ----
+// A second, fully independent WebGL program -- not one line of the wall
+// shader/program above is touched. One soft, textureless falloff quad per
+// wall, drawn as a separate pass before the wall panels themselves so the
+// opaque wall front-face simply paints over whatever part of the glow
+// falls "behind" it -- the glow is only ever visible in the space around
+// a panel, never on top of the photograph, guaranteed by draw order alone
+// rather than depth-math. Brightness comes directly from that wall's own
+// wallFog(camZ, w) -- the exact same value already driving its arrival/
+// glimpse state -- so the light cannot move independently of the
+// photograph it belongs to; there is no second proximity system.
+const envVsSrc = `
+  attribute vec2 aPos;
+  attribute vec2 aUV;
+  varying vec2 vUV;
+  uniform mat4 uProj;
+  uniform mat4 uView;
+  uniform mat4 uModel;
+  void main() {
+    gl_Position = uProj * uView * uModel * vec4(aPos, 0.0, 1.0);
+    vUV = aUV;
+  }
+`;
+const envFsSrc = `
+  precision mediump float;
+  varying vec2 vUV;
+  uniform float uFog;    // this wall's existing wallFog(camZ, w) -- identical value the photograph itself uses
+  uniform vec3 uTint;    // this wall's existing tint, pre-scaled down in JS before this uniform is set
+  uniform float uPeak;   // small max-brightness constant
+  void main() {
+    // Signed, anisotropic distance from center -- narrower horizontally
+    // than vertically so the falloff reads as a soft vertical wash rather
+    // than a circular pool, biased slightly toward the lower half of the
+    // patch (light implied to fall from above and settle near the base).
+    vec2 p = vUV * 2.0 - 1.0;
+    p.y -= 0.12;
+    vec2 d = p * vec2(1.25, 0.85);
+    float dist = length(d);
+    // Pure exponential falloff -- decays smoothly toward zero with no
+    // discernible edge or radius a viewer could point to (never a hard
+    // boundary, never a visible circle).
+    float falloff = exp(-dist * dist * 1.6);
+    float intensity = falloff * uFog * uPeak;
+    vec3 warm = vec3(1.0, 0.97, 0.91) + uTint;
+    gl_FragColor = vec4(warm * intensity, 1.0);
+  }
+`;
+const envProg = gl.createProgram();
+gl.attachShader(envProg, compile(gl.VERTEX_SHADER, envVsSrc));
+gl.attachShader(envProg, compile(gl.FRAGMENT_SHADER, envFsSrc));
+gl.linkProgram(envProg);
+if (!gl.getProgramParameter(envProg, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(envProg));
+const envAPos = gl.getAttribLocation(envProg, 'aPos');
+const envAUV = gl.getAttribLocation(envProg, 'aUV');
+const envUProj = gl.getUniformLocation(envProg, 'uProj');
+const envUView = gl.getUniformLocation(envProg, 'uView');
+const envUModel = gl.getUniformLocation(envProg, 'uModel');
+const envUFog = gl.getUniformLocation(envProg, 'uFog');
+const envUTint = gl.getUniformLocation(envProg, 'uTint');
+const envUPeak = gl.getUniformLocation(envProg, 'uPeak');
+// Deliberately conservative: a few hundredths of brightness lift at most,
+// at a wall's fully-arrived state -- meant to be felt ("the dark doesn't
+// look flat") rather than consciously noticed as a light. Tuned visually
+// against real screenshots, not assumed correct from this number alone.
+const ENV_PEAK = 0.028;
+// This wall's own approved tint, scaled well down further -- the glow
+// leans on the same colour temperature already established per wall, it
+// never introduces a new hue of its own.
+const ENV_TINT_SCALE = 0.22;
+
+function buildGlowQuad(w, h) {
+  const hw = w/2, hh = h/2;
+  return {
+    pos: [ -hw,-hh, hw,-hh, -hw,hh,  -hw,hh, hw,-hh, hw,hh ],
+    uv:  [ 0,1, 1,1, 0,0,  0,0, 1,1, 1,0 ],
+  };
+}
+function drawGlow(buf, x, y, z, fog, tint) {
+  const model = translate(x, y, z);
+  gl.uniformMatrix4fv(envUModel, false, model);
+  gl.uniform1f(envUFog, fog);
+  gl.uniform3f(envUTint, tint[0]*ENV_TINT_SCALE, tint[1]*ENV_TINT_SCALE, tint[2]*ENV_TINT_SCALE);
+  gl.uniform1f(envUPeak, ENV_PEAK);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf.posBuf);
+  gl.enableVertexAttribArray(envAPos);
+  gl.vertexAttribPointer(envAPos, 2, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf.uvBuf);
+  gl.enableVertexAttribArray(envAUV);
+  gl.vertexAttribPointer(envAUV, 2, gl.FLOAT, false, 0, 0);
+  gl.drawArrays(gl.TRIANGLES, 0, buf.count);
+}
+
 // ---- panel geometry: flat quad facing +Z, plus thin real-thickness bevel ----
 const THICK = 0.045;
 function buildPanel(w, h) {
@@ -450,15 +542,37 @@ function render() {
   gl.enable(gl.CULL_FACE);
   if (!window.__texturesReady) return;
 
-  gl.useProgram(prog);
   const proj = perspective(45 * Math.PI/180, VW/VH, 0.1, 100);
   const view = translate(0, 0, -camZ); // camera at (0,0,camZ) looking down -Z
+
+  // Each wall's fog computed exactly once per frame here, then reused for
+  // BOTH the glow pass and the wall pass below -- the environmental light
+  // and the photograph's own arrival read the literal same number, not
+  // two independently-computed values that merely happen to agree.
+  const fogs = WALLS.map(w => wallFog(camZ, w));
+
+  // ---- environmental gallery-light pass -- drawn first. The opaque wall
+  // panels drawn afterward simply paint over whatever part of a glow
+  // patch falls behind them, so the glow is only ever visible in the
+  // space around a panel, never over the photograph itself. ----
+  gl.useProgram(envProg);
+  gl.uniformMatrix4fv(envUProj, false, proj);
+  gl.uniformMatrix4fv(envUView, false, view);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE);
+  gl.depthMask(false);
+  WALLS.forEach((w, i) => {
+    drawGlow(w.glowBuffers, w.side * WALL_X_OFFSET, 0, w.z, fogs[i], w.tint);
+  });
+  gl.disable(gl.BLEND);
+  gl.depthMask(true);
+
+  gl.useProgram(prog);
   gl.uniformMatrix4fv(uProj, false, proj);
   gl.uniformMatrix4fv(uView, false, view);
 
-  WALLS.forEach(w => {
-    const fog = wallFog(camZ, w);
-    drawWall(w.buffers, w.side * WALL_X_OFFSET, w.z, w.texA, w.texB, w.reveal, fog, w.tint);
+  WALLS.forEach((w, i) => {
+    drawWall(w.buffers, w.side * WALL_X_OFFSET, w.z, w.texA, w.texB, w.reveal, fogs[i], w.tint);
   });
 }
 
@@ -504,6 +618,12 @@ Promise.all(WALLS.map(w => Promise.all([
     w.texB = b.tex;
     const geo = buildPanel(PANEL_H * a.aspect, PANEL_H);
     w.buffers = { front: makeBuffers(geo.front), sides: geo.sides.map(makeBuffers) };
+    // Glow patch sized larger than the panel itself (so the visible
+    // remainder, once the opaque panel paints over it, reads as a halo
+    // around/beneath the artwork rather than a shape of its own) and
+    // nudged slightly downward to bias the wash toward the base.
+    const glowGeo = buildGlowQuad(PANEL_H * a.aspect * 1.3, PANEL_H * 1.9);
+    w.glowBuffers = makeBuffers(glowGeo);
   });
   window.__texturesReady = true;
 });
