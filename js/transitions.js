@@ -96,14 +96,35 @@
   function findMorphSource(trigger) {
     if (!trigger || !trigger.getAttribute) return null;
     const workKey = trigger.getAttribute('data-work');
-    if (!workKey) return null;
+    if (workKey) {
+      const bg = trigger.querySelector && trigger.querySelector('.stage-photo-frame');
+      if (bg && bg.offsetParent !== null) {
+        return { id: 'cat-' + workKey, el: bg };
+      }
+      return null;
+    }
 
-    const bg = trigger.querySelector && trigger.querySelector('.stage-photo-frame');
-    if (bg && bg.offsetParent !== null) {
-      return { id: 'cat-' + workKey, el: bg };
+    // Generic path, added 2026-09-07 for the Projects index: any
+    // trigger whose click target contains an element carrying
+    // data-morph-id (the index's .project-photo-frame mats) can morph
+    // into a destination page's element sharing that same id, exactly
+    // like the data-work path above but without a fixed id-naming
+    // scheme. If the destination page doesn't have a matching element
+    // yet — true of street.html/architecture.html/portraits.html as
+    // of this writing, still the redirect stubs from the August
+    // continuous-scroll merge — onEnter's own morphTarget lookup below
+    // simply finds nothing and falls through to the default page-rise
+    // transition. Nothing here or there needs to change once those
+    // pages grow a real data-morph-id element; it starts working on
+    // its own.
+    const morphEl = trigger.querySelector && trigger.querySelector('[data-morph-id]');
+    if (morphEl && morphEl.offsetParent !== null) {
+      return { id: morphEl.getAttribute('data-morph-id'), el: morphEl };
     }
     return null;
   }
+
+  const prefersDesktop = () => window.matchMedia('(min-width: 901px)').matches;
 
   let pendingMorphId = null;
   let pendingMorphState = null;
@@ -198,6 +219,31 @@
         pendingMorphState = null;
 
         window.scrollTo(0, 0);
+
+        // Atmospheric haze — approved 2026-09-07 for the Projects
+        // index's photo→page transition. A separate, low-opacity
+        // layer that builds in and clears around the Flip, secondary
+        // to the photograph itself — never a filter on the growing
+        // photo or a real-time blurred duplicate of it. Deliberately a
+        // soft radial gradient rather than any CSS blur/backdrop-filter
+        // layer: the site has one open, unresolved, device-level
+        // rendering bug tied to blur-style GPU compositing (see the
+        // black-tile investigation), and a gradient gets the same
+        // "atmosphere gathering" read without going anywhere near that
+        // risk. Desktop + motion-allowed only, matching every other
+        // transition-adjacent effect on the site.
+        let haze = null;
+        if (prefersDesktop()) {
+          haze = document.createElement('div');
+          haze.style.cssText =
+            'position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0;' +
+            'background: radial-gradient(60% 60% at 50% 50%, rgba(10,9,8,0) 0%, rgba(10,9,8,0.55) 100%);';
+          document.body.appendChild(haze);
+          gsap.to(haze, { opacity: 1, duration: 0.55, ease: 'power1.out' });
+          gsap.to(haze, { opacity: 0, duration: 0.6, ease: 'power1.in', delay: 0.6,
+            onComplete: () => { if (haze && haze.parentNode) haze.parentNode.removeChild(haze); }
+          });
+        }
 
         const fromRect = from.getBoundingClientRect();
         const clipper = document.createElement('div');

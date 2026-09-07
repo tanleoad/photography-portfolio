@@ -27,6 +27,8 @@ let _heroTiltMoveHandler = null;
 let _heroTiltLeaveHandler = null;
 let _parallaxScrollHandler = null;
 let _parallaxResizeHandler = null;
+let _projectsScrollHandler = null;
+let _projectsResizeHandler = null;
 let _revealObserver = null;
 let _revealSafetyTimeout = null;
 let _workStageKeydownHandler = null;
@@ -54,6 +56,9 @@ function teardownPageContent() {
 
   if (_parallaxScrollHandler) { window.removeEventListener('scroll', _parallaxScrollHandler); _parallaxScrollHandler = null; }
   if (_parallaxResizeHandler) { window.removeEventListener('resize', _parallaxResizeHandler); _parallaxResizeHandler = null; }
+
+  if (_projectsScrollHandler) { window.removeEventListener('scroll', _projectsScrollHandler); _projectsScrollHandler = null; }
+  if (_projectsResizeHandler) { window.removeEventListener('resize', _projectsResizeHandler); _projectsResizeHandler = null; }
 
   if (_revealObserver) { _revealObserver.disconnect(); _revealObserver = null; }
   if (_revealSafetyTimeout) { clearTimeout(_revealSafetyTimeout); _revealSafetyTimeout = null; }
@@ -280,6 +285,41 @@ function initPageContent() {
     window.addEventListener('scroll', _parallaxScrollHandler, { passive: true });
     window.addEventListener('resize', _parallaxResizeHandler);
     updateParallax();
+  }
+
+  /* ---- Projects index: photograph proximity ----
+     Each threshold's photo mat carries --proximity (read by
+     .project-photo-frame in style.css to drive opacity/translateY/
+     scale/saturation/contrast — see that comment for the exact
+     values). 0 at the edges of the viewport, 1 once the photo is
+     centered. Same rAF-throttled, getBoundingClientRect-based,
+     desktop-only pattern as the Work-page parallax just above —
+     deliberately not a new mechanism. Mobile and reduced-motion both
+     rely entirely on the existing .reveal fade already on each
+     .project-threshold, same fallback the rest of the site uses. */
+  const projectMats = Array.from(document.querySelectorAll('.project-photo-mat'));
+  const projectsEnabled = projectMats.length &&
+    window.matchMedia('(min-width: 901px)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (projectsEnabled) {
+    let projectsTicking = false;
+    const updateProjectsProximity = () => {
+      projectsTicking = false;
+      const viewportH = window.innerHeight;
+      projectMats.forEach(el => {
+        const r = el.getBoundingClientRect();
+        const centerOffset = Math.abs((r.top + r.height / 2) - viewportH / 2);
+        const proximity = Math.max(0, 1 - centerOffset / (viewportH * 0.62));
+        el.style.setProperty('--proximity', proximity.toFixed(3));
+      });
+    };
+    _projectsScrollHandler = () => {
+      if (!projectsTicking) { projectsTicking = true; requestAnimationFrame(updateProjectsProximity); }
+    };
+    _projectsResizeHandler = updateProjectsProximity;
+    window.addEventListener('scroll', _projectsScrollHandler, { passive: true });
+    window.addEventListener('resize', _projectsResizeHandler);
+    updateProjectsProximity();
   }
 
   /* ---- Work page: the editing table ----
