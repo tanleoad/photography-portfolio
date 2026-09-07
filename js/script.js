@@ -29,6 +29,9 @@ let _parallaxScrollHandler = null;
 let _parallaxResizeHandler = null;
 let _projectsScrollHandler = null;
 let _projectsResizeHandler = null;
+let _projectsMql = null;
+let _projectsMqlHandler = null;
+let _projectsGateResizeHandler = null;
 let _revealObserver = null;
 let _revealSafetyTimeout = null;
 let _workStageKeydownHandler = null;
@@ -59,6 +62,8 @@ function teardownPageContent() {
 
   if (_projectsScrollHandler) { window.removeEventListener('scroll', _projectsScrollHandler); _projectsScrollHandler = null; }
   if (_projectsResizeHandler) { window.removeEventListener('resize', _projectsResizeHandler); _projectsResizeHandler = null; }
+  if (_projectsMql && _projectsMqlHandler) { _projectsMql.removeEventListener('change', _projectsMqlHandler); _projectsMql = null; _projectsMqlHandler = null; }
+  if (_projectsGateResizeHandler) { window.removeEventListener('resize', _projectsGateResizeHandler); _projectsGateResizeHandler = null; }
 
   if (_revealObserver) { _revealObserver.disconnect(); _revealObserver = null; }
   if (_revealSafetyTimeout) { clearTimeout(_revealSafetyTimeout); _revealSafetyTimeout = null; }
@@ -291,35 +296,100 @@ function initPageContent() {
      Each threshold's photo mat carries --proximity (read by
      .project-photo-frame in style.css to drive opacity/translateY/
      scale/saturation/contrast — see that comment for the exact
-     values). 0 at the edges of the viewport, 1 once the photo is
-     centered. Same rAF-throttled, getBoundingClientRect-based,
-     desktop-only pattern as the Work-page parallax just above —
-     deliberately not a new mechanism. Mobile and reduced-motion both
-     rely entirely on the existing .reveal fade already on each
-     .project-threshold, same fallback the rest of the site uses. */
+     values). Coupled handoff model, added 2026-09-07 to replace an
+     earlier version where each mat computed presence purely from its
+     own distance to viewport-center, independent of its neighbours —
+     a live scroll test showed that read as two separate fades
+     bottoming out together rather than one photograph yielding to the
+     next. This version measures each mat's falloff distance as the
+     REAL gap to its actual neighbour on either side (not a fixed
+     constant), and within that gap presence follows a hold-then-ease
+     curve: full strength for the first ~28% of the distance out from
+     settled, then a smooth eased decline. The incoming neighbour runs
+     the same curve in reverse, so it's already visibly rising while
+     the outgoing one is still near full strength, and the literal
+     midpoint between two thresholds lands around ~0.78 rather than
+     fading toward a shared dim floor.
+     Desktop-only, same rAF-throttled/getBoundingClientRect approach as
+     the Work-page parallax above — but unlike that block, the
+     desktop/mobile check here is a live matchMedia listener rather
+     than a one-time check at load, so resizing across the 900px
+     breakpoint after the page has already loaded correctly hands off
+     to (or back from) the .reveal-only mobile fallback instead of
+     leaving this effect running on top of the mobile/stacked layout. */
   const projectMats = Array.from(document.querySelectorAll('.project-photo-mat'));
-  const projectsEnabled = projectMats.length &&
-    window.matchMedia('(min-width: 901px)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (projectsEnabled) {
+  if (projectMats.length) {
+    const HOLD = 0.28; // fraction of the gap held at full presence before easing begins
+    const ease = u => u * u * (3 - 2 * u); // smoothstep
+    const presenceFromT = t => (t <= HOLD ? 1 : 1 - ease(Math.min(1, (t - HOLD) / (1 - HOLD))));
+
     let projectsTicking = false;
     const updateProjectsProximity = () => {
       projectsTicking = false;
       const viewportH = window.innerHeight;
-      projectMats.forEach(el => {
+      const viewportCenter = window.scrollY + viewportH / 2;
+      const fallbackGap = viewportH * 0.62; // same-feel fallback for the first/last mat's open side
+
+      const centers = projectMats.map(el => {
         const r = el.getBoundingClientRect();
-        const centerOffset = Math.abs((r.top + r.height / 2) - viewportH / 2);
-        const proximity = Math.max(0, 1 - centerOffset / (viewportH * 0.62));
-        el.style.setProperty('--proximity', proximity.toFixed(3));
+        return r.top + window.scrollY + r.height / 2;
+      });
+
+      projectMats.forEach((el, i) => {
+        const gapPrev = i > 0 ? centers[i] - centers[i - 1] : fallbackGap;
+        const gapNext = i < projectMats.length - 1 ? centers[i + 1] - centers[i] : fallbackGap;
+        const offset = viewportCenter - centers[i];
+        const gap = offset >= 0 ? gapNext : gapPrev;
+        const t = Math.min(1, Math.abs(offset) / Math.max(1, gap));
+        el.style.setProperty('--proximity', presenceFromT(t).toFixed(3));
       });
     };
+
     _projectsScrollHandler = () => {
       if (!projectsTicking) { projectsTicking = true; requestAnimationFrame(updateProjectsProximity); }
     };
     _projectsResizeHandler = updateProjectsProximity;
-    window.addEventListener('scroll', _projectsScrollHandler, { passive: true });
-    window.addEventListener('resize', _projectsResizeHandler);
-    updateProjectsProximity();
+
+    let projectsActive = false;
+    const activateProjects = () => {
+      if (projectsActive) return;
+      projectsActive = true;
+      window.addEventListener('scroll', _projectsScrollHandler, { passive: true });
+      window.addEventListener('resize', _projectsResizeHandler);
+      updateProjectsProximity();
+    };
+    const deactivateProjects = () => {
+      if (!projectsActive) return;
+      projectsActive = false;
+      window.removeEventListener('scroll', _projectsScrollHandler);
+      window.removeEventListener('resize', _projectsResizeHandler);
+      // Hand off cleanly to the mobile/reduced-motion fallback: clear the
+      // inline value so CSS's var(--proximity, 1) default takes over and
+      // the .reveal fade already on each .project-threshold is what's
+      // driving visibility instead.
+      projectMats.forEach(el => el.style.removeProperty('--proximity'));
+    };
+    const checkProjectsGate = () => {
+      const shouldRun = window.matchMedia('(min-width: 901px)').matches &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (shouldRun) activateProjects(); else deactivateProjects();
+    };
+
+    // Primary trigger: a plain, unconditionally-attached resize listener,
+    // re-checked on every resize regardless of current state. This is the
+    // one that's actually relied on — belt-and-suspenders below with a
+    // MediaQueryList 'change' listener too, but a live resize test during
+    // development showed 'change' alone didn't reliably re-fire when
+    // crossing back up through the breakpoint after loading below it, so
+    // this plain listener is the mechanism doing the real work.
+    _projectsGateResizeHandler = checkProjectsGate;
+    window.addEventListener('resize', _projectsGateResizeHandler);
+
+    _projectsMql = window.matchMedia('(min-width: 901px)');
+    _projectsMqlHandler = checkProjectsGate;
+    _projectsMql.addEventListener('change', _projectsMqlHandler);
+
+    checkProjectsGate();
   }
 
   /* ---- Work page: the editing table ----
