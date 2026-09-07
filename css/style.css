@@ -1996,7 +1996,7 @@ a.contact-value:hover{ color: var(--accent); }
 }
 .project-threshold{
   display: flex;
-  padding: clamp(3.5rem, 7vw, 5.5rem) var(--page-pad);
+  padding: clamp(2.25rem, 4.5vw, 3.25rem) var(--page-pad);
 }
 .project-threshold--street{ justify-content: flex-start; }
 .project-threshold--architecture{ justify-content: flex-end; }
