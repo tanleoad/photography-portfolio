@@ -318,6 +318,7 @@ function initPageContent() {
      to (or back from) the .reveal-only mobile fallback instead of
      leaving this effect running on top of the mobile/stacked layout. */
   const projectMats = Array.from(document.querySelectorAll('.project-photo-mat'));
+  const closingEl = document.querySelector('.closing');
   if (projectMats.length) {
     const HOLD = 0.28; // fraction of the gap held at full presence before easing begins
     const ease = u => u * u * (3 - 2 * u); // smoothstep
@@ -343,6 +344,20 @@ function initPageContent() {
         const t = Math.min(1, Math.abs(offset) / Math.max(1, gap));
         el.style.setProperty('--proximity', presenceFromT(t).toFixed(3));
       });
+
+      // Closing quote: recedes as the visitor scrolls past it toward Street
+      // (centers[0]), using the same hold-then-ease curve as every other
+      // handoff in this system. It has no "prev" neighbour of its own, so it
+      // simply stays at full presence until the viewport center passes its
+      // own center, then eases out over the real gap to Street.
+      if (closingEl) {
+        const closingRect = closingEl.getBoundingClientRect();
+        const closingCenter = closingRect.top + window.scrollY + closingRect.height / 2;
+        const closingGap = Math.max(1, centers[0] - closingCenter);
+        const closingOffset = Math.max(0, viewportCenter - closingCenter);
+        const closingT = Math.min(1, closingOffset / closingGap);
+        closingEl.style.setProperty('--proximity', presenceFromT(closingT).toFixed(3));
+      }
     };
 
     _projectsScrollHandler = () => {
@@ -368,6 +383,7 @@ function initPageContent() {
       // the .reveal fade already on each .project-threshold is what's
       // driving visibility instead.
       projectMats.forEach(el => el.style.removeProperty('--proximity'));
+      closingEl && closingEl.style.removeProperty('--proximity');
     };
     const checkProjectsGate = () => {
       const shouldRun = window.matchMedia('(min-width: 901px)').matches &&
