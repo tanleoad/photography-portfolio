@@ -1,21 +1,25 @@
 // ============================================================
-// Tania Khan Photography — shared behaviour
+// Tanleo_ (tanleophotography) — shared behaviour
 // ============================================================
 //
 // Two kinds of setup happen here:
-//  - Persistent, site-wide behaviour (nav scroll state, the camera
-//    cursor, the click flash, the menu overlay, the homepage intro)
-//    runs once, on the very first real page load. These all live
-//    outside each page's [data-taxi-view] content, so they're never
-//    removed or remounted by a client-side page transition.
+//  - Persistent, site-wide behaviour (nav scroll state, the menu
+//    overlay, the homepage intro) runs once, on the very first real
+//    page load. These all live outside each page's [data-taxi-view]
+//    content, so they're never removed or remounted by a client-side
+//    page transition. (A tiny black camera-icon cursor and a brief
+//    shutter-flash on meaningful clicks are approved as part of the
+//    site's finished interaction language and belong here once built
+//    -- not yet implemented; see the click-router comment further
+//    down for the current no-op cursor stub.)
 //  - Per-page content behaviour (scroll reveals, the homepage hero
-//    exit, the hero's auto-cycling story list, the Work index's
-//    hover-reveal photographs) lives inside window.
-//    initPageContent(). It runs once on first load, and again after
-//    every Taxi.js transition (see js/transitions.js), since that's
-//    the only thing that swaps in fresh page content without a full
-//    reload — old listeners are torn down first so they don't pile
-//    up as someone clicks around the site.
+//    exit, the hero's auto-cycling story list, the Projects Index
+//    proximity system) lives inside window.initPageContent(). It
+//    runs once on first load, and again after every Taxi.js
+//    transition (see js/transitions.js), since that's the only thing
+//    that swaps in fresh page content without a full reload — old
+//    listeners are torn down first so they don't pile up as someone
+//    clicks around the site.
 
 /* ---- Per-page content: state for teardown between transitions ---- */
 let _cheroCycleTimer = null;
@@ -25,26 +29,20 @@ let _heroExitResizeHandler = null;
 let _heroTiltEl = null;
 let _heroTiltMoveHandler = null;
 let _heroTiltLeaveHandler = null;
-let _parallaxScrollHandler = null;
-let _parallaxResizeHandler = null;
 let _projectsScrollHandler = null;
 let _projectsResizeHandler = null;
 let _projectsMql = null;
 let _projectsMqlHandler = null;
 let _projectsGateResizeHandler = null;
+let _portraitsDwellScrollHandler = null;
+let _sideNavObserver = null;
+let _sideNavClickHandlers = null;
 let _revealObserver = null;
 let _revealSafetyTimeout = null;
-let _workStageKeydownHandler = null;
 let _introPhotoTimeout = null;
 let _introPhotoSafetyTimeout = null;
-let _stageDevelopTimer = null;
-let _stageDevelopSafetyTimeout = null;
-let _stageRevealTimer = null;
-let _stageRevealSafetyTimeout = null;
-let _workStageWebGLCleanup = null;
 
 function teardownPageContent() {
-  if (_workStageKeydownHandler) { document.removeEventListener('keydown', _workStageKeydownHandler); _workStageKeydownHandler = null; }
   if (_cheroCycleTimer) { clearInterval(_cheroCycleTimer); _cheroCycleTimer = null; }
   _cheroCycleHandlers = null;
 
@@ -57,25 +55,23 @@ function teardownPageContent() {
   }
   _heroTiltEl = null; _heroTiltMoveHandler = null; _heroTiltLeaveHandler = null;
 
-  if (_parallaxScrollHandler) { window.removeEventListener('scroll', _parallaxScrollHandler); _parallaxScrollHandler = null; }
-  if (_parallaxResizeHandler) { window.removeEventListener('resize', _parallaxResizeHandler); _parallaxResizeHandler = null; }
-
   if (_projectsScrollHandler) { window.removeEventListener('scroll', _projectsScrollHandler); _projectsScrollHandler = null; }
   if (_projectsResizeHandler) { window.removeEventListener('resize', _projectsResizeHandler); _projectsResizeHandler = null; }
   if (_projectsMql && _projectsMqlHandler) { _projectsMql.removeEventListener('change', _projectsMqlHandler); _projectsMql = null; _projectsMqlHandler = null; }
   if (_projectsGateResizeHandler) { window.removeEventListener('resize', _projectsGateResizeHandler); _projectsGateResizeHandler = null; }
+  if (_portraitsDwellScrollHandler) { window.removeEventListener('scroll', _portraitsDwellScrollHandler); _portraitsDwellScrollHandler = null; }
+
+  if (_sideNavObserver) { _sideNavObserver.disconnect(); _sideNavObserver = null; }
+  if (_sideNavClickHandlers) {
+    _sideNavClickHandlers.forEach(({ el, handler }) => el.removeEventListener('click', handler));
+    _sideNavClickHandlers = null;
+  }
 
   if (_revealObserver) { _revealObserver.disconnect(); _revealObserver = null; }
   if (_revealSafetyTimeout) { clearTimeout(_revealSafetyTimeout); _revealSafetyTimeout = null; }
 
   if (_introPhotoTimeout) { clearTimeout(_introPhotoTimeout); _introPhotoTimeout = null; }
   if (_introPhotoSafetyTimeout) { clearTimeout(_introPhotoSafetyTimeout); _introPhotoSafetyTimeout = null; }
-
-  if (_stageDevelopTimer) { clearTimeout(_stageDevelopTimer); _stageDevelopTimer = null; }
-  if (_stageDevelopSafetyTimeout) { clearTimeout(_stageDevelopSafetyTimeout); _stageDevelopSafetyTimeout = null; }
-  if (_stageRevealTimer) { clearTimeout(_stageRevealTimer); _stageRevealTimer = null; }
-  if (_stageRevealSafetyTimeout) { clearTimeout(_stageRevealSafetyTimeout); _stageRevealSafetyTimeout = null; }
-  if (_workStageWebGLCleanup) { _workStageWebGLCleanup(); _workStageWebGLCleanup = null; }
 }
 
 function initPageContent() {
@@ -260,38 +256,6 @@ function initPageContent() {
     }, 6000);
   }
 
-  /* ---- Work page: gentle image parallax ----
-     Each editorial photograph drifts slightly against the scroll —
-     the same "motion connects sections instead of cutting" idea as
-     the homepage hero exit, just applied here to keep every entry on
-     the Work page feeling alive rather than static. Desktop only,
-     respects reduced-motion, and every image is pre-scaled in CSS so
-     the drift never reveals an edge. */
-  const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
-  const parallaxEnabled = parallaxEls.length &&
-    window.matchMedia('(min-width: 901px)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (parallaxEnabled) {
-    let parallaxTicking = false;
-    const updateParallax = () => {
-      parallaxTicking = false;
-      const viewportH = window.innerHeight;
-      parallaxEls.forEach(el => {
-        const r = el.getBoundingClientRect();
-        const centerOffset = (r.top + r.height / 2) - viewportH / 2;
-        const shift = Math.max(-1, Math.min(1, centerOffset / viewportH)) * 26;
-        el.style.transform = `scale(1.12) translateY(${shift}px)`;
-      });
-    };
-    _parallaxScrollHandler = () => {
-      if (!parallaxTicking) { parallaxTicking = true; requestAnimationFrame(updateParallax); }
-    };
-    _parallaxResizeHandler = updateParallax;
-    window.addEventListener('scroll', _parallaxScrollHandler, { passive: true });
-    window.addEventListener('resize', _parallaxResizeHandler);
-    updateParallax();
-  }
-
   /* ---- Projects index: photograph proximity ----
      Each threshold's photo mat carries --proximity (read by
      .project-photo-frame in style.css to drive opacity/translateY/
@@ -310,9 +274,8 @@ function initPageContent() {
      the outgoing one is still near full strength, and the literal
      midpoint between two thresholds lands around ~0.78 rather than
      fading toward a shared dim floor.
-     Desktop-only, same rAF-throttled/getBoundingClientRect approach as
-     the Work-page parallax above — but unlike that block, the
-     desktop/mobile check here is a live matchMedia listener rather
+     Desktop-only, rAF-throttled and measured via getBoundingClientRect.
+     The desktop/mobile check is a live matchMedia listener rather
      than a one-time check at load, so resizing across the 900px
      breakpoint after the page has already loaded correctly hands off
      to (or back from) the .reveal-only mobile fallback instead of
@@ -384,7 +347,46 @@ function initPageContent() {
       // driving visibility instead.
       projectMats.forEach(el => el.style.removeProperty('--proximity'));
       closingEl && closingEl.style.removeProperty('--proximity');
+      if (portraitsDwellTimer) { clearTimeout(portraitsDwellTimer); portraitsDwellTimer = null; }
+      portraitsMeta && portraitsMeta.classList.remove('portraits-attended');
     };
+
+    /* ---- Portraits: attention reward ----
+       Coherence pass, 2026-09-07. Portraits is the one chapter meant
+       to reward dwelling rather than movement (see
+       claude/held-print-interaction-system-v1.md). Adds
+       .portraits-attended to the chapter's .project-meta once the
+       visitor holds still for a beat with the photograph at full
+       presence -- the CSS above only lets the already-visible
+       description quietly deepen in response. Nothing is added to or
+       removed from the page; a visitor who never dwells sees exactly
+       the same content as one who does. Deliberately not folded into
+       updateProjectsProximity above: it only needs a plain, cheap
+       readback of the value that system already maintains, not a
+       hook into its own rAF loop. */
+    const portraitsFrame = document.querySelector('.project-threshold--portraits .project-photo-frame');
+    const portraitsMeta = document.querySelector('.project-threshold--portraits .project-meta');
+    let portraitsDwellTimer = null;
+    if (portraitsFrame && portraitsMeta) {
+      const PORTRAITS_DWELL_MS = 900;
+      const checkPortraitsDwell = () => {
+        if (portraitsDwellTimer) { clearTimeout(portraitsDwellTimer); portraitsDwellTimer = null; }
+        portraitsMeta.classList.remove('portraits-attended');
+        const proximity = parseFloat(getComputedStyle(portraitsFrame).getPropertyValue('--proximity'));
+        if (proximity >= 0.999) {
+          portraitsDwellTimer = setTimeout(() => {
+            portraitsMeta.classList.add('portraits-attended');
+          }, PORTRAITS_DWELL_MS);
+        }
+      };
+      let portraitsDwellTicking = false;
+      _portraitsDwellScrollHandler = () => {
+        if (!projectsActive || portraitsDwellTicking) return;
+        portraitsDwellTicking = true;
+        requestAnimationFrame(() => { portraitsDwellTicking = false; checkPortraitsDwell(); });
+      };
+      window.addEventListener('scroll', _portraitsDwellScrollHandler, { passive: true });
+    }
     const checkProjectsGate = () => {
       const shouldRun = window.matchMedia('(min-width: 901px)').matches &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -408,378 +410,6 @@ function initPageContent() {
     checkProjectsGate();
   }
 
-  /* ---- Work page: the editing table ----
-     One monumental photograph fills the screen at a time instead of a
-     list of rows. A single persistent frame (#stagePhotoFrame) stands
-     in for all four chapters in turn — cycling with the arrows or the
-     keyboard swaps its image, text and data-work/data-morph-id
-     attributes in place rather than navigating anywhere, so
-     findMorphSource() in js/transitions.js just reads whichever
-     chapter is currently loaded into that frame at the moment someone
-     actually clicks it. Four photographic behaviours carry the whole
-     system: the image develops in once, chemically, whenever the page
-     is freshly arrived at (see .work-stage.developed in style.css); a
-     light sweeps across it on hover, the way sunlight moves through a
-     room, and settles into a slow breathe if you linger; moving
-     between chapters reveals the next photograph through a growing
-     aperture iris — it's already sitting there behind the mask, never
-     hidden behind black — and a small exposure-meter needle shows
-     which of the four you're on. Street/Architecture/Portraits are
-     in-page anchors (see the "else" branch below); Photo Retouching
-     (2026-08-22) is the first chapter to point at a real standalone
-     page — the Beauty Archive corridor (retouching.html) — via its
-     own `page` property, rather than an in-page anchor or the old
-     "coming soon" inert state. */
-  const workStage = document.getElementById('workStage');
-  if (workStage) {
-    const stageChapters = [
-      { key: 'street', num: '01', name: 'Street', desc: 'Observations from cities, people and the moments between them.', img: 'images/louvre-abudhabi.jpg', alt: 'Dappled light beneath the Louvre Abu Dhabi dome' },
-      { key: 'architecture', num: '02', name: 'Architecture', desc: 'Where geometry, light and silence meet.', img: 'images/badshahi-mosque.jpg', alt: 'Grand mosque domes and minarets glowing at golden hour' },
-      { key: 'portraits', num: '03', name: 'Portraits', desc: 'Stories told through expression, presence and light.', img: 'images/double-exposure-portrait.jpg', alt: 'Double exposure portrait blurred against the Abu Dhabi skyline' },
-      { key: 'retouching', num: '04', name: 'Photo Retouching', desc: 'A corridor of finished images, and the care behind them.', img: 'images/mystic-night-lamps.jpg', alt: 'Warmly retouched night scene along a palace driveway', page: 'retouching.html' }
-    ];
-
-    const stageLink = document.getElementById('stageFrameLink');
-    const stagePhotoFrame = document.getElementById('stagePhotoFrame');
-    const stagePhoto = document.getElementById('stagePhoto');
-    const stagePhotoIncoming = document.getElementById('stagePhotoIncoming');
-    const stageNum = document.getElementById('stageNum');
-    const stageName = document.getElementById('stageName');
-    const stageDesc = document.getElementById('stageDesc');
-    const stageCounterCurrent = document.getElementById('stageCounterCurrent');
-    const stagePrevBtn = document.getElementById('stagePrevBtn');
-    const stageNextBtn = document.getElementById('stageNextBtn');
-    const stageSoonTag = document.getElementById('stageSoonTag');
-    const stageDots = Array.from(document.querySelectorAll('.stage-dot'));
-
-    /* ---- Work page: curved photographic opening (WebGL proof of concept) ----
-       This is deliberately a short-lived rendered surface, not a CSS
-       transform on the existing image. A dense mesh gives the photograph a
-       small real depth curve as it arrives, then its canvas dissolves away to
-       reveal the untouched HTML image underneath. The latter remains the
-       normal, accessible source and the shared-element morph target. */
-    function playStageSurfaceOpening() {
-      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion || !window.WebGLRenderingContext || !stagePhoto.complete || !stagePhoto.naturalWidth) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.className = 'stage-photo-webgl';
-      canvas.setAttribute('aria-hidden', 'true');
-      stagePhotoFrame.appendChild(canvas);
-
-      const gl = canvas.getContext('webgl', { alpha: true, antialias: true, premultipliedAlpha: false });
-      if (!gl) { canvas.remove(); return; }
-
-      const vertexSource = `
-        attribute vec2 aPosition; attribute vec2 aUV;
-        uniform float uBend; uniform float uFrameAspect; uniform float uImageAspect;
-        varying vec2 vUV; varying float vLight;
-        void main() {
-          vec2 uv = aUV;
-          if (uFrameAspect > uImageAspect) uv.y = 0.5 + (uv.y - 0.5) * (uImageAspect / uFrameAspect);
-          else uv.x = 0.5 + (uv.x - 0.5) * (uFrameAspect / uImageAspect);
-          float x = aPosition.x;
-          float depth = uBend * (1.0 - x * x) * 0.34;
-          float perspective = 1.0 / (1.0 - depth * 0.26);
-          gl_Position = vec4(x * (1.0 + uBend * 0.055) * perspective, aPosition.y * perspective, 0.0, 1.0);
-          vUV = uv;
-          vLight = 1.0 - uBend * (0.12 * abs(x) + 0.06 * (1.0 - aPosition.y));
-        }`;
-      const fragmentSource = `
-        precision mediump float; uniform sampler2D uTexture;
-        varying vec2 vUV; varying float vLight;
-        void main() { gl_FragColor = vec4(texture2D(uTexture, vUV).rgb * vLight, 1.0); }`;
-      const compile = (type, source) => {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source); gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { gl.deleteShader(shader); return null; }
-        return shader;
-      };
-      const vs = compile(gl.VERTEX_SHADER, vertexSource);
-      const fs = compile(gl.FRAGMENT_SHADER, fragmentSource);
-      if (!vs || !fs) { canvas.remove(); return; }
-      const program = gl.createProgram();
-      gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { canvas.remove(); return; }
-
-      const columns = 54, rows = 34, vertices = [], indices = [];
-      for (let y = 0; y <= rows; y++) for (let x = 0; x <= columns; x++) {
-        vertices.push(x / columns * 2 - 1, 1 - y / rows * 2, x / columns, y / rows);
-      }
-      for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
-        const i = y * (columns + 1) + x;
-        indices.push(i, i + 1, i + columns + 1, i + 1, i + columns + 2, i + columns + 1);
-      }
-      const vertexBuffer = gl.createBuffer(), indexBuffer = gl.createBuffer(), texture = gl.createTexture();
-      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      // The mesh UVs already use the image's top edge at v=0, matching
-      // HTML's image orientation; leave the upload unflipped.
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, stagePhoto);
-
-      const position = gl.getAttribLocation(program, 'aPosition'), uv = gl.getAttribLocation(program, 'aUV');
-      const bend = gl.getUniformLocation(program, 'uBend'), frameAspect = gl.getUniformLocation(program, 'uFrameAspect');
-      const imageAspect = gl.getUniformLocation(program, 'uImageAspect');
-      let raf = null, stopped = false;
-      const resize = () => {
-        const rect = stagePhotoFrame.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        canvas.width = Math.max(1, Math.round(rect.width * dpr)); canvas.height = Math.max(1, Math.round(rect.height * dpr));
-        gl.viewport(0, 0, canvas.width, canvas.height);
-      };
-      const cleanup = () => {
-        stopped = true; if (raf) cancelAnimationFrame(raf); window.removeEventListener('resize', resize); canvas.remove();
-        gl.deleteBuffer(vertexBuffer); gl.deleteBuffer(indexBuffer); gl.deleteTexture(texture); gl.deleteProgram(program);
-      };
-      _workStageWebGLCleanup = cleanup;
-      canvas.addEventListener('webglcontextlost', cleanup, { once: true });
-      resize(); window.addEventListener('resize', resize, { passive: true });
-      const started = performance.now(), duration = 1550;
-      const draw = (now) => {
-        if (stopped) return;
-        const t = Math.min((now - started) / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(program);
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-        gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 16, 0);
-        gl.enableVertexAttribArray(uv); gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, 16, 8);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.uniform1f(bend, (1 - eased) * 0.82); gl.uniform1f(frameAspect, canvas.width / canvas.height);
-        gl.uniform1f(imageAspect, stagePhoto.naturalWidth / stagePhoto.naturalHeight);
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-        canvas.style.opacity = String(Math.max(0, 1 - Math.max(0, (t - 0.68) / 0.32)));
-        if (t < 1) raf = requestAnimationFrame(draw); else cleanup();
-      };
-      raf = requestAnimationFrame(draw);
-    }
-
-    // Which chapter to open on: normally Street (index 0), but if the
-    // visitor is coming back to this page having already looked at a
-    // chapter this session — most commonly by clicking "Back to the
-    // Portfolio" on a category page — pick up from there instead of
-    // snapping back to the start every time. Without this, someone
-    // moving Street -> back -> Architecture -> back -> Portraits keeps
-    // landing on Street again on every return, so the "next chapter"
-    // arrow/dot they just used now points at a chapter they already
-    // saw instead of the next new one — which is exactly what reads as
-    // stuck/not-progressing rather than a smooth run through all three.
-    // sessionStorage (not localStorage) on purpose: this should only
-    // persist for the current visit, not linger forever across future
-    // visits to the site.
-    let stageCurrent = 0;
-    try {
-      const savedKey = sessionStorage.getItem('tanleoStageChapter');
-      if (savedKey) {
-        const savedIndex = stageChapters.findIndex(c => c.key === savedKey);
-        if (savedIndex !== -1) stageCurrent = savedIndex;
-      }
-    } catch (e) { /* sessionStorage unavailable (private mode etc.) — just start at Street */ }
-    let stageBusy = false;
-
-    // Text, attributes and the base photo for whichever chapter is
-    // now current — shared by the first-arrival render and by the
-    // moment a chapter-to-chapter reveal finishes.
-    function updateStageMeta(index) {
-      const ch = stageChapters[index];
-      stagePhoto.src = ch.img;
-      stagePhoto.alt = ch.alt;
-      stageNum.textContent = ch.num;
-      stageName.textContent = ch.name;
-      stageDesc.textContent = ch.desc;
-      stageCounterCurrent.textContent = ch.num;
-      stagePhotoFrame.setAttribute('data-morph-id', 'cat-' + ch.key);
-      stageSoonTag.classList.toggle('visible', !!ch.soon);
-      stageDots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-      try { sessionStorage.setItem('tanleoStageChapter', ch.key); } catch (e) { /* ignore */ }
-
-      if (ch.soon) {
-        stageLink.classList.add('is-soon');
-        stageLink.removeAttribute('href');
-        stageLink.removeAttribute('data-work');
-      } else {
-        // Street/Architecture/Portraits now live as sections further
-        // down this same document (single continuous-scroll page,
-        // 2026-08-15 — see claude/continuous-scroll-architecture-
-        // proposal.md) rather than as separate pages, so this is an
-        // in-page anchor rather than a page URL. The site-wide click
-        // router (document click handler, further down this file)
-        // already leaves any "#"-prefixed href alone — it never calls
-        // siteTaxi.navigateTo() for these — so clicking the big photo
-        // simply smooth-scrolls to that chapter's section
-        // (html{scroll-behavior:smooth} is already set globally in
-        // css/style.css). data-work/data-morph-id are left in place;
-        // they're harmless now that nothing triggers a Taxi/Flip morph
-        // for an in-page anchor.
-        //
-        // A chapter with its own `page` (Photo Retouching) is a real
-        // standalone destination rather than an in-page section, so it
-        // gets a normal page href instead — the click router above
-        // does NOT skip these (no leading "#"), so it hands off to
-        // window.siteTaxi.navigateTo() like any other real page link,
-        // same swap-transition behavior as the rest of the site.
-        stageLink.classList.remove('is-soon');
-        stageLink.setAttribute('href', ch.page || ('#' + ch.key));
-        stageLink.setAttribute('data-work', ch.key);
-      }
-    }
-
-    function renderStageChapter(index) {
-      // First arrival at the page only: the photograph holds still,
-      // slightly veiled, then settles into full clarity a beat later —
-      // the same quiet arrival pattern used for each category page's
-      // own opening photograph, rather than a bespoke effect just for
-      // this page. Chapter-to-chapter navigation after this never
-      // re-triggers it — see goToStageChapter, which keeps the frame
-      // settled and uses the crossfade instead.
-      updateStageMeta(index);
-
-      workStage.classList.remove('developed');
-      clearTimeout(_stageDevelopTimer);
-      clearTimeout(_stageDevelopSafetyTimeout);
-
-      // Force a reflow so the resting state actually paints on its own
-      // before the settle-in transition starts a beat later, rather
-      // than risking both states landing in the same frame and the
-      // image just appearing already-settled.
-      void workStage.offsetHeight;
-      _stageDevelopTimer = setTimeout(() => {
-        workStage.classList.add('developed');
-      }, 260);
-
-      // The WebGL "curved opening" effect (playStageSurfaceOpening,
-      // above) is disabled here. It was a short-lived decorative
-      // surface meant to fade itself out and remove itself within
-      // ~1.5s, but if its render loop ever threw or stalled partway
-      // (backgrounded tab, a GPU/driver quirk, anything not caught by
-      // the function's own guards), the canvas it creates sits at
-      // z-index:2 directly on top of the real photo and never gets
-      // removed — a permanent black cover with no visible error,
-      // which is exactly the "photo blinks in, then goes black"
-      // symptom this line previously caused. The real, accessible
-      // <img> underneath (opacity:1 by default, see .stage-photo in
-      // css/style.css) is what should always be shown; this optional
-      // surface was never worth the risk of silently hiding it.
-
-      // Safety net, same idea as the .reveal system and the category-page
-      // intro photo further up this file: the photograph must never be
-      // able to stay invisible forever just because one timer got delayed
-      // or dropped (a backgrounded tab throttling JS timers is the
-      // realistic way that happens) — force it visible after a few
-      // seconds regardless of what the primary timer did.
-      _stageDevelopSafetyTimeout = setTimeout(() => {
-        workStage.classList.add('developed');
-      }, 4000);
-    }
-
-    function goToStageChapter(newIndex) {
-      if (stageBusy) return;
-      stageBusy = true;
-      const next = (newIndex + stageChapters.length) % stageChapters.length;
-      const nextCh = stageChapters[next];
-
-      clearTimeout(_stageDevelopTimer);
-      clearTimeout(_stageDevelopSafetyTimeout);
-      clearTimeout(_stageRevealTimer);
-      clearTimeout(_stageRevealSafetyTimeout);
-
-      // The incoming chapter's photo goes into the frame right now,
-      // already sitting there behind a closed circular mask — nothing
-      // swaps to black first.
-      stagePhotoIncoming.src = nextCh.img;
-      stagePhotoIncoming.alt = nextCh.alt;
-      void workStage.offsetHeight;
-      workStage.classList.add('revealing');
-
-      const finishReveal = () => {
-        // Whichever timer got here first (the real one, or the safety
-        // net below) cancels the other, so this only ever runs once.
-        clearTimeout(_stageRevealTimer);
-        clearTimeout(_stageRevealSafetyTimeout);
-
-        // The mask has fully grown and covers the frame — swap the
-        // base photo underneath and collapse the mask back to zero in
-        // the same tick, so nothing visibly changes right now.
-        stageCurrent = next;
-        updateStageMeta(stageCurrent);
-        workStage.classList.add('developed');
-        workStage.classList.remove('revealing');
-        stagePhotoIncoming.removeAttribute('src');
-        stageBusy = false;
-      };
-
-      _stageRevealTimer = setTimeout(finishReveal, 1080);
-      // Safety net: never leave the frame stuck mid-transition — masked,
-      // unclickable, chapter half-swapped — if the primary timer above
-      // is ever delayed or dropped. Same reasoning as renderStageChapter.
-      _stageRevealSafetyTimeout = setTimeout(finishReveal, 4000);
-    }
-
-    stagePrevBtn.addEventListener('click', () => goToStageChapter(stageCurrent - 1));
-    stageNextBtn.addEventListener('click', () => goToStageChapter(stageCurrent + 1));
-
-    // Dot indicators: jump straight to any chapter, rather than only
-    // stepping one at a time with the arrows/keyboard.
-    stageDots.forEach((dot, i) => {
-      dot.addEventListener('click', () => {
-        if (i === stageCurrent) return;
-        goToStageChapter(i);
-      });
-    });
-
-    _workStageKeydownHandler = (e) => {
-      if (e.key === 'ArrowRight') goToStageChapter(stageCurrent + 1);
-      if (e.key === 'ArrowLeft') goToStageChapter(stageCurrent - 1);
-    };
-    document.addEventListener('keydown', _workStageKeydownHandler);
-
-    // Swipe to move between chapters (touch only) — the arrows and
-    // keyboard already do this; a phone visitor reaches for a swipe
-    // instead. Only counts as a swipe once the gesture is clearly
-    // horizontal and past a real distance, so an ordinary vertical
-    // scroll (to reach the "Have a story worth telling?" section
-    // below) is never mistaken for one. When a swipe IS detected, the
-    // tap-to-open-this-chapter click that would otherwise fire on the
-    // link right after lifting your finger is suppressed, so swiping
-    // never accidentally also navigates into the chapter you swiped
-    // away from.
-    let stageTouchStartX = null;
-    let stageTouchStartY = null;
-    let stageTouchIsSwipe = false;
-    stageLink.addEventListener('touchstart', (e) => {
-      const t = e.touches[0];
-      stageTouchStartX = t.clientX;
-      stageTouchStartY = t.clientY;
-      stageTouchIsSwipe = false;
-    }, { passive: true });
-    stageLink.addEventListener('touchmove', (e) => {
-      if (stageTouchStartX === null) return;
-      const t = e.touches[0];
-      const dx = t.clientX - stageTouchStartX;
-      const dy = t.clientY - stageTouchStartY;
-      if (Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy)) stageTouchIsSwipe = true;
-    }, { passive: true });
-    stageLink.addEventListener('touchend', (e) => {
-      if (stageTouchStartX === null) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - stageTouchStartX;
-      stageTouchStartX = null;
-      stageTouchStartY = null;
-      if (stageTouchIsSwipe && Math.abs(dx) > 40) {
-        goToStageChapter(stageCurrent + (dx < 0 ? 1 : -1));
-      }
-    });
-    stageLink.addEventListener('click', (e) => {
-      if (stageTouchIsSwipe) {
-        e.preventDefault();
-        stageTouchIsSwipe = false;
-      }
-    });
-
-    renderStageChapter(stageCurrent);
-  }
-
   /* ---- Persistent side nav: scroll-spy ----
      Added 2026-08-15 alongside the single-continuous-scroll rebuild
      (see claude/continuous-scroll-architecture-proposal.md). Reuses
@@ -792,7 +422,13 @@ function initPageContent() {
      rather than the instant its top edge appears — avoids flicker
      right at a section boundary. Runs once per page load/transition;
      harmless no-op on any page without a #sideNav (i.e. every page
-     except this one). */
+     except this one). The observer and click handlers are stored in
+     module-level state (see teardownPageContent() above) rather than
+     left anonymous/local -- #sideNav itself lives outside
+     [data-taxi-view] and survives every Taxi transition, so without
+     this a second lap through initPageContent() would attach a second
+     observer and a second set of click handlers on top of the first,
+     with no way to ever remove either. */
   const sideNav = document.getElementById('sideNav');
   if (sideNav) {
     const sideNavLinks = Array.from(sideNav.querySelectorAll('a[href^="#"]'));
@@ -803,18 +439,20 @@ function initPageContent() {
       sideNavLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
     };
     if ('IntersectionObserver' in window && sideNavSections.length) {
-      const sideNavObserver = new IntersectionObserver((entries) => {
+      _sideNavObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) setActiveSideNav(entry.target.id);
         });
       }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-      sideNavSections.forEach(sec => sideNavObserver.observe(sec));
+      sideNavSections.forEach(sec => _sideNavObserver.observe(sec));
     }
     // Mark the clicked destination active immediately, rather than
     // waiting for the smooth-scroll animation to finish and the
     // observer to catch up — avoids a brief flicker/lag on click.
-    sideNavLinks.forEach(a => {
-      a.addEventListener('click', () => setActiveSideNav(a.getAttribute('href').slice(1)));
+    _sideNavClickHandlers = sideNavLinks.map(a => {
+      const handler = () => setActiveSideNav(a.getAttribute('href').slice(1));
+      a.addEventListener('click', handler);
+      return { el: a, handler };
     });
     setActiveSideNav('home');
   }
@@ -829,9 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
      prefetching is deliberately off there (see that file's comments)
      since it's tied to a link selector Taxi never actually sees. On a
      slow or just-cold connection, that fetch can visibly take a
-     second or two, during which nothing happens on screen: the flash
-     fires, then the site just sits there looking stuck, until the
-     response finally lands and the transition suddenly continues.
+     second or two, during which nothing happens on screen: the site
+     just sits there looking stuck, until the response finally lands
+     and the transition suddenly continues.
      Warming the browser's own HTTP cache for every internal page
      during idle time after load means that fetch almost always
      resolves instantly from cache instead, no matter which link ends
@@ -868,34 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
-
-  /* ---- Mobile nav toggle ---- */
-  const toggle = document.querySelector('.nav-toggle');
-  const links = document.querySelector('.nav-links');
-  if (toggle && links) {
-    toggle.addEventListener('click', () => {
-      toggle.classList.toggle('open');
-      links.classList.toggle('open');
-    });
-    links.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        toggle.classList.remove('open');
-        links.classList.remove('open');
-      });
-    });
-  }
-
-  /* ---- Hero slideshow: slow 4s cross-fade, holds ~4.5s between ---- */
-  const slides = document.querySelectorAll('.hero-slide');
-  if (slides.length) {
-    let current = 0;
-    slides[0].classList.add('active');
-    setInterval(() => {
-      slides[current].classList.remove('active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('active');
-    }, 4500);
-  }
 
   /* ---- Home: full-screen menu overlay ---- */
   const menuTrigger = document.getElementById('menuTrigger');
@@ -958,86 +568,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ---- Site-wide: floating glass nav state ----
-     The nav markup itself (.glass-nav) sits outside [data-taxi-view],
-     same as .site-nav and .menu-overlay above, so Taxi never tears it
-     down between pages — real <a href> clicks inside it already go
-     through the site-wide click router further down this file, no
-     extra listeners needed here. What DOES need to happen on every
-     navigation is swapping which of its two states is showing, so
-     this runs once on first load (below) and again after every Taxi
-     transition (see the updateGlassNav() call in js/transitions.js's
-     NAVIGATE_END handler, right next to where it updates the
-     menu-overlay's own active link). */
-  // projects.html is a legacy redirect stub to portfolio.html, not a
-  // real destination, so it's deliberately left out of this map; that
-  // thumbnail links to portfolio.html. retouching.html (2026-08-22,
-  // the Beauty Archive corridor) is also left out here on purpose —
-  // this map is only for the .glass-nav component's own section
-  // state on street.html/architecture.html/portraits.html, which
-  // retouching.html doesn't use.
-  const CATEGORY_PAGES = { 'street.html': 'street', 'architecture.html': 'architecture', 'portraits.html': 'portraits' };
-  window.updateGlassNav = function updateGlassNav() {
-    const glassNav = document.querySelector('.glass-nav');
-    if (!glassNav) return;
-    const path = window.location.pathname.split('/').pop() || 'index.html';
-    const categoryKey = CATEGORY_PAGES[path];
-    const items = glassNav.querySelectorAll('.glass-nav__item');
-    const label = glassNav.querySelector('.glass-nav__label');
-    if (categoryKey) {
-      glassNav.setAttribute('data-state', 'section');
-      let activeItem = null;
-      items.forEach(item => {
-        const isActive = item.getAttribute('data-key') === categoryKey;
-        item.classList.toggle('--active', isActive);
-        if (isActive) activeItem = item;
-      });
-      if (label && activeItem) label.textContent = activeItem.dataset.name || '';
-    } else {
-      glassNav.setAttribute('data-state', 'home');
-      items.forEach(item => item.classList.remove('--active'));
-    }
-  };
-
-  /* ---- Projects: horizontal drag-to-scroll lineup (mouse/trackpad) ----
-     Touch and trackpad swipe already scroll the row natively via
-     overflow-x + scroll-snap in CSS; this just adds click-and-drag
-     for mouse users, the way Apple's product carousels work. */
-  const lineupGrid = document.querySelector('.lineup-grid');
-  if (lineupGrid) {
-    let isDown = false;
-    let startX = 0;
-    let scrollStart = 0;
-    let dragged = false;
-
-    const endDrag = () => {
-      isDown = false;
-      lineupGrid.classList.remove('dragging');
-    };
-
-    lineupGrid.addEventListener('mousedown', (e) => {
-      isDown = true;
-      dragged = false;
-      lineupGrid.classList.add('dragging');
-      startX = e.pageX;
-      scrollStart = lineupGrid.scrollLeft;
-    });
-    window.addEventListener('mouseup', endDrag);
-    lineupGrid.addEventListener('mouseleave', endDrag);
-    lineupGrid.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const delta = e.pageX - startX;
-      if (Math.abs(delta) > 5) dragged = true;
-      lineupGrid.scrollLeft = scrollStart - delta;
-    });
-    lineupGrid.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', (e) => {
-        if (dragged) e.preventDefault();
-      });
-    });
-  }
-
   /* ---- Homepage intro (index.html only, plays only on a true fresh
      load — a client-side page transition back to the homepage never
      re-adds this markup, so it never replays mid-visit) ---- */
@@ -1060,31 +590,121 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
-  /* ---- Site-wide: click-to-navigate router ----
-     Runs once, on every page. Used to also drive a custom camera-
-     shaped cursor and a click-flash burst — removed per the site's
-     design philosophy ("every interaction should make a photograph
-     feel closer, nothing should explain its own theme"): a cursor
-     literally shaped like a camera, and a synthetic flash of light on
-     every click, were both charming but literal — decoration *about*
-     photography rather than the photograph itself getting closer, and
-     the flash in particular was competing for attention with real
-     light already inside the photographs (lamps, sun flare, golden
-     hour) on every single click, the whole visit through. grow()/
-     shrink() are kept as harmless no-ops so the rest of the site's
-     code — several sections call them on hover — doesn't need to
-     change. What's left here is just the click router: it hands
-     internal link clicks off to the page-transition system (js/
-     transitions.js) so the destination swaps in smoothly instead of a
-     hard reload, and falls back to a normal navigation if that router
-     never loaded (CDN blocked, offline) — the site works exactly the
-     same either way, just without the swap animation. In-page
-     anchors, new-tab clicks, modified clicks, and mailto/tel links are
-     left alone. */
-  const cursor = { grow: () => {}, shrink: () => {} };
-  window.siteCursor = cursor;
+  /* ---- Site-wide: camera cursor + shutter flash ----
+     Added 2026-09-08. Runs once, on every page -- persistent and
+     site-wide like the click router just below, so it's never torn
+     down or rebuilt by a Taxi transition. Two small pieces:
+       - .site-cursor: a 16px black camera glyph that replaces the
+         native pointer on desktop/fine-pointer devices only (see the
+         media query and the html.has-camera-cursor rules in
+         css/style.css). Position is set directly from pointermove
+         with no CSS transition on it, so it tracks 1:1 with no lag,
+         bounce, or eased catch-up. Touch/coarse-pointer devices never
+         get the html.has-camera-cursor class, so the native cursor
+         (irrelevant there anyway) is untouched.
+       - fireShutterFlash(): a single reusable element repositioned
+         and re-animated (via the Web Animations API, cancelling any
+         flash already in flight first) at the click point, instead of
+         creating a new DOM node per click -- rapid clicking re-triggers
+         the same flash rather than piling several up. Called from the
+         click router below for any click landing on an actual
+         interactive control; skipped entirely under
+         prefers-reduced-motion. Purely visual and fire-and-forget --
+         it never delays or blocks the navigation logic beneath it. */
+  (function initCameraCursor() {
+    const pointerQuery = window.matchMedia('(pointer: fine) and (hover: hover)');
+    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const cursorEl = document.createElement('div');
+    cursorEl.className = 'site-cursor';
+    cursorEl.setAttribute('aria-hidden', 'true');
+    cursorEl.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+        '<rect x="9.5" y="5" width="5" height="2.4" rx="0.6" fill="#0a0908"></rect>' +
+        '<rect x="3" y="7.4" width="18" height="11.6" rx="2.2" fill="#0a0908"></rect>' +
+        '<circle cx="12" cy="13.2" r="3.1" fill="none" stroke="#f3f0e9" stroke-width="1.3"></circle>' +
+      '</svg>';
+    document.body.appendChild(cursorEl);
+
+    const flashEl = document.createElement('div');
+    flashEl.className = 'site-cursor-flash';
+    flashEl.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(flashEl);
+
+    let cursorActive = false;
+    let cursorSeen = false; // true once a real pointermove has placed it, so it never flashes in from (0,0)
+
+    const setCursorActive = (active) => {
+      cursorActive = active;
+      document.documentElement.classList.toggle('has-camera-cursor', active);
+      if (!active) {
+        cursorEl.style.opacity = '0';
+        cursorSeen = false;
+      }
+    };
+    setCursorActive(pointerQuery.matches);
+    const onPointerCapabilityChange = () => setCursorActive(pointerQuery.matches);
+    if (pointerQuery.addEventListener) pointerQuery.addEventListener('change', onPointerCapabilityChange);
+    else if (pointerQuery.addListener) pointerQuery.addListener(onPointerCapabilityChange); // older Safari
+
+    window.addEventListener('pointermove', (e) => {
+      if (!cursorActive || e.pointerType !== 'mouse') return;
+      cursorEl.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+      if (!cursorSeen) {
+        cursorSeen = true;
+        cursorEl.style.opacity = '1';
+      }
+    }, { passive: true });
+
+    // Don't leave the glyph sitting frozen over the browser chrome
+    // once the real pointer has left the page.
+    document.addEventListener('mouseout', (e) => {
+      if (cursorActive && !e.relatedTarget && !e.toElement) {
+        cursorEl.style.opacity = '0';
+        cursorSeen = false;
+      }
+    });
+
+    let flashAnim = null;
+    function fireShutterFlash(x, y) {
+      if (!cursorActive || reducedMotion()) return;
+      flashEl.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      if (flashAnim) flashAnim.cancel();
+      flashAnim = flashEl.animate(
+        [
+          { opacity: 0, transform: flashEl.style.transform + ' scale(0.55)' },
+          { opacity: 0.9, transform: flashEl.style.transform + ' scale(1)', offset: 0.2 },
+          { opacity: 0, transform: flashEl.style.transform + ' scale(1.2)' }
+        ],
+        { duration: 360, easing: 'ease-out' }
+      );
+    }
+
+    window.siteCursor = { fireShutterFlash };
+  })();
+
+  /* ---- Site-wide: click-to-navigate router ----
+     Runs once, on every page. Hands internal link clicks off to the
+     page-transition system (js/transitions.js) so the destination
+     swaps in smoothly instead of a hard reload, and falls back to a
+     normal navigation if that router never loaded (CDN blocked,
+     offline) — the site works exactly the same either way, just
+     without the swap animation. In-page anchors, new-tab clicks,
+     modified clicks, and mailto/tel links are left alone. Also fires
+     the shutter flash above for any click on an actual interactive
+     control, independent of whether that same click also triggers
+     in-app navigation below -- one shared listener rather than a
+     second document-wide click handler duplicating this one. */
   document.addEventListener('click', (e) => {
+    if (e.button === 0) {
+      const control = e.target.closest(
+        'a, button, input[type="submit"], input[type="button"], input[type="checkbox"], input[type="radio"], select, [role="button"]'
+      );
+      if (control && !control.disabled) {
+        window.siteCursor.fireShutterFlash(e.clientX, e.clientY);
+      }
+    }
+
     const link = e.target.closest('a[href]');
     if (
       link &&
@@ -1119,210 +739,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* ---- Homepage: Selected Works drifting gallery (index.html only) ----
-     Duplicates the track once (not baked into the HTML) so the drift
-     loops seamlessly without doubling the page's image weight. */
-  const galleryTrack = document.getElementById('galleryTrack');
-  if (galleryTrack) {
-    const galleryClone = galleryTrack.cloneNode(true);
-    galleryClone.removeAttribute('id');
-    Array.from(galleryClone.children).forEach(c => galleryTrack.appendChild(c));
-
-    document.querySelectorAll('.gallery-item').forEach(item => {
-      const isLive = item.tagName === 'A';
-      item.addEventListener('mouseenter', () => cursor.grow(isLive ? 'Enter' : ''));
-      item.addEventListener('mouseleave', cursor.shrink);
-    });
-  }
-
-  /* ---- Projects page: scroll-driven carousel ----
-     Desktop: vertical scroll through a tall wrapper drives horizontal
-     movement through the slides, like a pinned "scrollytelling" section.
-     Scroll position is the single source of truth — arrows/clicks just
-     scroll the window to the right spot, and the scroll handler does
-     the rest.
-     Mobile: scroll-hijacking is disorienting on touch, so instead the
-     carousel behaves like a normal contained carousel (click/arrow
-     driven, no page-scroll hijack). */
-  const carouselTrack = document.getElementById('carouselTrack');
-  const scrollWrapper = document.getElementById('carouselScrollWrapper');
-  const carouselPin = document.getElementById('carouselPin');
-
-  if (carouselTrack && scrollWrapper && carouselPin) {
-    const carouselSlides = Array.from(carouselTrack.querySelectorAll('.carousel-slide'));
-    const carouselViewport = document.querySelector('.carousel-viewport');
-    const carouselPrev = document.getElementById('carouselPrev');
-    const carouselNext = document.getElementById('carouselNext');
-    const carouselCounter = document.getElementById('carouselCounter');
-    const isDesktop = () => window.matchMedia('(min-width: 701px)').matches;
-    let carouselActive = 0;
-    let mode = null; // 'scroll' | 'click'
-
-    const slideCenterX = (i) => {
-      const vw = carouselViewport.clientWidth;
-      const slide = carouselSlides[i];
-      const step = carouselSlides.length > 1 ? (carouselSlides[1].offsetLeft - carouselSlides[0].offsetLeft) : 0;
-      const slideNaturalLeft = i * step;
-      return (vw - slide.offsetWidth) / 2 - slideNaturalLeft;
-    };
-
-    const setActiveClasses = (idx) => {
-      carouselSlides.forEach((s, i) => s.classList.toggle('is-active', i === idx));
-      if (carouselPrev) carouselPrev.disabled = idx === 0;
-      if (carouselNext) carouselNext.disabled = idx === carouselSlides.length - 1;
-      if (carouselCounter) {
-        carouselCounter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(carouselSlides.length).padStart(2, '0');
-      }
-    };
-
-    /* ---------------- Desktop: scroll-driven mode ---------------- */
-    let wrapperTopAbs = 0;
-    let scrollableDistance = 0;
-
-    const measureScrollGeometry = () => {
-      const rect = scrollWrapper.getBoundingClientRect();
-      wrapperTopAbs = rect.top + window.scrollY;
-      scrollableDistance = scrollWrapper.offsetHeight - window.innerHeight;
-    };
-
-    const progressToScrollY = (progress) => wrapperTopAbs + progress * scrollableDistance;
-
-    const onScrollUpdate = () => {
-      if (scrollableDistance <= 0) return;
-      const scrolled = window.scrollY - wrapperTopAbs;
-      let progress = scrolled / scrollableDistance;
-      progress = Math.max(0, Math.min(1, progress));
-
-      const idx = Math.round(progress * (carouselSlides.length - 1));
-      if (idx !== carouselActive) {
-        carouselActive = idx;
-        setActiveClasses(idx);
-      }
-
-      const startX = slideCenterX(0);
-      const endX = slideCenterX(carouselSlides.length - 1);
-      const targetX = startX + progress * (endX - startX);
-      carouselTrack.style.transform = `translateX(${targetX}px)`;
-    };
-
-    const goToIndexScroll = (idx) => {
-      idx = Math.max(0, Math.min(carouselSlides.length - 1, idx));
-      const progress = carouselSlides.length > 1 ? idx / (carouselSlides.length - 1) : 0;
-      window.scrollTo({ top: progressToScrollY(progress), behavior: 'smooth' });
-    };
-
-    /* ---------------- Mobile: click/arrow mode (no scroll hijack) ---------------- */
-    const clickLayout = () => {
-      const targetX = slideCenterX(carouselActive);
-      carouselTrack.style.transform = `translateX(${targetX}px)`;
-    };
-    const goToIndexClick = (idx) => {
-      carouselActive = Math.max(0, Math.min(carouselSlides.length - 1, idx));
-      setActiveClasses(carouselActive);
-      requestAnimationFrame(clickLayout);
-    };
-
-    /* ---------------- Mode setup ---------------- */
-    const enableScrollMode = () => {
-      mode = 'scroll';
-      scrollWrapper.style.height = `${(carouselSlides.length + 1) * 100}vh`;
-      carouselTrack.style.transition = 'none';
-      measureScrollGeometry();
-      onScrollUpdate();
-    };
-
-    const enableClickMode = () => {
-      mode = 'click';
-      scrollWrapper.style.height = 'auto';
-      carouselTrack.style.transition = 'transform 0.85s cubic-bezier(0.16,1,0.3,1)';
-      goToIndexClick(carouselActive);
-    };
-
-    const applyModeForViewport = () => {
-      if (isDesktop() && mode !== 'scroll') {
-        enableScrollMode();
-      } else if (!isDesktop() && mode !== 'click') {
-        enableClickMode();
-      } else if (isDesktop()) {
-        measureScrollGeometry();
-        onScrollUpdate();
-      }
-    };
-
-    applyModeForViewport();
-    setActiveClasses(carouselActive);
-
-    window.addEventListener('scroll', () => {
-      if (mode === 'scroll') requestAnimationFrame(onScrollUpdate);
-    }, { passive: true });
-
-    window.addEventListener('resize', () => {
-      applyModeForViewport();
-    });
-
-    carouselSlides.forEach((s, i) => {
-      const photo = s.querySelector('.carousel-photo');
-      if (!photo) return;
-      photo.addEventListener('click', (e) => {
-        if (i === carouselActive) return;
-        e.preventDefault();
-        if (mode === 'scroll') goToIndexScroll(i);
-        else goToIndexClick(i);
-      });
-    });
-
-    if (carouselPrev) carouselPrev.addEventListener('click', () => {
-      if (carouselActive <= 0) return;
-      if (mode === 'scroll') goToIndexScroll(carouselActive - 1);
-      else goToIndexClick(carouselActive - 1);
-    });
-    if (carouselNext) carouselNext.addEventListener('click', () => {
-      if (carouselActive >= carouselSlides.length - 1) return;
-      if (mode === 'scroll') goToIndexScroll(carouselActive + 1);
-      else goToIndexClick(carouselActive + 1);
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' && carouselActive < carouselSlides.length - 1) {
-        if (mode === 'scroll') goToIndexScroll(carouselActive + 1); else goToIndexClick(carouselActive + 1);
-      }
-      if (e.key === 'ArrowLeft' && carouselActive > 0) {
-        if (mode === 'scroll') goToIndexScroll(carouselActive - 1); else goToIndexClick(carouselActive - 1);
-      }
-    });
-
-    /* ---- Camera cursor + photo tilt (desktop hover only) ----
-       The camera cursor itself is the shared site-wide one set up
-       above; this just tells it when to grow over carousel controls
-       and photos, and adds the gentle tilt-toward-pointer on photos. */
-    document.querySelectorAll('.carousel-explore, .carousel-arrow').forEach(el => {
-      el.addEventListener('mouseenter', () => cursor.grow(''));
-      el.addEventListener('mouseleave', cursor.shrink);
-    });
-
-    // Photos: grow the cursor into a "View" label, and gently tilt
-    // the image toward the pointer — a livelier hover than a flat
-    // zoom, while still calm enough for a photography portfolio.
-    carouselSlides.forEach((slide) => {
-      const photo = slide.querySelector('.carousel-photo');
-      const img = photo && photo.querySelector('img');
-      if (!photo || !img) return;
-
-      photo.addEventListener('mouseenter', () => cursor.grow('View'));
-      photo.addEventListener('mouseleave', () => {
-        cursor.shrink();
-        img.style.transform = '';
-      });
-      photo.addEventListener('mousemove', (e) => {
-        const r = photo.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width - 0.5;
-        const py = (e.clientY - r.top) / r.height - 0.5;
-        const activeScale = slide.classList.contains('is-active') ? 1.04 : 1.0;
-        img.style.transform = `scale(${activeScale}) rotateX(${(-py * 6).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg)`;
-      });
-    });
-  }
-
   initPageContent();
-  if (typeof window.updateGlassNav === 'function') window.updateGlassNav();
 });

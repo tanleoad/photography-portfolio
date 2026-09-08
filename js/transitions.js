@@ -15,33 +15,37 @@
 // When it does load, it sets up window.siteTaxi: a router that
 // intercepts clicks on internal links, quietly fetches the
 // destination page in the background, and swaps in only its
-// [data-taxi-view] content — no full reload, so the persistent nav,
-// menu overlay and camera cursor never remount. We do NOT let Taxi
-// listen for clicks itself (see `links` below) — the existing
-// camera-flash click handler in script.js already owns every
-// qualifying click, and after its 200ms flash delay it now hands
-// the click off to window.siteTaxi.navigateTo() instead of doing a
-// hard `location.href` reload.
+// [data-taxi-view] content — no full reload, so the persistent nav
+// and menu overlay never remount. We do NOT let Taxi listen for
+// clicks itself (see `links` below) — the site-wide click router in
+// script.js already owns every qualifying click and hands it off to
+// window.siteTaxi.navigateTo() instead of doing a hard
+// `location.href` reload.
 //
 // Two transition styles, chosen automatically per click:
 //
 //  - The signature one: the photograph becomes the doorway. When the
-//    thing that was clicked is the Work index's current chapter
-//    (Street, Architecture or Portraits — whichever monumental photo
-//    is on screen at the moment of the click), that photograph
-//    doesn't just sit there while the page changes around it — it
-//    grows, in place, directly into that chapter's own hero
-//    photograph. Nothing else does a page-turn; the photo you clicked
-//    *is* the transition. Built with GSAP's Flip plugin: the frame's
-//    on-screen position/size is captured the instant it's clicked
-//    (onLeave — the one lifecycle hook Taxi actually hands the
-//    clicked element to), and the big frame on the new page is
-//    animated from that captured state into its own natural position
-//    (onEnter). Both frames are plain overflow:hidden boxes with a
-//    filling <img> — never the <img> itself — so the crop stays
-//    correct at every size in between, not just the start and end
-//    (see the .cat-hero-photo / .stage-photo-frame comments in
-//    style.css).
+//    clicked element contains a photo frame carrying data-morph-id
+//    (currently the Projects Index's four .project-photo-frame mats —
+//    see findMorphSource() below and the PROJECTS INDEX comment in
+//    index.html), and the destination page it's navigating to has an
+//    element sharing that same id, that photograph doesn't just sit
+//    there while the page changes around it — it grows, in place,
+//    directly into the destination's own frame. Nothing else does a
+//    page-turn; the photo you clicked *is* the transition. Built with
+//    GSAP's Flip plugin: the frame's on-screen position/size is
+//    captured the instant it's clicked (onLeave — the one lifecycle
+//    hook Taxi actually hands the clicked element to), and the
+//    matching frame on the new page is animated from that captured
+//    state into its own natural position (onEnter). Both frames are
+//    plain overflow:hidden boxes with a filling <img> — never the
+//    <img> itself — so the crop stays correct at every size in
+//    between, not just the start and end. As of this writing, none of
+//    the four destinations (street.html/architecture.html/
+//    portraits.html are still plain redirect stubs; retouching.html
+//    bypasses Taxi entirely) has a matching data-morph-id element, so
+//    every real click today falls through to the fallback below —
+//    this path starts working on its own once a destination grows one.
 //
 //  - The fallback: for everything else — the nav, the footer, "Back
 //    to the Work", Home, About, Contact, browser back/forward — the
@@ -83,40 +87,22 @@
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Given the clicked element, find the on-screen photograph frame
-  // that should morph into the destination's hero photo, if any.
-  // Only the Work-index's stage link carries data-work, so this is a
-  // no-op (returns null) for every other link on the site — exactly
-  // the cases that should keep the plain page-rise instead. The Work
-  // index now shows one chapter at a time in a single persistent frame
-  // (.stage-photo-frame) rather than a separate row per chapter, so
-  // js/script.js keeps that frame's data-work and data-morph-id
-  // attributes in sync with whichever chapter is currently on screen
-  // — this function just reads whatever they currently say at the
-  // moment of the click.
+  // that should morph into the destination's matching frame, if any.
+  // Added 2026-09-07 for the Projects index: any trigger whose click
+  // target contains an element carrying data-morph-id (the index's
+  // .project-photo-frame mats) can morph into a destination page's
+  // element sharing that same id. If the destination page doesn't
+  // have a matching element yet — true of street.html/
+  // architecture.html/portraits.html as of this writing, still the
+  // redirect stubs from the August continuous-scroll merge —
+  // onEnter's own morphTarget lookup below simply finds nothing and
+  // falls through to the default page-rise transition. Nothing here
+  // or there needs to change once those pages grow a real
+  // data-morph-id element; it starts working on its own. Returns null
+  // for every other link on the site — exactly the cases that should
+  // keep the plain page-rise instead.
   function findMorphSource(trigger) {
     if (!trigger || !trigger.getAttribute) return null;
-    const workKey = trigger.getAttribute('data-work');
-    if (workKey) {
-      const bg = trigger.querySelector && trigger.querySelector('.stage-photo-frame');
-      if (bg && bg.offsetParent !== null) {
-        return { id: 'cat-' + workKey, el: bg };
-      }
-      return null;
-    }
-
-    // Generic path, added 2026-09-07 for the Projects index: any
-    // trigger whose click target contains an element carrying
-    // data-morph-id (the index's .project-photo-frame mats) can morph
-    // into a destination page's element sharing that same id, exactly
-    // like the data-work path above but without a fixed id-naming
-    // scheme. If the destination page doesn't have a matching element
-    // yet — true of street.html/architecture.html/portraits.html as
-    // of this writing, still the redirect stubs from the August
-    // continuous-scroll merge — onEnter's own morphTarget lookup below
-    // simply finds nothing and falls through to the default page-rise
-    // transition. Nothing here or there needs to change once those
-    // pages grow a real data-morph-id element; it starts working on
-    // its own.
     const morphEl = trigger.querySelector && trigger.querySelector('[data-morph-id]');
     if (morphEl && morphEl.offsetParent !== null) {
       return { id: morphEl.getAttribute('data-morph-id'), el: morphEl };
@@ -368,9 +354,9 @@
     // Taxi's own automatic click-handling is scoped to this selector.
     // It never matches a real link, which keeps Taxi's click listener
     // permanently inert — every navigation instead goes exclusively
-    // through the existing camera-flash click handler in script.js,
-    // which calls core.navigateTo() itself. This avoids the two
-    // systems ever fighting over the same click.
+    // through the site-wide click router in script.js, which calls
+    // core.navigateTo() itself. This avoids the two systems ever
+    // fighting over the same click.
     links: 'a[data-taxi-auto-link]',
     transitions: { default: SiteTransition },
     // false on purpose: both transition styles need the outgoing page

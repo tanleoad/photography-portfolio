@@ -99,13 +99,13 @@
         <a href="#projects" class="story-link s-people">
           <span class="story-title">People</span>
         </a>
-        <img class="story-media-m" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" loading="lazy">
+        <img class="story-media-m" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
       </li>
       <li class="story-row">
         <a href="#projects" class="story-link s-motion">
           <span class="story-title">Motion</span>
         </a>
-        <img class="story-media-m" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy">
+        <img class="story-media-m" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" width="1440" height="1800" loading="lazy">
       </li>
       <li class="story-row">
         <a href="#projects" class="story-link s-stillness">
@@ -144,6 +144,20 @@
   </div>
 </section>
 
+<!-- ============ The Photographic Threshold ============
+     Isolated WebGL module (js/threshold.js) — see that file and the
+     matching CSS block for the full explanation. Desktop + motion-ok
+     only; collapsed entirely on mobile/reduced-motion, in which case
+     Closing hands off straight to Street exactly as before this
+     section existed. aria-hidden because it carries no unique
+     content of its own -- the same photograph it approaches is the
+     real Street threshold immediately below it. -->
+<section class="threshold" id="threshold" aria-hidden="true">
+  <div class="threshold-pin">
+    <canvas id="thresholdCanvas"></canvas>
+  </div>
+</section>
+
 <!-- ============================================================
      PROJECTS INDEX
      Rebuilt 2026-09-07 per the approved "Threshold + Case-Study
@@ -168,7 +182,7 @@
   <div class="project-threshold project-threshold--street reveal" id="street">
     <a class="project-photo-mat" href="street.html" aria-label="View Street">
       <span class="project-photo-frame" data-morph-id="cat-street">
-        <img class="project-photo" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" loading="lazy">
+        <img class="project-photo" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
       </span>
     </a>
     <div class="project-meta">
@@ -181,7 +195,7 @@
   <div class="project-threshold project-threshold--architecture reveal" id="architecture">
     <a class="project-photo-mat" href="architecture.html" aria-label="View Architecture">
       <span class="project-photo-frame" data-morph-id="cat-architecture">
-        <img class="project-photo" src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" loading="lazy">
+        <img class="project-photo" src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" width="1600" height="2000" loading="lazy">
       </span>
     </a>
     <div class="project-meta">
@@ -194,7 +208,7 @@
   <div class="project-threshold project-threshold--portraits reveal" id="portraits">
     <a class="project-photo-mat" href="portraits.html" aria-label="View Portraits">
       <span class="project-photo-frame" data-morph-id="cat-portraits">
-        <img class="project-photo" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" loading="lazy">
+        <img class="project-photo" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" width="1440" height="1800" loading="lazy">
       </span>
     </a>
     <div class="project-meta">
@@ -207,7 +221,7 @@
   <div class="project-threshold project-threshold--retouching reveal">
     <a class="project-photo-mat" href="retouching.html" aria-label="View Photo Retouching">
       <span class="project-photo-frame" data-morph-id="cat-retouching">
-        <img class="project-photo" src="images/beauty-archive-warmth-shadow-depth.jpg" alt="A close portrait shaped by warm light, deep shadow, and careful colour retouching." loading="lazy">
+        <img class="project-photo" src="images/beauty-archive-warmth-shadow-depth.jpg" alt="A close portrait shaped by warm light, deep shadow, and careful colour retouching." width="1000" height="1500" loading="lazy">
       </span>
     </a>
     <div class="project-meta">
@@ -219,63 +233,91 @@
 </section>
 
 <!-- ============================================================
-     ABOUT (was about.html — content unmodified)
-     ============================================================ -->
-<section class="page-banner" id="about">
-  <div class="page-banner-inner reveal">
+     ABOUT — editorial sequence (Held Print coherence pass, 2026-09-07)
+     Same real content as before (portrait, the two-sentence bio, the
+     same seven recognition credits) restructured into sequential
+     beats -- presence, statement, practice, recognition, closing --
+     so the reading mode matches the rest of the site (one held thing
+     at a time) instead of a two-column bio card plus a scannable
+     award grid. Nothing invented, nothing gated behind hover or
+     dwell: every beat is a plain .reveal block using the exact same
+     IntersectionObserver every other section already uses, so a
+     normal scroll surfaces all of it, in order, for every visitor
+     and every screen reader. The source bio is exactly two sentences
+     -- sentence one (identity/credentials) is the defining-statement
+     beat, sentence two (light/mood/colour, everyday scenes into
+     narrative) is specifically about her practice, so it gets its
+     own quieter beat rather than being padded into a paragraph that
+     doesn't exist in the real copy. -->
+<section class="about-presence" id="about">
+  <div class="about-presence-media reveal photo-presence">
+    <img src="images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+  </div>
+  <div class="about-presence-caption reveal">
     <p class="eyebrow">The Photographer</p>
-    <h1>About</h1>
+    <h1>Tanleo_</h1>
+    <p class="about-presence-location">Abu Dhabi, UAE</p>
   </div>
 </section>
 
-<section class="section" style="padding-bottom: 2.5rem;">
+<section class="section about-statement-wrap">
   <div class="container">
-    <div class="intro-split reveal">
-      <div class="intro-split-image">
-        <img src="images/tania-portrait.jpg" alt="Portrait of Tania Khan">
-      </div>
-      <div class="intro-split-text">
-        <p class="eyebrow">Abu Dhabi, UAE</p>
-        <h2>Tanleo_</h2>
-        <p style="margin-top:1rem;">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading. Her work explores the relationship between light, mood, and color, transforming everyday scenes into intentional visual narratives.</p>
-      </div>
-    </div>
+    <p class="about-statement reveal">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
   </div>
 </section>
 
-<section class="section recognition reveal">
+<section class="section about-practice-wrap">
   <div class="container">
-    <p class="eyebrow" style="text-align:center;">Exhibited &amp; Featured</p>
-    <div class="recognition-grid">
-      <div class="recognition-item">
-        <span class="recognition-title">Fulle Galleria</span>
-        <span class="recognition-sub">International Exhibition, Argentina</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">Spaces of Light</span>
-        <span class="recognition-sub">Sheikh Zayed Grand Mosque Competition</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">Qasr Al Hosn</span>
-        <span class="recognition-sub">Official Instagram Feature</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">Cultural Foundation</span>
-        <span class="recognition-sub">Official Instagram Feature</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">Film Abu Dhabi Commission</span>
-        <span class="recognition-sub">Official Instagram Feature</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">Ethara / Abu Dhabi Grand Prix</span>
-        <span class="recognition-sub">Corporate Suite Photography</span>
-      </div>
-      <div class="recognition-item">
-        <span class="recognition-title">What's On Abu Dhabi</span>
-        <span class="recognition-sub">Published Feature</span>
-      </div>
-    </div>
+    <p class="about-practice reveal">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+  </div>
+</section>
+
+<section class="section recognition">
+  <div class="container">
+    <p class="eyebrow about-recognition-eyebrow reveal" style="text-align:center;">Exhibited &amp; Featured</p>
+    <ol class="recognition-index">
+      <li class="recognition-row reveal">
+        <span class="recognition-num">01</span>
+        <span class="recognition-row-title">Fulle Galleria</span>
+        <span class="recognition-row-sub">International Exhibition, Argentina</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">02</span>
+        <span class="recognition-row-title">Spaces of Light</span>
+        <span class="recognition-row-sub">Sheikh Zayed Grand Mosque Competition</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">03</span>
+        <span class="recognition-row-title">Qasr Al Hosn</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">04</span>
+        <span class="recognition-row-title">Cultural Foundation</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">05</span>
+        <span class="recognition-row-title">Film Abu Dhabi Commission</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">06</span>
+        <span class="recognition-row-title">Ethara / Abu Dhabi Grand Prix</span>
+        <span class="recognition-row-sub">Corporate Suite Photography</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">07</span>
+        <span class="recognition-row-title">What's On Abu Dhabi</span>
+        <span class="recognition-row-sub">Published Feature</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section about-closing-wrap">
+  <div class="container about-closing">
+    <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
   </div>
 </section>
 
@@ -283,8 +325,8 @@
      CONTACT (was contact.html — content unmodified)
      ============================================================ -->
 <section class="contact-hero" id="contact">
-  <div class="contact-hero-bg">
-    <img src="images/mystic-night-lamps.jpg" alt="Warmly lit lamps along a misty palace driveway at night" loading="lazy">
+  <div class="contact-hero-bg reveal photo-presence">
+    <img src="images/mystic-night-lamps.jpg" alt="Warmly lit lamps along a misty palace driveway at night" width="1921" height="2400" loading="lazy">
   </div>
   <div class="contact-hero-scrim"></div>
 
@@ -367,5 +409,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@unseenco/taxi@1.4.0/dist/taxi.umd.js"></script>
 <script src="js/transitions.js"></script>
 <script src="js/script.js"></script>
+<script src="js/threshold.js"></script>
 </body>
 </html>
