@@ -1401,26 +1401,29 @@ a.contact-value:hover{ color: var(--accent); }
 }
 .wall-photo img{
   width: 100%; height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
 }
 
-/* Height-driven sizing: every source photograph here is portrait-
-   orientation, and the stage is a fixed 100vh sticky viewport, so
-   height is the dimension that has to stay bounded. Width follows
-   from each image's own aspect-ratio, applied to the padded box.
-   Sizes vary per chapter -- Street and Retouching (opener/closer) are
-   the largest, Architecture and Portraits smaller. */
-.wall-photo[data-i="0"]{ height: clamp(475px, 75vh, 800px); aspect-ratio: 1600 / 2400; }
-.wall-photo[data-i="1"]{ height: clamp(425px, 62vh, 700px); aspect-ratio: 1600 / 2000; }
-.wall-photo[data-i="2"]{ height: clamp(450px, 67vh, 750px); aspect-ratio: 1440 / 1800; }
-.wall-photo[data-i="3"]{ height: clamp(500px, 80vh, 850px); aspect-ratio: 1000 / 1500; }
+/* Uniform sizing -- 2026-09-09, per Tan: "the street and photo
+   retouching cover pages are the same crop size but the rest of the
+   two aren't. I want them all aligned and for them to be the same
+   crop size please." All four source photographs previously kept
+   their own native aspect-ratio inside object-fit:contain, which is
+   what produced the mismatch (Street/Retouching at 2:3, Architecture/
+   Portraits at 4:5, and none of the four actually sharing the same
+   box size either). One shared aspect-ratio and one shared height
+   clamp now apply to every chapter, with object-fit:cover (above)
+   doing the actual cropping to fill that box -- 4:5 chosen since it's
+   already the native ratio of two of the four photographs, so it's
+   the gentler crop of the two ratio families rather than forcing
+   everything to 2:3. The height clamp is the average of the four
+   previous per-chapter clamps, keeping overall photographic presence
+   the same as before this change. */
+.wall-photo[data-i]{ height: clamp(460px, 70vh, 780px); aspect-ratio: 4 / 5; }
 
 @media (max-width: 900px){
-  .wall-photo[data-i="0"]{ height: clamp(358px, 58vh, 582px); }
-  .wall-photo[data-i="1"]{ height: clamp(336px, 49vh, 515px); }
-  .wall-photo[data-i="2"]{ height: clamp(347px, 51vh, 538px); }
-  .wall-photo[data-i="3"]{ height: clamp(381px, 63vh, 627px); }
+  .wall-photo[data-i]{ height: clamp(355px, 55vh, 565px); }
 }
 
 /* ---------------- Exhibition label ----------------
