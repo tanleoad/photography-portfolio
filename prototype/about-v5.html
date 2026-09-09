@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v5 — Tanleo_</title>
+<!-- Isolated prototype, About v5 -- "a moving portrait". v4 is fully
+     discarded per review: "The page places isolated elements in
+     opposite corners of very large empty canvases, producing
+     disconnected 'editorial spreads' rather than a coherent
+     experience." This is not a fifth spread concept -- it's a
+     different structural idea entirely: one continuous spatial
+     composition, not a sequence of independent boxed sections.
+
+     Reference library studied before building (each for a specific
+     principle, per instruction -- not combined, not copied literally):
+       Kenichi Aikawa   -- photography as a spatial, physical object;
+                           minimal interface. (Site is gated behind a
+                           loading sequence and built on a custom
+                           interaction layer -- confirmed its
+                           reputation for restraint and physicality
+                           rather than its exact mechanism, which is
+                           explicitly not to be copied.)
+       Darek Fortas     -- confirmed directly (About page inspected):
+                           a single, modest, non-dominant portrait,
+                           generous whitespace, and a large amount of
+                           serious biographical/credential text
+                           presented as plain, confident, unbordered
+                           lines -- never as cards or achievement UI.
+                           That plain-line treatment is the direct
+                           source for this version's Recognition
+                           record.
+       Ausra Babiedaite -- confirmed directly: no separate "About"
+                           page at all -- a compressed personal
+                           statement lives lightly inside navigation/
+                           footer while photography carries the site.
+                           Read here as permission to keep identity
+                           text brief and physically attached to the
+                           work, not its own large isolated block.
+       Hannah Miles     -- confirmed directly: identity established
+                           immediately, then straight into image-led
+                           work with almost no interface chrome.
+       A24              -- editorial confidence, deliberate emptiness,
+                           catalogue rhythm -- restraint as a
+                           typographic discipline, not a visual style
+                           to copy.
+     Common thread taken from all five: photography is the
+     protagonist, typography supports it, space is intentional, the
+     interface gets out of the way. Not a Frankenstein of their
+     individual looks -- the result below still needs to look like
+     Tanleo_.
+
+     Structure -- one continuous environment, four beats, no visible
+     section labels or act markers anywhere:
+
+       OPENING + IDENTITY -- the portrait is large (roughly half the
+         page width on desktop, well beyond v4's small matted frame),
+         held in place with position: sticky -- a real CSS layout
+         mechanism, not JS -- while the page scrolls past it. The
+         identity plate (Tanleo_ / Photographer, Visual Storyteller /
+         Abu Dhabi, UAE) is mounted directly on the photograph's own
+         top-left corner, overlapping it like a label fixed to a
+         print. The biography starts on the very same top line,
+         close beside the portrait -- so the first viewport already
+         reads as one held-together composition even with all motion
+         disabled.
+
+       WAY OF SEEING -- blossom-terrace.jpg, substantially larger
+         than in v4, mirrored to the right side this time (image on
+         the right, text on the left -- the opposite of the opening),
+         with the practice sentence starting at the same top line,
+         close beside it. Text here is italic, the opposite register
+         from the opening's upright biography -- a different room,
+         same world.
+
+       PHOTOGRAPHIC EVIDENCE -- three real photographs already used
+         and approved on Home (louvre-abudhabi.jpg,
+         corniche-beach-skyline.jpg, double-exposure-portrait.jpg),
+         held at three different sizes and alignments with unequal
+         space between them -- encountered one at a time, the way you
+         come across photographs walking through a room, not a
+         gallery grid, not cards, no category captions.
+
+       RECOGNITION -- a small "Selected Recognition" kicker (the real
+         .eyebrow primitive), then the seven existing credits as one
+         clean, continuous typographic record -- no cards, no
+         borders, no numbers.
+
+     DEPARTURE closes the page: generous space, then the existing,
+     unstyled Contact link.
+
+     Motion is applied only to photographs (.photo-presence, the real
+     site primitive, completely unmodified) -- never to text. Nothing
+     here fades or slides in block-by-block; text is simply present
+     in normal flow, so the static, no-JS appearance of the page is
+     the same composition as the live one. Nothing invented in the
+     copy: same portrait, same two bio sentences, same seven credits,
+     same closing link, same real css/style.css tokens and
+     typographic primitives -- only about-v5.css/.js are new. Not
+     linked from the live site, not part of index.html. Safe to
+     delete the whole prototype/ folder when the review is done. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v5.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v5 — not part of the live site</div>
+
+<section id="about">
+
+  <!-- ============ Opening + Identity ============ -->
+  <div class="a5-anchor">
+    <div class="a5-anchor-inner">
+
+      <div class="a5-portrait-col">
+        <div class="a5-portrait-wrap">
+          <div class="a5-frame reveal photo-presence">
+            <img src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+          </div>
+          <div class="a5-plate">
+            <p class="a5-plate-role">Photographer &middot; Visual Storyteller</p>
+            <p class="a5-plate-name">Tanleo_</p>
+            <p class="a5-plate-location">Abu Dhabi, UAE</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="a5-content-col">
+        <p class="a5-statement-text">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ Way of seeing (mirrored) ============ -->
+  <div class="a5-seeing">
+    <div class="a5-seeing-inner">
+
+      <div class="a5-seeing-text-wrap">
+        <p class="a5-seeing-text">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+      </div>
+
+      <div class="a5-seeing-portrait-wrap">
+        <div class="a5-frame reveal photo-presence">
+          <img src="../images/blossom-terrace.jpg" alt="Candid restaurant scene framed through blossoming branches" width="1440" height="1800" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ Photographic evidence ============ -->
+  <div class="a5-evidence">
+    <div class="a5-evidence-track">
+      <div class="a5-evidence-item a5-evidence-item--1">
+        <div class="a5-frame reveal photo-presence">
+          <img src="../images/louvre-abudhabi.jpg" alt="Louvre Abu Dhabi architectural photograph" width="1921" height="2400" loading="lazy">
+        </div>
+      </div>
+      <div class="a5-evidence-item a5-evidence-item--2">
+        <div class="a5-frame reveal photo-presence">
+          <img src="../images/corniche-beach-skyline.jpg" alt="Corniche beach and Abu Dhabi skyline photograph" width="1600" height="2400" loading="lazy">
+        </div>
+      </div>
+      <div class="a5-evidence-item a5-evidence-item--3">
+        <div class="a5-frame reveal photo-presence">
+          <img src="../images/double-exposure-portrait.jpg" alt="Double exposure portrait photograph" width="1440" height="1800" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Recognition ============ -->
+  <div class="a5-recognition">
+    <div class="a5-recognition-inner">
+      <p class="eyebrow a5-recognition-kicker">Selected Recognition</p>
+      <div class="a5-rec-list">
+        <p class="a5-rec-line"><span class="a5-rec-title">Fulle Galleria</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">International Exhibition, Argentina</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">Spaces of Light</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Sheikh Zayed Grand Mosque Competition</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">Qasr Al Hosn</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Official Instagram Feature</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">Cultural Foundation</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Official Instagram Feature</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">Film Abu Dhabi Commission</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Official Instagram Feature</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">Ethara / Abu Dhabi Grand Prix</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Corporate Suite Photography</span></p>
+        <p class="a5-rec-line"><span class="a5-rec-title">What&rsquo;s On Abu Dhabi</span><span class="a5-rec-sep">&mdash;</span><span class="a5-rec-sub">Published Feature</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Departure ============ -->
+  <div class="a5-departure">
+    <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
+  </div>
+
+</section>
+
+<p class="proto-end">— end of prototype: About v5 —</p>
+
+<script src="about-v5.js"></script>
+</body>
+</html>

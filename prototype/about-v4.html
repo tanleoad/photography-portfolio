@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v4 — Tanleo_</title>
+<!-- Isolated prototype, About v4 -- "photographic monograph". Discards
+     v2's composition entirely per review: "About v2 is rejected at
+     the conceptual/visual level... We are restarting the About
+     presentation." v3's specific device (a single symmetrical sticky-
+     portrait-beside-continuous-column) is also retired, per: "Do not
+     return to the v2 structure. Do not produce multiple concepts."
+
+     Brief: "ABOUT = A PHOTOGRAPHIC MONOGRAPH PORTRAIT OF THE
+     PHOTOGRAPHER... NOT a five-section editorial webpage, NOT a
+     conventional About page, NOT another cinematic hero." The
+     narrative moves person -> identity -> way of seeing -> evidence
+     -> departure, but never as labelled sections or numbered acts --
+     no roman numerals, no "I. Presence" markers, no visible section
+     titles anywhere on this page.
+
+     Four unlabelled beats:
+
+       FRONTISPIECE  -- the portrait as a placed photographic object:
+                        contained, matted, offset to the outer edge
+                        of the spread and held down from the top to
+                        leave real negative space above it, beside a
+                        quiet eyebrow/name/location. Underneath, the
+                        biography arrives as its own offset paragraph
+                        in upright (non-italic) Fraunces at a
+                        considered size -- confident editorial
+                        typography, not a pull-quote.
+
+       WAY OF SEEING -- a second photograph, images/blossom-terrace.jpg
+                        (already real, already used and approved on
+                        Home for the "Colour" story), paired with the
+                        practice sentence in a MIRRORED asymmetry --
+                        image now smaller and on the left, text on the
+                        right, both bottom-aligned rather than top-
+                        aligned -- so this spread is compositionally
+                        distinct from the frontispiece rather than the
+                        same layout with the sides swapped. The text
+                        here is italic, the opposite typographic
+                        register from the frontispiece's upright
+                        statement.
+
+       EVIDENCE      -- the seven recognition credits, run as one
+                        continuous publication colophon -- small,
+                        dense, semicolon-separated prose in a narrow
+                        measure -- explicitly not a list, not cards,
+                        not a numbered ledger. This directly answers
+                        the note that Recognition needed to feel
+                        "something special", by making it read like
+                        the credits page of a printed monograph rather
+                        than a UI component.
+
+       DEPARTURE     -- generous quiet space, then the existing,
+                        unstyled Contact link.
+
+     Studied again before building: Home's .chero (word-led crossfade
+     hero -- not reused here, About still isn't a hero page), Projects'
+     .project-threshold matted-print treatment (its "photograph as a
+     physically presented object" quality is the one thing borrowed,
+     at a single deliberate size, not its alternating-threshold
+     mechanism), and Beauty Archive/retouching.html (confirms the
+     site's own quiet "exhibition register" -- small kickers, restrained
+     station text -- without borrowing its WebGL corridor mechanism).
+
+     Nothing invented in the copy: same portrait, same two bio
+     sentences, same seven credits (recomposed as prose, not
+     reworded), same closing link, same real css/style.css tokens and
+     typographic primitives (.eyebrow, .quiet-link, .reveal,
+     .photo-presence, Fraunces/Inter, the real colour variables) --
+     only about-v4.css/.js are new. Motion is a single plain settle
+     per block, nothing sequenced or staggered, so the page still
+     reads as intentional with all animation switched off -- the
+     brief's own "printed as static spreads" test. Not linked from the
+     live site, not part of index.html. Safe to delete the whole
+     prototype/ folder when the review is done. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v4.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v4 — not part of the live site</div>
+
+<section id="about">
+
+  <!-- ============ Frontispiece: person, then identity ============ -->
+  <div class="a4-frontispiece">
+    <div class="a4-frontispiece-inner">
+      <div class="a4-identity reveal">
+        <p class="eyebrow">The Photographer</p>
+        <h1>Tanleo_</h1>
+        <p class="a4-location">Abu Dhabi, UAE</p>
+      </div>
+      <div class="a4-portrait-wrap">
+        <div class="a4-portrait-frame reveal photo-presence">
+          <img src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="a4-statement">
+    <div class="a4-statement-inner">
+      <p class="a4-statement-text reveal">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+    </div>
+  </div>
+
+  <!-- ============ Way of seeing: mirrored image + text ============ -->
+  <div class="a4-seeing">
+    <div class="a4-seeing-inner">
+      <div class="a4-seeing-portrait-wrap">
+        <div class="a4-portrait-frame reveal photo-presence">
+          <img src="../images/blossom-terrace.jpg" alt="Candid restaurant scene framed through blossoming branches" width="1440" height="1800" loading="lazy">
+        </div>
+      </div>
+      <div class="a4-seeing-text-wrap">
+        <p class="a4-seeing-text reveal">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Evidence: publication colophon ============ -->
+  <div class="a4-colophon">
+    <div class="a4-colophon-inner">
+      <p class="a4-colophon-text reveal"><span class="a4-colophon-lead">Exhibited and featured</span> — Fulle Galleria, International Exhibition, Argentina; Spaces of Light, Sheikh Zayed Grand Mosque Competition; Qasr Al Hosn, Official Instagram Feature; Cultural Foundation, Official Instagram Feature; Film Abu Dhabi Commission, Official Instagram Feature; Ethara / Abu Dhabi Grand Prix, Corporate Suite Photography; What&rsquo;s On Abu Dhabi, Published Feature.</p>
+    </div>
+  </div>
+
+  <!-- ============ Departure ============ -->
+  <div class="a4-departure">
+    <div class="a4-departure-inner reveal">
+      <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
+    </div>
+  </div>
+
+</section>
+
+<p class="proto-end">— end of prototype: About v4 —</p>
+
+<script src="about-v4.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+/* =========================================================
+   PROTOTYPE — Projects Index v2 (moving photographic wall)
+   =========================================================
+   Isolated stylesheet for prototype/projects-index-v2.html. Not
+   linked from the live site, safe to delete along with the rest of
+   prototype/. Only base tokens/reset/typography/grain come from the
+   real css/style.css (linked, unmodified, read-only).
+
+   v2 replaces v1's composition per Tan's review of the v1 recording:
+   "small centered image + huge black space + bottom-left label,
+   repeated four times... more like a polished portfolio index than a
+   photographic exhibition." The fix, entirely in this file and
+   projects-index-v2.js:
+     - photographs are matted prints at (near enough) their natural
+       aspect ratio, borrowing production's .project-photo-frame
+       language (padded mat, background, drop shadow) instead of
+       v1's fixed-box object-fit:cover crop
+     - each chapter has its own off-centre home position and its own
+       size, alternating left/right the way production's
+       .project-threshold--street/architecture/portraits/retouching
+       already do, instead of every photo sitting dead centre
+     - a soft tracking spotlight (radial-gradient, no WebGL/particles)
+       gives the black field a sense of lit space
+     - a small fixed per-chapter tilt gives each print a slightly
+       placed-by-hand quality instead of a rigid rectangle */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------------- Lead-in: reproduced Statement + Closing ---------------- */
+.proto-leadin .statement,
+.proto-leadin .closing{
+  position: relative;
+  z-index: 1;
+}
+/* Refinement pass: closing the Statement -> Projects seam. Real
+   .closing padding-bottom runs up to 10rem, which read as a stretch
+   of dead black scroll between the blockquote and the point Street
+   starts becoming visible -- like a new section had started rather
+   than the same field continuing. Scoped to this prototype only
+   (production .closing is untouched); copy is unchanged. */
+.proto-leadin .closing{
+  padding-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+/* ---------------- The wall ---------------- */
+.wall-projects{
+  position: relative;
+  background: var(--bg);
+}
+.wall-stage-wrap{
+  position: relative;
+  height: 500vh; /* 4 chapters + a half-unit of lead-in/out, same pacing as v1 */
+}
+.wall-stage{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Soft tracking glow behind the photographs -- interpolated by JS
+   between the chapters straddling the current scroll position, so
+   the black field reads as a space with light moving through it
+   rather than flat webpage background. Pure CSS gradient, no canvas,
+   no particles. */
+.wall-spotlight{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Matted print: padded frame + shadow, echoing production's
+   .project-photo-frame so these read as photographic objects being
+   presented rather than UI thumbnails. transform/opacity/filter/
+   z-index are all set per-frame by projects-index-v2.js from scroll
+   position -- nothing here animates on its own. */
+.wall-photo{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  padding: clamp(14px, 1.8vw, 30px);
+  box-shadow: 0 44px 100px -32px rgba(0,0,0,0.65);
+  will-change: transform, opacity, filter;
+}
+.wall-photo img{
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Height-driven sizing (not width-driven, unlike v1): every source
+   photograph here is portrait-orientation, and the stage is a fixed
+   100vh sticky viewport rather than production's normal document
+   flow, so height is the dimension that has to stay bounded. Width
+   follows from each image's own aspect-ratio, applied to the padded
+   box -- close enough to the true ratio that object-fit:contain
+   above only ever has to absorb the padding, not force a crop.
+   Sizes are substantially larger than v1's (which read as too small)
+   and vary per chapter -- Street and Retouching (opener/closer) are
+   the largest, Architecture and Portraits smaller -- the same kind
+   of size contrast production already uses across its four
+   thresholds (38/30/34/40vw). */
+/* Refinement pass (post-v2 review): "increase photographic
+   presence... approximately 20-30%" -- heights bumped ~25% from the
+   first v2 cut below, aspect-ratio and everything else unchanged. */
+.wall-photo[data-i="0"]{ height: clamp(475px, 75vh, 800px); aspect-ratio: 1600 / 2400; }
+.wall-photo[data-i="1"]{ height: clamp(425px, 62vh, 700px); aspect-ratio: 1600 / 2000; }
+.wall-photo[data-i="2"]{ height: clamp(450px, 67vh, 750px); aspect-ratio: 1440 / 1800; }
+.wall-photo[data-i="3"]{ height: clamp(500px, 80vh, 850px); aspect-ratio: 1000 / 1500; }
+
+@media (max-width: 900px){
+  .wall-photo[data-i="0"]{ height: clamp(358px, 58vh, 582px); }
+  .wall-photo[data-i="1"]{ height: clamp(336px, 49vh, 515px); }
+  .wall-photo[data-i="2"]{ height: clamp(347px, 51vh, 538px); }
+  .wall-photo[data-i="3"]{ height: clamp(381px, 63vh, 627px); }
+}
+
+/* ---------------- Exhibition label ----------------
+   Restrained wall-plaque reading order: number -> title -> a short
+   mood pair ("fleeting / oblique") instead of v1's full descriptive
+   sentence -- kept small and subordinate to the photograph. A faint
+   scrim behind it keeps it legible regardless of which asymmetric
+   photo position happens to sit nearby, since homes are no longer
+   all centred clear of this corner the way v1's were. */
+.wall-label{
+  position: absolute;
+  left: var(--page-pad);
+  bottom: clamp(2rem, 5.6vw, 3.1rem);
+  z-index: 500;
+  max-width: 26ch;
+  padding: 0.6rem 0.85rem 0.7rem;
+  background: rgba(10,9,8,0.38);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+.wall-label-num{
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: var(--text-faint);
+}
+.wall-label-title{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+}
+.wall-label-mood{
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+}
+
+/* ---------------- Progress ---------------- */
+.wall-progress{
+  position: absolute;
+  right: var(--page-pad);
+  bottom: clamp(2rem, 5.6vw, 3.1rem);
+  z-index: 500;
+  font-family: 'Fraunces', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.wall-progress-current{ color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce){
+  .wall-photo{ transition: none; }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

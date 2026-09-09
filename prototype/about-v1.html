@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v1 — Tanleo_</title>
+<!-- Isolated prototype for the About coherence pass. Not linked from
+     the live site, not part of index.html. Safe to delete the whole
+     prototype/ folder when the review is done.
+
+     Per Tan's brief: "presentation/sequencing only, not the
+     underlying information... A subtle held-plate / staged-scroll
+     procession is appropriate here, as identified in the previous
+     coherence audit." The About section was already restructured
+     into sequential beats in an earlier coherence pass (presence ->
+     statement -> practice -> recognition -> closing) -- this
+     prototype changes nothing about that structure, the copy, the
+     images, the typography or the palette. It only changes the
+     TIMING each beat arrives on: real css/style.css and every real
+     class name (about-presence, about-statement, about-practice,
+     recognition-index/row, quiet-link, eyebrow, reveal,
+     photo-presence) are reused unmodified, so the base rendering is
+     identical to production. The only new file is about-v1.js, which
+     paces Plates 2-4 per claude/held-print-interaction-system-v1.md
+     section 7 -- see the comment at the top of that file for exactly
+     what changed and why. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v1.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v1 — not part of the live site</div>
+
+<!-- ============ Reproduced verbatim from index.html ============
+     Same classes and copy as production so the real css/style.css
+     renders it identically. Nothing here has been reworded, resized,
+     recolored or restructured. -->
+
+<section class="about-presence" id="about">
+  <div class="about-presence-media reveal photo-presence">
+    <img src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+  </div>
+  <div class="about-presence-caption reveal">
+    <p class="eyebrow">The Photographer</p>
+    <h1>Tanleo_</h1>
+    <p class="about-presence-location">Abu Dhabi, UAE</p>
+  </div>
+</section>
+
+<section class="section about-statement-wrap">
+  <div class="container">
+    <p class="about-statement reveal">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+  </div>
+</section>
+
+<section class="section about-practice-wrap">
+  <div class="container">
+    <p class="about-practice reveal">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+  </div>
+</section>
+
+<section class="section recognition">
+  <div class="container">
+    <p class="eyebrow about-recognition-eyebrow reveal" style="text-align:center;">Exhibited &amp; Featured</p>
+    <ol class="recognition-index">
+      <li class="recognition-row reveal">
+        <span class="recognition-num">01</span>
+        <span class="recognition-row-title">Fulle Galleria</span>
+        <span class="recognition-row-sub">International Exhibition, Argentina</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">02</span>
+        <span class="recognition-row-title">Spaces of Light</span>
+        <span class="recognition-row-sub">Sheikh Zayed Grand Mosque Competition</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">03</span>
+        <span class="recognition-row-title">Qasr Al Hosn</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">04</span>
+        <span class="recognition-row-title">Cultural Foundation</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">05</span>
+        <span class="recognition-row-title">Film Abu Dhabi Commission</span>
+        <span class="recognition-row-sub">Official Instagram Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">06</span>
+        <span class="recognition-row-title">Ethara / Abu Dhabi Grand Prix</span>
+        <span class="recognition-row-sub">Corporate Suite Photography</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">07</span>
+        <span class="recognition-row-title">What's On Abu Dhabi</span>
+        <span class="recognition-row-sub">Published Feature</span>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section about-closing-wrap">
+  <div class="container about-closing">
+    <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
+  </div>
+</section>
+
+<p class="proto-end">— end of prototype: About v1 —</p>
+
+<script src="about-v1.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v6 — Tanleo_</title>
+<!-- Isolated prototype, About v6 -- "the portrait + the voice". v5 is
+     rejected as a DIRECTION, not for its execution: "the About page
+     has been over-designed around the problem of 'how do we present
+     all the information?' Instead: what is the minimum experience
+     required to encounter the photographer?"
+
+     So this version subtracts rather than recomposes. Six elements
+     only, in one straight sequence, each its own moment -- nothing
+     paired side-by-side, nothing sharing a viewport that needs to be
+     spatially related to something else (which is what caused v4/v5's
+     "isolated corners" problem in the first place):
+
+       PORTRAIT -> VOICE -> PHOTOGRAPH -> VOICE -> COLOPHON -> CONTACT
+
+     Explicitly removed from every earlier version: the two-column /
+     sticky-portrait layout, the identity plate, the matted "frame"
+     treatment on any image, the three-image photographic-evidence
+     sequence (Projects already performs that function), any kicker/
+     label, any card, act marker, or archive treatment. Photographs
+     are bare -- no mat, no border, no shadow -- large enough to be
+     the dominant encounter of their moment, contained with real
+     margin on every side so they read as intimate and photographic,
+     not a full-bleed hero and not a portfolio thumbnail.
+
+     Reference study (same small library, re-applied to a much
+     smaller composition):
+       Kenichi Aikawa   -- photography AS the experience; minimal
+                           interface. Taken literally this time: no
+                           frame, no caption, no chrome around either
+                           photograph at all.
+       Darek Fortas      -- confirmed directly (About page inspected
+                           in the prior round): serious biographical
+                           information can be presented as plain,
+                           quiet, confident text with no card or
+                           archive treatment. Source for the colophon
+                           here being one unlabelled paragraph, not a
+                           kicker-and-record block.
+       Hannah Miles       -- immediate identity, minimal information,
+                           the work carries credibility. Source for
+                           dropping the separate name/eyebrow/location
+                           block entirely -- "Tania Khan" is already
+                           named in the first Voice sentence; nothing
+                           needs to repeat it.
+       A24                -- editorial confidence and deliberate
+                           emptiness, not literal style -- used here
+                           as license to let each of six elements have
+                           real room around it rather than compressing
+                           everything to fit a fixed number of
+                           "sections."
+
+     Motion, unchanged from v5: applied only to photographs via the
+     real .photo-presence primitive. No text fades or slides in
+     independently. Nothing invented in the copy -- same portrait,
+     same two bio sentences, same seven credits (folded into one
+     quiet colophon paragraph, not reworded), same closing link, same
+     real css/style.css tokens and typographic primitives -- only
+     about-v6.css/.js are new. Not linked from the live site, not
+     part of index.html. Safe to delete the whole prototype/ folder
+     when the review is done. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v6.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v6 — not part of the live site</div>
+
+<section id="about">
+
+  <!-- ============ Portrait ============ -->
+  <div class="a6-portrait">
+    <div class="a6-portrait-media reveal photo-presence">
+      <img src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+    </div>
+  </div>
+
+  <!-- ============ Voice ============ -->
+  <div class="a6-voice">
+    <div class="a6-voice-inner">
+      <p class="a6-voice-text">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+    </div>
+  </div>
+
+  <!-- ============ Photograph (interrupt) ============ -->
+  <div class="a6-photograph">
+    <div class="a6-photograph-media reveal photo-presence">
+      <img src="../images/blossom-terrace.jpg" alt="Candid restaurant scene framed through blossoming branches" width="1440" height="1800" loading="lazy">
+    </div>
+  </div>
+
+  <!-- ============ Voice (quieter) ============ -->
+  <div class="a6-voice a6-voice--quiet">
+    <div class="a6-voice-inner">
+      <p class="a6-voice-text">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+    </div>
+  </div>
+
+  <!-- ============ Colophon ============ -->
+  <div class="a6-colophon">
+    <p class="a6-colophon-text">Exhibited and featured — Fulle Galleria, International Exhibition, Argentina; Spaces of Light, Sheikh Zayed Grand Mosque Competition; Qasr Al Hosn, Official Instagram Feature; Cultural Foundation, Official Instagram Feature; Film Abu Dhabi Commission, Official Instagram Feature; Ethara / Abu Dhabi Grand Prix, Corporate Suite Photography; What&rsquo;s On Abu Dhabi, Published Feature.</p>
+  </div>
+
+  <!-- ============ Contact transition ============ -->
+  <div class="a6-departure">
+    <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
+  </div>
+
+</section>
+
+<p class="proto-end">— end of prototype: About v6 —</p>
+
+<script src="about-v6.js"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+/* =========================================================
+   PROTOTYPE — About v4 (photographic monograph)
+   =========================================================
+   Isolated stylesheet for prototype/about-v4.html. Not linked from
+   the live site. Only fonts, colour tokens, .eyebrow, .quiet-link,
+   .reveal and .photo-presence come from the real css/style.css
+   (linked, unmodified) -- everything below is new.
+
+   Brief: "ABOUT = A PHOTOGRAPHIC MONOGRAPH PORTRAIT OF THE
+   PHOTOGRAPHER... NOT a five-section editorial webpage... Do not use
+   numbered acts, section labels, pull-quote treatment, achievement
+   cards/ledgers, or a conventional full-bleed hero." v2's acts and
+   v3's sticky-symmetrical-column device are both retired. No element
+   here is labelled with a section name or a roman numeral; nothing
+   is a card, a ledger row, or a numbered list; no image fills the
+   full viewport as a hero.
+
+   Four unlabelled beats, moving person -> identity -> way of seeing
+   -> evidence -> departure entirely through composition, not text
+   labels:
+
+     FRONTISPIECE  -- the portrait as a placed photographic object
+                      (contained, matted, offset to one side, held
+                      down from the top edge to leave deliberate
+                      negative space above it) beside a quiet
+                      eyebrow/name/location in that same negative
+                      space. Underneath, the biography enters on its
+                      own as an offset, considered-measure paragraph
+                      in upright (non-italic) Fraunces -- confident
+                      editorial typography, not a pull-quote.
+
+     WAY OF SEEING -- a second photograph (blossom-terrace.jpg,
+                      already used and approved on Home) paired with
+                      the practice sentence in a MIRRORED asymmetry:
+                      image now on the left at a smaller, secondary
+                      size, text on the right, both bottom-aligned
+                      instead of top-aligned, so this spread reads as
+                      a different composition from the frontispiece,
+                      not a repeated template with the sides swapped.
+                      The text here is italic and quieter, the
+                      opposite typographic treatment from the
+                      frontispiece's upright statement -- the two
+                      spreads deliberately don't match.
+
+     EVIDENCE      -- recognition presented as a restrained
+                      publication colophon: one continuous run of
+                      small prose in a narrow measure, semicolon-
+                      separated, NOT a list, not cards, not a
+                      numbered ledger (both v2's two-column index and
+                      v3's stacked credit lines are retired here).
+
+     DEPARTURE     -- generous quiet space and the existing,
+                      unstyled Contact link.
+
+   Motion is a single plain settle per block (the real .reveal /
+   .photo-presence primitives, unmodified) -- nothing sequenced,
+   staggered, or scroll-driven. Per the brief's own test: this
+   composition is designed to still feel intentional as a sequence of
+   printed spreads with the motion switched off entirely. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------------- Frontispiece ---------------- */
+.a4-frontispiece{
+  padding: clamp(6.5rem, 12vw, 10rem) var(--page-pad) clamp(3rem, 6vw, 4.5rem);
+  background: var(--bg);
+}
+.a4-frontispiece-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+.a4-identity{
+  padding-top: clamp(0.6rem, 2vw, 1.6rem);
+}
+.a4-identity h1{
+  margin: 0.6rem 0 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+.a4-identity .a4-location{
+  margin: 0.9rem 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+/* The portrait held down from the top of the spread and pushed to
+   the outer edge of its column -- a placed object with room around
+   it, not a hero filling the frame. Same matted-frame treatment
+   Projects already gives its own photographs (padded, background,
+   drop shadow) at one moderate, deliberate size. */
+.a4-portrait-wrap{
+  justify-self: end;
+  width: 100%;
+  max-width: 420px;
+  margin-top: clamp(3rem, 9vw, 6rem);
+}
+.a4-portrait-frame{
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+  padding: clamp(14px, 1.6vw, 24px);
+  box-shadow: 0 44px 100px -32px rgba(0,0,0,0.6);
+}
+.a4-portrait-frame img{
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+/* The biography: an offset, considered-measure paragraph -- upright
+   Fraunces, not italic, not enlarged into a pull-quote -- occupying
+   roughly the same column the portrait sits above, so the two blocks
+   read as related rather than the paragraph simply spanning the full
+   page width. */
+.a4-statement{
+  padding: 0 var(--page-pad) clamp(5.5rem, 10vw, 8rem);
+}
+.a4-statement-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+.a4-statement-text{
+  grid-column: 2 / 3;
+  margin: 0;
+  font-family: 'Fraunces', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(1.25rem, 2.1vw, 1.55rem);
+  line-height: 1.62;
+  color: var(--text);
+}
+
+/* ---------------- Way of seeing ----------------
+   Mirrored asymmetry: image now on the left, smaller and secondary
+   in scale to the frontispiece portrait; text on the right. Both
+   bottom-aligned (align-items: end) rather than top-aligned, so this
+   spread sits on a different compositional axis than the
+   frontispiece -- not the same layout with the sides swapped. */
+.a4-seeing{
+  padding: 0 var(--page-pad) clamp(6.5rem, 12vw, 9rem);
+}
+.a4-seeing-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: end;
+}
+.a4-seeing-portrait-wrap{
+  width: 100%;
+  max-width: 360px;
+}
+.a4-seeing-portrait-wrap .a4-portrait-frame img{
+  object-position: center 40%;
+}
+.a4-seeing-text-wrap{
+  max-width: 46ch;
+  padding-bottom: clamp(0.4rem, 2vw, 1.4rem);
+}
+.a4-seeing-text{
+  margin: 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.7vw, 1.22rem);
+  line-height: 1.72;
+  color: var(--text-dim);
+}
+
+/* ---------------- Evidence (publication colophon) ----------------
+   One continuous run of small prose, narrow measure -- the way a
+   book's own colophon or a magazine's masthead credits page runs as
+   a block of set type, not a list, not cards, not numbers. */
+.a4-colophon{
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: clamp(3.6rem, 7vw, 5.6rem) var(--page-pad);
+}
+.a4-colophon-inner{
+  max-width: 620px;
+  margin: 0 auto;
+}
+.a4-colophon-text{
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.9;
+  letter-spacing: 0.005em;
+  color: var(--text-dim);
+}
+.a4-colophon-lead{
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+/* ---------------- Departure ---------------- */
+.a4-departure{
+  padding: clamp(5.5rem, 11vw, 8.5rem) var(--page-pad) clamp(7rem, 13vw, 10rem);
+  text-align: center;
+}
+.a4-departure-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px){
+  .a4-frontispiece-inner{
+    grid-template-columns: 1fr;
+  }
+  .a4-portrait-wrap{
+    justify-self: start;
+    max-width: 320px;
+    margin-top: clamp(2.4rem, 8vw, 3.4rem);
+  }
+  .a4-statement-inner{
+    grid-template-columns: 1fr;
+  }
+  .a4-statement-text{
+    grid-column: 1 / 2;
+  }
+  .a4-seeing-inner{
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .a4-seeing-portrait-wrap{
+    max-width: 280px;
+  }
+  .a4-seeing-text-wrap{
+    max-width: none;
+    padding-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .a4-portrait-frame img{ transition: none; }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

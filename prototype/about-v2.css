@@ -1,0 +1,300 @@
+/* =========================================================
+   PROTOTYPE — About v2 (editorial portrait)
+   =========================================================
+   Isolated stylesheet for prototype/about-v2.html. Not linked from
+   the live site. Only fonts, colour tokens, .eyebrow, .quiet-link,
+   .reveal and .photo-presence come from the real css/style.css
+   (linked, unmodified) -- every layout rule below is new, replacing
+   about-v1's approach of reusing the real About layout untouched and
+   only changing timing.
+
+   Per the review that rejected v1: "the deeper issue is that About
+   still visually reads as a conventional photographer biography
+   page... rethink the PRESENTATION, not the content." Five acts --
+   Presence / Voice / Practice / Recognition / Exit -- each with a
+   different, deliberate spatial idea instead of one repeated
+   "centered paragraph, then the next centered paragraph" template. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------------- Act markers ----------------
+   A quiet, static, recurring "I -- Presence" / "II -- Voice" / ...
+   label at the top of each act -- catalogue-style metadata and
+   repetition (a wayfinding device an editorial publication or a
+   film's own credit sequence would use), not motion. Never animated,
+   never gated behind a reveal -- it's a fixed piece of the
+   composition, present immediately. */
+.a2-mark{
+  margin: 0 0 1.1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.a2-mark--over{
+  position: absolute;
+  top: clamp(3.6rem, 7vw, 4.6rem);
+  left: var(--page-pad);
+  z-index: 2;
+  margin: 0;
+  color: rgba(240,236,228,0.72);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+}
+.a2-mark--right{ text-align: right; }
+.a2-mark--center{ text-align: center; }
+
+/* ---------------- I. Presence ----------------
+   Full-bleed portrait instead of the old side-by-side bio-card grid
+   -- borrows the site's own existing full-bleed-photo + scrim +
+   overlaid-caption grammar (already used for Contact's hero and the
+   project category heroes) rather than inventing a new one. The
+   caption sits over the photograph's own lower third like a wall
+   label, echoing the bottom-left label position Projects v2 already
+   uses, instead of living beside the photo in its own grid cell. */
+.a2-presence{
+  position: relative;
+  background: var(--bg);
+}
+.a2-portrait-frame{
+  position: relative;
+  width: 100%;
+  height: clamp(460px, 84vh, 900px);
+  overflow: hidden;
+}
+.a2-portrait{
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+}
+.a2-presence-scrim{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    rgba(8,7,6,0) 55%,
+    rgba(8,7,6,0.35) 78%,
+    rgba(8,7,6,0.72) 100%);
+}
+.a2-presence-caption{
+  position: absolute;
+  left: var(--page-pad);
+  bottom: clamp(2rem, 5.6vw, 3.4rem);
+  z-index: 2;
+  max-width: 24ch;
+}
+.a2-presence-caption h1{
+  font-size: clamp(2.1rem, 4.4vw, 3.4rem);
+  margin: 0.5rem 0 0;
+}
+.a2-location{
+  margin-top: 0.7rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+/* ---------------- II. Voice ----------------
+   The identity/credentials sentence, set as a genuine pull-quote:
+   large, asymmetric (left-set with generous space to its right, not
+   centered on the page), marked with a quiet vertical rule the way
+   an editorial magazine sets a lifted quotation. */
+.a2-voice{
+  padding: clamp(5rem, 11vw, 8rem) var(--page-pad) clamp(2.5rem, 6vw, 4rem);
+}
+.a2-voice-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+}
+.a2-voice-text{
+  max-width: 30ch;
+  margin: 0;
+  padding-left: clamp(1.2rem, 2.6vw, 2rem);
+  border-left: 1px solid var(--border);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+  line-height: 1.32;
+  color: var(--text);
+}
+/* The name reads as its own typographic beat within the sentence --
+   non-italic and full colour against the rest of the line's dimmer
+   weight -- so the sentence itself carries hierarchy instead of
+   sitting as one flat block of text. Same font, same size: no new
+   type introduced, just an internal contrast already latent in the
+   family (roman vs. italic). */
+.a2-voice-lead{
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* ---------------- III. Practice ----------------
+   The light/mood sentence -- a quieter, smaller aside that follows
+   the statement rather than matching it, offset to the right side of
+   the page so Voice and Practice read as two distinct weights in one
+   conversation instead of two identical paragraphs stacked. */
+.a2-practice{
+  padding: 0 var(--page-pad) clamp(5.5rem, 11vw, 8.5rem);
+}
+.a2-practice-inner{
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.a2-practice-inner .a2-mark{ max-width: 34ch; }
+.a2-practice-text{
+  max-width: 34ch;
+  margin: 0;
+  text-align: right;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* ---------------- IV. Recognition ----------------
+   "A curated index/record of a photographic career, not seven cards
+   or seven individually animated list items." Reworked as a single
+   two-column typographic ledger -- CSS multi-column flow rather than
+   a manual grid split, so it reads as one continuous record the way
+   a colophon or exhibition history reads in print. The whole block
+   carries one .reveal; individual entries are never separately
+   animated. */
+.a2-record{
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  padding: clamp(4rem, 9vw, 6.5rem) var(--page-pad) clamp(4.5rem, 9vw, 7rem);
+}
+.a2-record-inner{
+  max-width: 900px;
+  margin: 0 auto;
+}
+.a2-record-eyebrow{ margin-bottom: clamp(2rem, 4.5vw, 3rem); }
+.a2-record-index{
+  columns: 2;
+  column-gap: clamp(2.2rem, 5vw, 4rem);
+}
+/* Each credit as a small two-line archival record -- a title line,
+   then a smaller uppercase descriptor line beneath it -- rather than
+   one flowing sentence per credit. Reads closer to an accession
+   record or a film's own printed credit block than a caption. */
+.a2-record-entry{
+  break-inside: avoid;
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.a2-num{
+  flex: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+.a2-entry-body{
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.a2-entry-title{
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text);
+}
+.a2-entry-sub{
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* ---------------- V. Exit ---------------- */
+.a2-exit{
+  padding: clamp(4rem, 8vw, 6rem) var(--page-pad) clamp(6rem, 11vw, 8rem);
+  text-align: center;
+}
+.a2-exit-inner .a2-mark{ margin-bottom: 1.4rem; }
+
+/* ---------------- Arrival: settle, not a generic page fade ----------------
+   The real .reveal (css/style.css) nudges up on a translateY -- right
+   for body copy, but every composed block above is meant to feel
+   like it's arriving as part of a sequence rather than "fading into
+   view" the way an ordinary webpage section would. Overridden here,
+   scoped to just these four composed blocks, with a quiet scale
+   settle instead -- the same idea as .photo-presence's photograph
+   settle-in, tuned lighter for text (1.018 vs. photo-presence's
+   1.045, since large type blurs distractingly at a stronger zoom).
+   Same easing curve already used sitewide; opacity behaviour
+   unchanged; only the transform differs. */
+.a2-voice-inner.reveal,
+.a2-practice-inner.reveal,
+.a2-record-index.reveal,
+.a2-exit-inner.reveal{
+  transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1), transform 1.1s cubic-bezier(0.16,1,0.3,1);
+}
+.a2-voice-inner.reveal.pre,
+.a2-practice-inner.reveal.pre,
+.a2-record-index.reveal.pre,
+.a2-exit-inner.reveal.pre{
+  transform: scale(1.018);
+}
+.a2-voice-inner.reveal.in,
+.a2-practice-inner.reveal.in,
+.a2-record-index.reveal.in,
+.a2-exit-inner.reveal.in{
+  transform: scale(1);
+}
+
+@media (max-width: 900px){
+  .a2-portrait-frame{ height: clamp(420px, 66vh, 640px); }
+  .a2-practice-inner{ justify-content: flex-start; }
+  .a2-practice-text{ text-align: left; }
+  .a2-record-index{ columns: 1; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .a2-portrait,
+  .a2-voice-inner.reveal,
+  .a2-practice-inner.reveal,
+  .a2-record-index.reveal,
+  .a2-exit-inner.reveal{
+    transition: none;
+  }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

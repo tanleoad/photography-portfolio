@@ -1,0 +1,37 @@
+/* =========================================================
+   PROTOTYPE — About v1 (held-plate procession)
+   =========================================================
+   Isolated stylesheet for prototype/about-v1.html. Not linked from
+   the live site, safe to delete along with the rest of prototype/.
+
+   Deliberately almost empty. Every visual rule About needs already
+   exists, unmodified, in the real css/style.css (.about-presence,
+   .about-statement, .about-practice, .recognition-index/-row,
+   .reveal, .photo-presence, .eyebrow, .quiet-link) -- this prototype
+   is about WHEN each beat arrives, not what it looks like, so no new
+   visual language is introduced here. See about-v1.js for the
+   pacing itself. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

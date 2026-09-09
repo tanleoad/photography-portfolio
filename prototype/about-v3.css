@@ -1,0 +1,152 @@
+/* =========================================================
+   PROTOTYPE — About v3 (held portrait, continuous read)
+   =========================================================
+   Isolated stylesheet for prototype/about-v3.html. Not linked from
+   the live site. Only fonts, colour tokens, .eyebrow, .quiet-link,
+   .reveal and .photo-presence come from the real css/style.css
+   (linked, unmodified) -- everything below is new.
+
+   v2 was rejected for reading as "a five-section portfolio webpage"
+   -- numbered acts, section labels, a pull-quote, a credits ledger,
+   a full-bleed hero. None of those devices appear here in any form.
+   Instead: one continuous column of prose runs beside a portrait
+   that stays in view (position:sticky, a real CSS layout mechanism,
+   not a JS effect) for as long as there is text to read next to it
+   -- the way a magazine sits a photograph beside a profile rather
+   than breaking the page into labelled UI sections. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+.a3-profile{
+  display: grid;
+  grid-template-columns: minmax(260px, 36vw) 1fr;
+  gap: clamp(3rem, 6vw, 6rem);
+  align-items: start;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: clamp(5.5rem, 10vw, 8rem) var(--page-pad) clamp(6.5rem, 11vw, 9rem);
+  background: var(--bg);
+}
+
+/* The portrait: contained and matted, not a hero. Borrows the same
+   physical-object treatment Projects already gives its photographs
+   (padded frame, background, drop shadow) at a single, moderate
+   size -- roughly a third of the page width -- rather than bleeding
+   to the edges. Held in place with the reader via position:sticky
+   while the text column beside it is taller than the viewport;
+   releases naturally once the column runs out, the ordinary way
+   sticky layout behaves, no scroll-driven JS involved. */
+.a3-portrait-col{
+  position: sticky;
+  top: clamp(4rem, 9vh, 6.5rem);
+}
+.a3-portrait-frame{
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+  padding: clamp(14px, 1.6vw, 26px);
+  box-shadow: 0 44px 100px -32px rgba(0,0,0,0.6);
+}
+.a3-portrait-frame img{
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+/* The text column: one continuous read, not a stack of labelled
+   components. Name and location introduce the photograph; the two
+   real bio sentences follow as plain paragraphs (same measured
+   Fraunces italic the site already uses for reflective copy, at
+   body scale -- not enlarged into a pull-quote); the credits
+   continue the same column as quiet running lines, not a numbered
+   index or bordered rows; the closing link ends the page the way it
+   already does in production. */
+.a3-text-col{
+  max-width: 58ch;
+  padding-top: clamp(0.4rem, 1.6vh, 1.2rem);
+}
+.a3-name{
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.5rem 0 0;
+}
+.a3-location{
+  margin: 0.8rem 0 clamp(2.4rem, 5vw, 3.4rem);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.a3-copy{
+  margin: 0 0 1.6rem;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.08rem, 1.6vw, 1.24rem);
+  line-height: 1.7;
+  color: var(--text);
+}
+.a3-copy + .a3-copy{ color: var(--text-dim); }
+
+.a3-credits{
+  margin: clamp(2.6rem, 5vw, 3.6rem) 0 clamp(2.6rem, 5vw, 3.6rem);
+  padding-top: clamp(1.6rem, 3vw, 2.2rem);
+  border-top: 1px solid var(--border);
+}
+.a3-credits-intro{
+  margin: 0 0 0.9rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.a3-credit-line{
+  margin: 0 0 0.55rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+.a3-credit-line:last-child{ margin-bottom: 0; }
+
+@media (max-width: 900px){
+  .a3-profile{
+    grid-template-columns: 1fr;
+    gap: clamp(2.4rem, 8vw, 3.2rem);
+  }
+  .a3-portrait-col{
+    position: static;
+    max-width: 340px;
+  }
+  .a3-text-col{ max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .a3-portrait-frame img{ transition: none; }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

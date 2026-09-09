@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v3 — Tanleo_</title>
+<!-- Isolated prototype, About v3. Discards v2's composition entirely
+     per review: "Do not iterate on About v2. Discard its visual
+     composition entirely... design a fundamentally different About
+     experience that feels like an editorial photographic portrait of
+     the photographer, not a five-section portfolio webpage." v2's
+     specific devices are explicitly retired here, not reused in any
+     form: no numbered acts (I/II/III...), no section labels, no
+     pull-quote treatment, no achievement cards/ledger, no full-bleed
+     hero.
+
+     Studied before building: Home's .chero (full-bleed word-led photo
+     crossfade), Projects' .project-threshold system (alternating
+     matted prints + case-study meta), and Beauty Archive/retouching.html
+     (a WebGL gallery corridor with station text and a plate count).
+     Each is a genuinely different mechanism -- so About needed its
+     own, not a fourth variation on any of theirs.
+
+     The idea: a single continuous editorial spread, the way a print
+     magazine profile actually reads -- one photograph, held in place,
+     while the words about her run alongside it. On desktop the
+     portrait sits in a sticky column (position:sticky, not fixed/
+     full-bleed) at a contained, matted size -- borrowing Projects'
+     own "photograph as a physically presented object" quality (a
+     padded frame + shadow) without repeating its alternating-
+     threshold layout -- while the copy, the practice line and the
+     recognition credits run as one unbroken column of continuous
+     prose beside it: no card, no numbered index, no separate
+     background band per "beat". The photograph simply stays with the
+     reader for as long as there is something to read, then the
+     column ends and so does the page. Nothing invented in the copy;
+     same portrait, same two sentences, same seven credits, same
+     closing link, same real css/style.css tokens/typography
+     (.eyebrow, .quiet-link, .reveal, .photo-presence, Fraunces/
+     Inter, the real colour variables) -- only about-v3.css/.js are
+     new. Not linked from the live site, not part of index.html. Safe
+     to delete the whole prototype/ folder when the review is done. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v3.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v3 — not part of the live site</div>
+
+<section class="a3-profile" id="about">
+
+  <div class="a3-portrait-col">
+    <div class="a3-portrait-frame reveal photo-presence">
+      <img src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+    </div>
+  </div>
+
+  <div class="a3-text-col">
+    <p class="eyebrow reveal">The Photographer</p>
+    <h1 class="a3-name reveal">Tanleo_</h1>
+    <p class="a3-location reveal">Abu Dhabi, UAE</p>
+
+    <p class="a3-copy reveal">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+
+    <p class="a3-copy reveal">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+
+    <div class="a3-credits reveal">
+      <p class="a3-credits-intro">Exhibited and featured</p>
+      <p class="a3-credit-line">Fulle Galleria — International Exhibition, Argentina</p>
+      <p class="a3-credit-line">Spaces of Light — Sheikh Zayed Grand Mosque Competition</p>
+      <p class="a3-credit-line">Qasr Al Hosn — Official Instagram Feature</p>
+      <p class="a3-credit-line">Cultural Foundation — Official Instagram Feature</p>
+      <p class="a3-credit-line">Film Abu Dhabi Commission — Official Instagram Feature</p>
+      <p class="a3-credit-line">Ethara / Abu Dhabi Grand Prix — Corporate Suite Photography</p>
+      <p class="a3-credit-line">What&rsquo;s On Abu Dhabi — Published Feature</p>
+    </div>
+
+    <a href="#contact" class="quiet-link reveal">Continue to Contact <span>&rarr;</span></a>
+  </div>
+
+</section>
+
+<p class="proto-end">— end of prototype: About v3 —</p>
+
+<script src="about-v3.js"></script>
+</body>
+</html>

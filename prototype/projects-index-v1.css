@@ -1,0 +1,149 @@
+/* =========================================================
+   PROTOTYPE — Projects Index v1 (continuous photographic field)
+   =========================================================
+   Isolated stylesheet for a single experimental page
+   (prototype/projects-index-v1.html). Not linked from the live site,
+   not loaded by index.html, safe to delete along with the rest of
+   the prototype/ folder. Only base tokens/reset/typography/grain
+   come from the real css/style.css (linked, unmodified, read-only)
+   -- everything below is new, built to test one question: does a
+   continuous compositional field read as one photographic exhibition
+   rather than four stacked cards. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------------- Lead-in: reproduced Statement + Closing ----------------
+   Same markup/classes/copy as the live index.html so the real
+   css/style.css rules render them identically -- this prototype is
+   testing the Closing -> Projects relationship, not restating the
+   Statement or inventing new copy for it. */
+.proto-leadin .statement,
+.proto-leadin .closing{
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------- The continuous field ---------------- */
+.proto-projects{
+  position: relative;
+  background: var(--bg);
+}
+.proto-stage-wrap{
+  position: relative;
+  height: 500vh; /* 4 chapters + a half-unit of breathing room on each end */
+}
+.proto-stage{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.proto-photo{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  will-change: transform, opacity;
+  /* transform/opacity/z-index/pointer-events are set per-frame by
+     prototype/projects-index-v1.js from scroll position -- nothing
+     here animates on its own, so there is no transition to fight
+     with the scroll-driven values. */
+}
+.proto-photo img{
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Distinct frame per chapter -- proportions deliberately vary (not
+   tied 1:1 to each source photo's native ratio) so no two chapters
+   read as the same template, the same principle the live
+   .project-threshold system already uses. */
+.proto-photo[data-i="0"]{ width: 34vw; height: 68vh; }
+.proto-photo[data-i="1"]{ width: 44vw; height: 50vh; }
+.proto-photo[data-i="2"]{ width: 28vw; height: 72vh; }
+.proto-photo[data-i="3"]{ width: 38vw; height: 58vh; }
+@media (max-width: 900px){
+  .proto-photo[data-i="0"]{ width: 74vw; height: 62vh; }
+  .proto-photo[data-i="1"]{ width: 82vw; height: 52vh; }
+  .proto-photo[data-i="2"]{ width: 68vw; height: 66vh; }
+  .proto-photo[data-i="3"]{ width: 78vw; height: 56vh; }
+}
+
+/* ---------------- Exhibition label ----------------
+   Quiet wall-label reading order: number -> title -> one subordinate
+   line, small enough to never compete with the photograph. Content
+   is swapped by JS as the dominant chapter changes; opacity/position
+   are driven by the same presence curve as the photographs so the
+   label recedes and returns with the handoff instead of jump-cutting. */
+.proto-label{
+  position: absolute;
+  left: var(--page-pad);
+  bottom: clamp(2.2rem, 6vw, 3.4rem);
+  z-index: 500;
+  max-width: 30ch;
+  pointer-events: none;
+}
+.proto-label-num{ display:block; margin-bottom: 0.7rem; }
+.proto-label-title{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  line-height: 1.02;
+  color: var(--text);
+  margin: 0 0 0.6rem;
+}
+.proto-label-desc{
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 34ch;
+}
+
+/* ---------------- Progress ---------------- */
+.proto-progress{
+  position: absolute;
+  right: var(--page-pad);
+  bottom: clamp(2.2rem, 6vw, 3.4rem);
+  z-index: 500;
+  font-family: 'Fraunces', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.proto-progress-current{ color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce){
+  .proto-photo{ transition: none; }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — About v2 — Tanleo_</title>
+<!-- Isolated prototype, About v2. Supersedes about-v1 per review:
+     "The pacing mechanism works technically, but I do not consider
+     this a successful solution... it preserves the same underlying
+     visual structure and simply staggers its existing elements." v1
+     kept every real class name and layout and only changed timing;
+     this version keeps the real COPY, recognition information,
+     typography and photography, but rebuilds the PRESENTATION --
+     new classes throughout (a2-*), reusing only the typographic
+     primitives (.eyebrow, .quiet-link, .reveal, .photo-presence) and
+     design tokens (fonts/colors/--page-pad) from the real
+     css/style.css, the same license used for Projects v2.
+
+     Five acts, matching the brief's own framing exactly:
+       PRESENCE  -- full-bleed portrait with an overlaid caption,
+                    reusing the site's own existing full-bleed-photo-
+                    plus-scrim-plus-overlaid-text grammar (already
+                    used on Contact's hero and the category heroes)
+                    instead of the old side-by-side bio-card grid.
+       VOICE     -- the identity/credentials sentence, set large and
+                    asymmetric with a quiet left rule, a genuine
+                    pull-quote rather than a centered paragraph.
+       PRACTICE  -- the light/mood sentence, smaller, quieter,
+                    offset to the right -- a murmur following the
+                    statement, not a matching twin.
+       RECOGNITION -- the same seven credits recomposed as a single
+                    two-column typographic index/ledger (CSS multi-
+                    column flow, one entry per line: number, title,
+                    dash, sub) that settles in as one composed record,
+                    not seven individually revealed cards or rows.
+       EXIT      -- the existing quiet closing link, given room to
+                    read as a deliberate final beat.
+
+     Motion is deliberately minimal here -- one settle per act (see
+     about-v2.css: text blocks settle with a quiet scale-down rather
+     than the site's default translateY nudge, so arrival reads as
+     part of the composition rather than a generic webpage fade),
+     the same easing curve used everywhere else on the site. The
+     "staged" feeling is meant to come from the composition and
+     typographic hierarchy, not from sequencing tricks (that was
+     v1's mistake).
+
+     Refinement pass: borrows PRINCIPLES only -- typographic scale,
+     deliberate emptiness, catalogue-like metadata, repetition,
+     editorial sequencing -- not any one reference's layout or
+     styling (per the site's own reference library: each reference
+     has one specific role, never mixed). Concretely: a quiet
+     recurring "I -- Presence / II -- Voice / ..." act-marker per
+     section (repetition + catalogue metadata, static, no animation);
+     Voice's opening name set apart typographically within its own
+     sentence (text as composition, not just a paragraph); Recognition
+     entries reformatted as two-line archival records -- title, then
+     a smaller uppercase descriptor line -- instead of one flowing
+     sentence per credit. Palette, typography and photography are
+     unchanged; Home/Projects/Beauty Archive are untouched.
+
+     Not linked from the live site, not part of index.html. Safe to
+     delete the whole prototype/ folder when the review is done. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="about-v2.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — About v2 — not part of the live site</div>
+
+<!-- ============ I. PRESENCE ============ -->
+<section class="a2-presence" id="about">
+  <div class="a2-portrait-frame">
+    <p class="a2-mark a2-mark--over">I — Presence</p>
+    <img class="a2-portrait reveal photo-presence" src="../images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+    <div class="a2-presence-scrim"></div>
+    <div class="a2-presence-caption reveal">
+      <p class="eyebrow">The Photographer</p>
+      <h1>Tanleo_</h1>
+      <p class="a2-location">Abu Dhabi, UAE</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ II. VOICE ============ -->
+<section class="a2-voice">
+  <div class="a2-voice-inner reveal">
+    <p class="a2-mark">II — Voice</p>
+    <p class="a2-voice-text"><span class="a2-voice-lead">Tania Khan</span> is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
+  </div>
+</section>
+
+<!-- ============ III. PRACTICE ============ -->
+<section class="a2-practice">
+  <div class="a2-practice-inner reveal">
+    <p class="a2-mark a2-mark--right">III — Practice</p>
+    <p class="a2-practice-text">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
+  </div>
+</section>
+
+<!-- ============ IV. RECOGNITION ============ -->
+<section class="a2-record">
+  <div class="a2-record-inner">
+    <p class="a2-mark">IV — Recognition</p>
+    <p class="eyebrow a2-record-eyebrow reveal">Exhibited &amp; Featured</p>
+    <div class="a2-record-index reveal">
+      <div class="a2-record-entry"><span class="a2-num">01</span><span class="a2-entry-body"><span class="a2-entry-title">Fulle Galleria</span><span class="a2-entry-sub">International Exhibition — Argentina</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">02</span><span class="a2-entry-body"><span class="a2-entry-title">Spaces of Light</span><span class="a2-entry-sub">Sheikh Zayed Grand Mosque Competition</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">03</span><span class="a2-entry-body"><span class="a2-entry-title">Qasr Al Hosn</span><span class="a2-entry-sub">Official Instagram Feature</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">04</span><span class="a2-entry-body"><span class="a2-entry-title">Cultural Foundation</span><span class="a2-entry-sub">Official Instagram Feature</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">05</span><span class="a2-entry-body"><span class="a2-entry-title">Film Abu Dhabi Commission</span><span class="a2-entry-sub">Official Instagram Feature</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">06</span><span class="a2-entry-body"><span class="a2-entry-title">Ethara / Abu Dhabi Grand Prix</span><span class="a2-entry-sub">Corporate Suite Photography</span></span></div>
+      <div class="a2-record-entry"><span class="a2-num">07</span><span class="a2-entry-body"><span class="a2-entry-title">What&rsquo;s On Abu Dhabi</span><span class="a2-entry-sub">Published Feature</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ V. EXIT ============ -->
+<section class="a2-exit">
+  <div class="a2-exit-inner reveal">
+    <p class="a2-mark a2-mark--center">V — Exit</p>
+    <a href="#contact" class="quiet-link">Continue to Contact <span>&rarr;</span></a>
+  </div>
+</section>
+
+<p class="proto-end">— end of prototype: About v2 —</p>
+
+<script src="about-v2.js"></script>
+</body>
+</html>

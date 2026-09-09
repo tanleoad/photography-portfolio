@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROTOTYPE — Projects Index v2 — Tanleo_</title>
+<!-- Isolated prototype, v2. Supersedes v1 per review: "REWORK -- do
+     not integrate. Core idea approved, visual execution is not."
+     Keeps v1's core mechanic (each work already present in the field
+     before it becomes dominant, threaded entry/home/exit so one
+     work's exit is the next work's entry) but replaces the small
+     centred-thumbnail composition with larger, asymmetrically placed
+     matted prints borrowing the production Projects section's own
+     photographic language. Not linked from the live site, not part
+     of index.html. Only the real css/style.css is reused (read-only,
+     unmodified) for base tokens/typography/grain -- everything
+     specific to this composition lives in projects-index-v2.css/.js
+     alongside this one. Safe to delete the whole prototype/ folder
+     when the review is done. No camera cursor / click flash yet, per
+     brief. -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="projects-index-v2.css">
+</head>
+<body>
+
+<div class="proto-badge">Prototype — Projects Index v2 — not part of the live site</div>
+
+<!-- ============ Reproduced, unmodified: Statement + Closing ============
+     Same classes and copy as index.html, so the real css/style.css
+     renders them identically. Included so the Closing -> Projects
+     handoff can be judged in context, not just the wall composition
+     in isolation. -->
+<div class="proto-leadin">
+  <section class="statement reveal" id="statement">
+    <p class="statement-text">I&rsquo;m not photographing the world as it is.<br>I&rsquo;m photographing the way it felt to me.</p>
+  </section>
+
+  <section class="closing reveal" id="closing">
+    <div class="container">
+      <blockquote>These are a few frames from a longer story.</blockquote>
+    </div>
+  </section>
+</div>
+
+<!-- ============ PROTOTYPE v2: moving photographic wall ============ -->
+<section class="wall-projects" id="wallProjects">
+  <div class="wall-stage-wrap">
+    <div class="wall-stage">
+
+      <div class="wall-spotlight"></div>
+
+      <div class="wall-photo" data-i="0">
+        <img src="../images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind">
+      </div>
+      <div class="wall-photo" data-i="1">
+        <img src="../images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches">
+      </div>
+      <div class="wall-photo" data-i="2">
+        <img src="../images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline">
+      </div>
+      <div class="wall-photo" data-i="3">
+        <img src="../images/beauty-archive-warmth-shadow-depth.jpg" alt="A close portrait shaped by warm light, deep shadow, and careful colour retouching.">
+      </div>
+
+      <div class="wall-label">
+        <span class="eyebrow wall-label-num">01</span>
+        <h2 class="wall-label-title">Street</h2>
+        <p class="wall-label-mood">fleeting / oblique</p>
+      </div>
+
+      <div class="wall-progress"><span class="wall-progress-current">01</span> — 04</div>
+
+    </div>
+  </div>
+</section>
+
+<p class="proto-end">— end of prototype: Projects Index v2 —</p>
+
+<script src="projects-index-v2.js"></script>
+</body>
+</html>

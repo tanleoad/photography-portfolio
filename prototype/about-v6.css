@@ -1,0 +1,164 @@
+/* =========================================================
+   PROTOTYPE — About v6 (the portrait + the voice)
+   =========================================================
+   Isolated stylesheet for prototype/about-v6.html. Not linked from
+   the live site. Only fonts, colour tokens, .quiet-link, .reveal and
+   .photo-presence come from the real css/style.css (linked,
+   unmodified) -- everything below is new.
+
+   v5 is rejected as a DIRECTION, not for its execution: "the About
+   page has been over-designed around the problem of 'how do we
+   present all the information?' Instead: what is the minimum
+   experience required to encounter the photographer?" So this
+   version removes rather than recomposes -- no two-column grid, no
+   sticky portrait, no identity plate, no matted "frame" treatment on
+   any image, no photographic-evidence sequence (Projects already
+   does that job). Six elements only, in one straight sequence:
+
+     PORTRAIT -> VOICE -> PHOTOGRAPH -> VOICE -> COLOPHON -> CONTACT
+
+   Every beat is a single centred column, full width of its own
+   moment, one at a time -- not paired side-by-side with anything.
+   That's the whole fix for "isolated elements in opposite corners":
+   there are no longer two things sharing a viewport that need to
+   relate to each other spatially. Photographs are bare -- no
+   background mat, no border, no shadow, no caption -- sized large
+   enough to be the dominant encounter of their moment but contained
+   with real margin either side, so they read as intimate and
+   photographic rather than a full-bleed hero or a portfolio
+   thumbnail. Text is centred, comfortably larger than body copy for
+   its moment (not a giant pull-quote), and quiets down after the
+   photograph interrupts it, per "the page should become
+   progressively quieter."
+
+   Motion, as in v5: applied ONLY to photographs via the real
+   .photo-presence primitive, unmodified. No text block fades or
+   slides in. The page needs to hold up exactly this way with
+   JavaScript and animation disabled entirely. */
+
+.proto-badge{
+  position: fixed;
+  top: 1rem; left: 1rem;
+  z-index: 99999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(10,9,8,0.55);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  pointer-events: none;
+}
+
+/* ---------------- Portrait ----------------
+   The dominant visual encounter of the page. Large, contained, bare
+   -- no mat, no border, no shadow -- so nothing sits between the
+   visitor and the photograph. Real margin on every side keeps it
+   from reading as a full-bleed hero; its size keeps it from reading
+   as a thumbnail. */
+.a6-portrait{
+  padding: clamp(7rem, 13vw, 10rem) var(--page-pad) clamp(5rem, 10vw, 7.5rem);
+  text-align: center;
+}
+.a6-portrait-media{
+  display: inline-block;
+  width: 100%;
+  max-width: clamp(420px, 60vw, 880px);
+}
+.a6-portrait-media img{
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------------- Voice ----------------
+   The biography becomes the dominant element of its own moment --
+   nothing shares the viewport with it. Comfortably larger than body
+   copy, centred, upright (not a pull-quote, not italic). Reused for
+   both voice beats; the second is quieter (dimmer, slightly smaller)
+   since the page is meant to settle after the photograph interrupts
+   it. */
+.a6-voice{
+  padding: 0 var(--page-pad) clamp(6rem, 12vw, 9rem);
+  text-align: center;
+}
+.a6-voice-inner{
+  max-width: 640px;
+  margin: 0 auto;
+}
+.a6-voice-text{
+  margin: 0;
+  font-family: 'Fraunces', serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.6;
+  color: var(--text);
+}
+.a6-voice--quiet .a6-voice-text{
+  font-size: clamp(1.2rem, 2.1vw, 1.6rem);
+  color: var(--text-dim);
+}
+
+/* ---------------- Photograph (interrupt) ----------------
+   The connection between what she says and what she photographs --
+   same bare treatment as the portrait, slightly smaller so the
+   portrait remains the page's single largest image. */
+.a6-photograph{
+  padding: 0 var(--page-pad) clamp(6rem, 12vw, 9rem);
+  text-align: center;
+}
+.a6-photograph-media{
+  display: inline-block;
+  width: 100%;
+  max-width: clamp(360px, 52vw, 760px);
+}
+.a6-photograph-media img{
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------------- Colophon ----------------
+   A very quiet documentary line, not a record, not a list, not a
+   kicker-labelled block -- just quiet running text sitting in space. */
+.a6-colophon{
+  padding: clamp(2rem, 6vw, 4rem) var(--page-pad) clamp(5rem, 10vw, 7.5rem);
+  text-align: center;
+}
+.a6-colophon-text{
+  max-width: 46ch;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.85;
+  color: var(--text-faint);
+}
+
+/* ---------------- Contact transition ---------------- */
+.a6-departure{
+  padding: clamp(4rem, 9vw, 6.5rem) var(--page-pad) clamp(7rem, 13vw, 10rem);
+  text-align: center;
+}
+
+@media (max-width: 900px){
+  .a6-portrait-media{ max-width: 82vw; }
+  .a6-photograph-media{ max-width: 78vw; }
+  .a6-voice-inner{ max-width: 30ch; margin: 0 auto; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .a6-portrait-media img,
+  .a6-photograph-media img{ transition: none; }
+}
+
+/* ---------------- End-of-prototype marker ---------------- */
+.proto-end{
+  padding: clamp(5rem, 12vw, 8rem) var(--page-pad);
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
