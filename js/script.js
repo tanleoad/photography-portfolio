@@ -354,6 +354,20 @@ function initPageContent() {
     }
 
     let wallCurrentActive = -1;
+    // Performance fix, 2026-09-09 (Tan: "why is it lagging"). The four
+    // source photographs are full-resolution photography (well beyond
+    // their on-screen display size), and re-running a brightness/
+    // saturate/blur filter on all four of them every single scroll
+    // frame -- including the two typically sitting fully out of range
+    // and invisible at any given moment -- is expensive work the
+    // browser was doing for nothing. Once a photo is fully outside
+    // RANGE (opacity 0, presence 0), its resting values never change
+    // frame-to-frame, so this writes that resting state ONCE and then
+    // skips all further work for it until it re-enters range. The
+    // values written are byte-identical to what the full computation
+    // would have produced (opacity 0, pointerEvents none, zIndex 0) --
+    // purely a perf fix, no change to the locked choreography itself.
+    const wallOffState = [false, false, false, false];
     function renderWall() {
       if (wallScrollable <= 0) return;
       const raw = clamp01((window.scrollY - wallWrapTop) / wallScrollable);
@@ -362,6 +376,17 @@ function initPageContent() {
       wallPhotos.forEach((el, i) => {
         const d = progress - i;
         const p = presence(d);
+        const isOff = p === 0 && opacityFor(d) === 0;
+        if (isOff) {
+          if (!wallOffState[i]) {
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+            el.style.zIndex = '0';
+            wallOffState[i] = true;
+          }
+          return;
+        }
+        wallOffState[i] = false;
         const pos = positionFor(OFFSETS[i], d);
         const t = clampN(d, -1, 1);
         const scale = (0.44 + 0.56 * p) * (1 + 0.045 * passBump(t));
