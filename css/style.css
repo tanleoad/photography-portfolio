@@ -866,9 +866,14 @@ body.intro-active{ overflow:hidden; }
    The pause between them is carried by padding and the .reveal timing
    alone. */
 .closing{
-  padding: clamp(6rem, 12vw, 10rem) 0;
+  padding: clamp(6rem, 12vw, 10rem) 0 clamp(2rem, 5vw, 3.5rem);
   text-align:center;
 }
+/* Bottom padding trimmed 2026-09-09, integrating the approved
+   Statement -> Closing -> Projects wall seam (Projects v2): the full
+   10rem read as a stretch of dead scroll before the wall's Street
+   chapter became visible, like a new section had started rather than
+   the same field continuing. Top/side padding unchanged. */
 .closing .eyebrow{ display:block; margin-bottom: 1.6rem; }
 .closing blockquote{
   font-family: 'Fraunces', serif;
@@ -1281,14 +1286,13 @@ a.contact-value:hover{ color: var(--accent); }
 
 .reveal.in{ opacity: 1; transform: translateY(0); }
 
-/* Closing quote recedes as the visitor scrolls toward the Projects
-   Index, reusing the same --proximity mechanism as the four photo
-   thresholds below (see js/script.js, "Projects index: photograph
-   proximity" — closingEl is coupled to Street's center the same way
-   two adjacent thresholds are coupled to each other). Opacity only,
-   so the existing .reveal fade-in transform is untouched; 3-class
-   specificity to override .reveal.in above; defaults to fully
-   visible if the script never runs. Added 2026-09-07. */
+/* Added 2026-09-07, superseded 2026-09-09 by Projects Index v2's
+   simpler Statement -> Closing seam (a trimmed .closing bottom
+   padding, see above) — the JS that wrote --proximity onto .closing
+   no longer runs (its querySelector target, .project-photo-mat, no
+   longer exists), so this rule is inert and just falls back to its
+   default, full opacity. Left in place rather than removed — outside
+   the scope of the 2026-09-09 integration checkpoint. */
 .closing.reveal.in{ opacity: var(--proximity, 1); }
 
 /* ============================================================
@@ -1334,6 +1338,162 @@ a.contact-value:hover{ color: var(--accent); }
   .threshold{ display: none; }
 }
 
+/* ============================================================
+   Projects Index v2 — moving photographic wall
+   Integrated 2026-09-09 from prototype/projects-index-v2.css,
+   verbatim (per "PUSH LOCKED WORK TO GITHUB — PRODUCTION INTEGRATION
+   ONLY": the prototype is the source of truth, no redesign). One
+   continuous sticky stage; all sizing/transform/opacity/filter math
+   is driven per-frame by js/script.js from scroll position — nothing
+   below animates on its own. Photographs are matted prints at (near
+   enough) their natural aspect ratio, borrowing the same padded-mat +
+   shadow language the old .project-photo-frame used, at a size and
+   off-centre home position that alternates left/right per chapter.
+   ============================================================ */
+.wall-projects{
+  position: relative;
+  background: var(--bg);
+}
+.wall-stage-wrap{
+  position: relative;
+  height: 500vh; /* 4 chapters + a half-unit of lead-in/out */
+}
+.wall-stage{
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Soft tracking glow behind the photographs -- interpolated by JS
+   between the chapters straddling the current scroll position, so
+   the black field reads as a space with light moving through it
+   rather than flat webpage background. Pure CSS gradient, no canvas,
+   no particles. */
+.wall-spotlight{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Matted print: padded frame + shadow, echoing the site's own
+   photograph-as-object language. transform/opacity/filter/z-index
+   are all set per-frame by js/script.js from scroll position --
+   nothing here animates on its own. Each .wall-photo is a real link
+   to its category page (see index.html) with pointer-events toggled
+   by script based on presence, so only the photograph currently at
+   or near full presence is actually clickable. */
+.wall-photo{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  padding: clamp(14px, 1.8vw, 30px);
+  box-shadow: 0 44px 100px -32px rgba(0,0,0,0.65);
+  will-change: transform, opacity, filter;
+}
+.wall-photo img{
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Height-driven sizing: every source photograph here is portrait-
+   orientation, and the stage is a fixed 100vh sticky viewport, so
+   height is the dimension that has to stay bounded. Width follows
+   from each image's own aspect-ratio, applied to the padded box.
+   Sizes vary per chapter -- Street and Retouching (opener/closer) are
+   the largest, Architecture and Portraits smaller. */
+.wall-photo[data-i="0"]{ height: clamp(475px, 75vh, 800px); aspect-ratio: 1600 / 2400; }
+.wall-photo[data-i="1"]{ height: clamp(425px, 62vh, 700px); aspect-ratio: 1600 / 2000; }
+.wall-photo[data-i="2"]{ height: clamp(450px, 67vh, 750px); aspect-ratio: 1440 / 1800; }
+.wall-photo[data-i="3"]{ height: clamp(500px, 80vh, 850px); aspect-ratio: 1000 / 1500; }
+
+@media (max-width: 900px){
+  .wall-photo[data-i="0"]{ height: clamp(358px, 58vh, 582px); }
+  .wall-photo[data-i="1"]{ height: clamp(336px, 49vh, 515px); }
+  .wall-photo[data-i="2"]{ height: clamp(347px, 51vh, 538px); }
+  .wall-photo[data-i="3"]{ height: clamp(381px, 63vh, 627px); }
+}
+
+/* ---------------- Exhibition label ----------------
+   Restrained wall-plaque reading order: number -> title -> a short
+   mood pair ("fleeting / oblique"), kept small and subordinate to the
+   photograph. A faint scrim behind it keeps it legible regardless of
+   which asymmetric photo position happens to sit nearby. */
+.wall-label{
+  position: absolute;
+  left: var(--page-pad);
+  bottom: clamp(2rem, 5.6vw, 3.1rem);
+  z-index: 500;
+  max-width: 26ch;
+  padding: 0.6rem 0.85rem 0.7rem;
+  background: rgba(10,9,8,0.38);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+.wall-label-num{
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: var(--text-faint);
+}
+.wall-label-title{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+}
+.wall-label-mood{
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+}
+
+/* ---------------- Progress ---------------- */
+.wall-progress{
+  position: absolute;
+  right: var(--page-pad);
+  bottom: clamp(2rem, 5.6vw, 3.1rem);
+  z-index: 500;
+  font-family: 'Fraunces', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.wall-progress-current{ color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce){
+  .wall-photo{ transition: none; }
+}
+
+/* ============================================================
+   Superseded 2026-09-09 by Projects Index v2 (.wall-projects) above.
+   Nothing in index.html references .projects-index/.project-threshold/
+   .project-photo-mat/.project-photo-frame or --proximity anymore, so
+   everything below this point is inert (and the matching JS block in
+   js/script.js no-ops for the same reason: its querySelectorAll calls
+   now find zero elements). Left in place rather than removed — outside
+   the scope of this production-integration checkpoint; safe for Tan to
+   delete later if she wants the file shorter.
+   ============================================================ */
 /* ============================================================
    Projects Index — four quiet photographic thresholds
    Added 2026-09-07. Continuous scroll, no snap. Only .project-

@@ -159,75 +159,65 @@
 </section>
 
 <!-- ============================================================
-     PROJECTS INDEX
-     Rebuilt 2026-09-07 per the approved "Threshold + Case-Study
-     Depth" direction (see claude/projects-page-redesign-concepts-v1.md
-     in the project). Four quiet photographic thresholds, fixed order,
-     alternating left/right with a distinct width + vertical offset
-     per chapter so no two read as the same template. Only the
-     photograph is a link/clickable; the meta text beside it is not.
-     Each photo mat carries data-morph-id — if street.html etc. ever
-     grow a matching element, js/transitions.js's existing Flip morph
-     will pick it up automatically (see findMorphSource() there); until
-     then those three destinations are the plain redirect stubs from
-     the August continuous-scroll merge, so clicking falls through to
-     the site's normal "page rises" transition instead of a photo
-     morph — see the implementation report for detail. Photo
-     Retouching (retouching.html) is a standalone document and already
-     bypasses Taxi entirely (isStandaloneCorridor in js/script.js), so
-     it always does a plain navigation regardless — unchanged, per
-     Tan's "do not restructure Beauty Archive" instruction.
+     PROJECTS INDEX — moving photographic wall (Projects v2)
+     Integrated 2026-09-09 from prototype/projects-index-v2 per Tan's
+     explicit approval and "PUSH LOCKED WORK TO GITHUB — PRODUCTION
+     INTEGRATION ONLY" instruction: no redesign, the prototype is the
+     source of truth. Replaces the earlier "Threshold + Case-Study
+     Depth" four-stacked-thresholds layout (678f012 onward) with a
+     single sticky stage: one continuous scroll-driven field where all
+     four photographs are always present, each threaded so its exit
+     hands off cleanly to the next chapter's entry (see the OFFSETS
+     chain in js/script.js). Choreography constants — HOLD=.15,
+     RANGE=.74, FADE=.16, the +4.5% passBump on mid-transit scale — are
+     unchanged from the locked prototype, copied verbatim, not
+     retuned.
+     One addition beyond the prototype, needed only because the
+     prototype was an isolated, non-navigable preview: each
+     .wall-photo is an anchor element, not a plain div, carrying the
+     same real destination and aria-label the old .project-photo-mat links used,
+     so the site's actual navigation function (clicking a photograph
+     to reach its category page) is preserved. data-morph-id is
+     likewise carried over unchanged, for the same future Flip-morph
+     hook noted on the old markup. Photo Retouching (retouching.html)
+     is still a standalone document that bypasses Taxi entirely
+     (isStandaloneCorridor in js/script.js) — unchanged, per Tan's "do
+     not restructure Beauty Archive" instruction; the Beauty Archive
+     corridor itself is untouched by this integration.
+     The superseded .projects-index/.project-threshold/--proximity CSS
+     (css/style.css) and its matching JS block (js/script.js) are left
+     in place, inert — nothing in the page references those selectors
+     anymore, so they no longer run, but they were not part of this
+     integration's scope and are left for Tan to decide whether to
+     remove later.
      ============================================================ -->
-<section class="projects-index" id="projects">
-  <div class="project-threshold project-threshold--street reveal" id="street">
-    <a class="project-photo-mat" href="street.html" aria-label="View Street">
-      <span class="project-photo-frame" data-morph-id="cat-street">
-        <img class="project-photo" src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
-      </span>
-    </a>
-    <div class="project-meta">
-      <span class="project-eyebrow-num">01</span>
-      <h2 class="project-name">Street</h2>
-      <p class="project-desc">Candid frames from the Corniche and the old souks — light, motion, and the city's unscripted rhythm.</p>
-    </div>
-  </div>
+<section class="wall-projects" id="projects">
+  <div class="wall-stage-wrap">
+    <div class="wall-stage">
 
-  <div class="project-threshold project-threshold--architecture reveal" id="architecture">
-    <a class="project-photo-mat" href="architecture.html" aria-label="View Architecture">
-      <span class="project-photo-frame" data-morph-id="cat-architecture">
-        <img class="project-photo" src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" width="1600" height="2000" loading="lazy">
-      </span>
-    </a>
-    <div class="project-meta">
-      <span class="project-eyebrow-num">02</span>
-      <h2 class="project-name">Architecture</h2>
-      <p class="project-desc">Domes, arches, and quiet interiors, studied for how light moves through them.</p>
-    </div>
-  </div>
+      <div class="wall-spotlight"></div>
 
-  <div class="project-threshold project-threshold--portraits reveal" id="portraits">
-    <a class="project-photo-mat" href="portraits.html" aria-label="View Portraits">
-      <span class="project-photo-frame" data-morph-id="cat-portraits">
-        <img class="project-photo" src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" width="1440" height="1800" loading="lazy">
-      </span>
-    </a>
-    <div class="project-meta">
-      <span class="project-eyebrow-num">03</span>
-      <h2 class="project-name">Portraits</h2>
-      <p class="project-desc">Faces and gestures, held in the same cinematic color language as the rest of the work.</p>
-    </div>
-  </div>
+      <a class="wall-photo" data-i="0" data-morph-id="cat-street" href="street.html" aria-label="View Street">
+        <img src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
+      </a>
+      <a class="wall-photo" data-i="1" data-morph-id="cat-architecture" href="architecture.html" aria-label="View Architecture">
+        <img src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" width="1600" height="2000" loading="lazy">
+      </a>
+      <a class="wall-photo" data-i="2" data-morph-id="cat-portraits" href="portraits.html" aria-label="View Portraits">
+        <img src="images/double-exposure-portrait.jpg" alt="Double exposure portrait blurred against the Abu Dhabi skyline" width="1440" height="1800" loading="lazy">
+      </a>
+      <a class="wall-photo" data-i="3" data-morph-id="cat-retouching" href="retouching.html" aria-label="View Photo Retouching">
+        <img src="images/beauty-archive-warmth-shadow-depth.jpg" alt="A close portrait shaped by warm light, deep shadow, and careful colour retouching." width="1000" height="1500" loading="lazy">
+      </a>
 
-  <div class="project-threshold project-threshold--retouching reveal">
-    <a class="project-photo-mat" href="retouching.html" aria-label="View Photo Retouching">
-      <span class="project-photo-frame" data-morph-id="cat-retouching">
-        <img class="project-photo" src="images/beauty-archive-warmth-shadow-depth.jpg" alt="A close portrait shaped by warm light, deep shadow, and careful colour retouching." width="1000" height="1500" loading="lazy">
-      </span>
-    </a>
-    <div class="project-meta">
-      <span class="project-eyebrow-num">04</span>
-      <h2 class="project-name">Photo Retouching</h2>
-      <p class="project-desc">Careful, restrained retouching that stays true to the original frame.</p>
+      <div class="wall-label">
+        <span class="eyebrow wall-label-num">01</span>
+        <h2 class="wall-label-title">Street</h2>
+        <p class="wall-label-mood">fleeting / oblique</p>
+      </div>
+
+      <div class="wall-progress"><span class="wall-progress-current">01</span> — 04</div>
+
     </div>
   </div>
 </section>

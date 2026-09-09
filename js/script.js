@@ -35,6 +35,8 @@ let _projectsMql = null;
 let _projectsMqlHandler = null;
 let _projectsGateResizeHandler = null;
 let _portraitsDwellScrollHandler = null;
+let _wallScrollHandler = null;
+let _wallResizeHandler = null;
 let _sideNavObserver = null;
 let _sideNavClickHandlers = null;
 let _revealObserver = null;
@@ -60,6 +62,8 @@ function teardownPageContent() {
   if (_projectsMql && _projectsMqlHandler) { _projectsMql.removeEventListener('change', _projectsMqlHandler); _projectsMql = null; _projectsMqlHandler = null; }
   if (_projectsGateResizeHandler) { window.removeEventListener('resize', _projectsGateResizeHandler); _projectsGateResizeHandler = null; }
   if (_portraitsDwellScrollHandler) { window.removeEventListener('scroll', _portraitsDwellScrollHandler); _portraitsDwellScrollHandler = null; }
+  if (_wallScrollHandler) { window.removeEventListener('scroll', _wallScrollHandler); _wallScrollHandler = null; }
+  if (_wallResizeHandler) { window.removeEventListener('resize', _wallResizeHandler); _wallResizeHandler = null; }
 
   if (_sideNavObserver) { _sideNavObserver.disconnect(); _sideNavObserver = null; }
   if (_sideNavClickHandlers) {
@@ -256,6 +260,171 @@ function initPageContent() {
     }, 6000);
   }
 
+  /* ---- Projects index v2: moving photographic wall ----
+     Integrated 2026-09-09 from prototype/projects-index-v2.js,
+     verbatim, per "PUSH LOCKED WORK TO GITHUB — PRODUCTION
+     INTEGRATION ONLY": the prototype is the source of truth, no
+     retuning. Replaces the .project-photo-mat proximity system below
+     (left in place, now inert — see its own updated comment). Every
+     constant and function here — DATA, OFFSETS, TILT, HOLD=.15,
+     RANGE=.74, FADE=.16, passBump's +4.5% mid-transit scale bump,
+     presence()/opacityFor()/positionFor() — is copied unchanged from
+     the locked prototype; only the outer scaffolding differs, so this
+     plugs into the site's existing initPageContent()/
+     teardownPageContent() lifecycle (module-level handler vars,
+     torn down on every Taxi transition) instead of the prototype's
+     own one-shot IIFE. */
+  const wallStageWrap = document.querySelector('.wall-stage-wrap');
+  const wallPhotos = Array.from(document.querySelectorAll('.wall-photo'));
+  if (wallStageWrap && wallPhotos.length === 4) {
+    const N = 4;
+    const spotlight = document.querySelector('.wall-spotlight');
+    const labelEl = document.querySelector('.wall-label');
+    const labelNum = document.querySelector('.wall-label-num');
+    const labelTitle = document.querySelector('.wall-label-title');
+    const labelMood = document.querySelector('.wall-label-mood');
+    const progressCurrent = document.querySelector('.wall-progress-current');
+
+    const DATA = [
+      { num: '01', title: 'Street', mood: 'fleeting / oblique' },
+      { num: '02', title: 'Architecture', mood: 'quiet / structural' },
+      { num: '03', title: 'Portraits', mood: 'held / unhurried' },
+      { num: '04', title: 'Photo Retouching', mood: 'careful / restrained' }
+    ];
+
+    const OFFSETS = [
+      { entry: { x: 20, y: 13 },   home: { x: -15, y: -5 }, exit: { x: -40, y: -26 } },
+      { entry: { x: -40, y: -26 }, home: { x: 16, y: 3 },   exit: { x: 42, y: 24 } },
+      { entry: { x: 42, y: 24 },   home: { x: -13, y: 10 }, exit: { x: -38, y: -22 } },
+      { entry: { x: -38, y: -22 }, home: { x: 15, y: -6 },  exit: { x: 6, y: -20 } }
+    ];
+
+    const TILT = [-1.1, 0.9, -0.7, 1.2];
+
+    const smoothstep = u => u * u * (3 - 2 * u);
+    const clamp01 = u => Math.max(0, Math.min(1, u));
+    const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    const HOLD = 0.15;
+    const RANGE = 0.74;
+    function presence(d) {
+      const ad = Math.abs(d);
+      if (ad >= RANGE) return 0;
+      if (ad <= HOLD) return 1;
+      const t = (ad - HOLD) / (RANGE - HOLD);
+      return 1 - smoothstep(t);
+    }
+
+    const FADE = 0.16;
+    function opacityFor(d) {
+      const ad = Math.abs(d);
+      if (ad >= RANGE) return 0;
+      const solidTo = RANGE - FADE;
+      if (ad <= solidTo) return 1;
+      const t = (ad - solidTo) / FADE;
+      return 1 - smoothstep(t);
+    }
+
+    function passBump(t) {
+      const at = Math.abs(t);
+      if (at <= 0 || at >= 1) return 0;
+      const peak = 0.34;
+      const rise = smoothstep(clamp01(at / peak));
+      const fall = 1 - smoothstep(clamp01((at - peak) / (1 - peak)));
+      return rise * fall;
+    }
+
+    function positionFor(off, d) {
+      const t = clampN(d, -1, 1);
+      if (t <= 0) {
+        const u = smoothstep(t + 1);
+        return { x: lerp(off.entry.x, off.home.x, u), y: lerp(off.entry.y, off.home.y, u) };
+      }
+      const u = smoothstep(t);
+      return { x: lerp(off.home.x, off.exit.x, u), y: lerp(off.home.y, off.exit.y, u) };
+    }
+
+    let wallWrapTop = 0;
+    let wallScrollable = 0;
+    function measureWall() {
+      const rect = wallStageWrap.getBoundingClientRect();
+      wallWrapTop = rect.top + window.scrollY;
+      wallScrollable = wallStageWrap.offsetHeight - window.innerHeight;
+    }
+
+    let wallCurrentActive = -1;
+    function renderWall() {
+      if (wallScrollable <= 0) return;
+      const raw = clamp01((window.scrollY - wallWrapTop) / wallScrollable);
+      const progress = raw * (N + 1) - 0.5;
+
+      wallPhotos.forEach((el, i) => {
+        const d = progress - i;
+        const p = presence(d);
+        const pos = positionFor(OFFSETS[i], d);
+        const t = clampN(d, -1, 1);
+        const scale = (0.44 + 0.56 * p) * (1 + 0.045 * passBump(t));
+        const bright = 0.42 + 0.58 * p;
+        const sat = 0.55 + 0.45 * p;
+        const blur = (1 - p) * 2.2;
+        el.style.transform =
+          `translate(-50%, -50%) translate(${pos.x}vw, ${pos.y}vh) scale(${scale}) rotate(${TILT[i]}deg)`;
+        el.style.opacity = String(opacityFor(d));
+        el.style.filter = `brightness(${bright}) saturate(${sat}) blur(${blur}px)`;
+        el.style.zIndex = String(Math.round(p * 100));
+        el.style.pointerEvents = p > 0.5 ? 'auto' : 'none';
+      });
+
+      const lo = clampN(Math.floor(progress), 0, N - 1);
+      const hi = clampN(Math.ceil(progress), 0, N - 1);
+      const frac = clamp01(progress - lo);
+      const homeLo = OFFSETS[lo].home;
+      const homeHi = OFFSETS[hi].home;
+      const sx = lerp(homeLo.x, homeHi.x, smoothstep(frac));
+      const sy = lerp(homeLo.y, homeHi.y, smoothstep(frac));
+      if (spotlight) {
+        spotlight.style.background =
+          `radial-gradient(46vw 46vh at calc(50% + ${sx}vw) calc(50% + ${sy}vh), rgba(214,196,168,0.10) 0%, rgba(214,196,168,0.04) 38%, transparent 68%)`;
+      }
+
+      const activeIndex = clampN(Math.round(progress), 0, N - 1);
+      const dActive = progress - activeIndex;
+      const labelPresence = presence(dActive);
+      const labelOpacity = opacityFor(dActive);
+      if (activeIndex !== wallCurrentActive) {
+        wallCurrentActive = activeIndex;
+        const d = DATA[activeIndex];
+        labelNum.textContent = d.num;
+        labelTitle.textContent = d.title;
+        labelMood.textContent = d.mood;
+        progressCurrent.textContent = d.num;
+      }
+      labelEl.style.opacity = String(labelOpacity);
+      labelEl.style.transform = `translateY(${(1 - labelPresence) * 10}px)`;
+    }
+
+    let wallTicking = false;
+    _wallScrollHandler = () => {
+      if (wallTicking) return;
+      wallTicking = true;
+      requestAnimationFrame(() => { renderWall(); wallTicking = false; });
+    };
+    _wallResizeHandler = () => { measureWall(); renderWall(); };
+    window.addEventListener('scroll', _wallScrollHandler, { passive: true });
+    window.addEventListener('resize', _wallResizeHandler);
+
+    measureWall();
+    renderWall();
+  }
+
+  /* ---- Superseded 2026-09-09 by Projects index v2 above ----
+     Nothing in index.html carries .project-photo-mat anymore, so
+     projectMats.length is always 0 below and this entire block is
+     inert (it returns/no-ops without attaching any listeners). Left
+     in place rather than removed — outside the scope of the
+     2026-09-09 production-integration checkpoint; safe for Tan to
+     delete later if she wants the file shorter. */
   /* ---- Projects index: photograph proximity ----
      Each threshold's photo mat carries --proximity (read by
      .project-photo-frame in style.css to drive opacity/translateY/
