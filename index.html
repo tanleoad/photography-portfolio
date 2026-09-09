@@ -136,13 +136,16 @@
   <p class="statement-text">I&rsquo;m not photographing the world as it is.<br>I&rsquo;m photographing the way it felt to me.</p>
 </section>
 
-<!-- ============ Quiet closing / handoff into Projects ============ -->
-<section class="closing reveal" id="closing">
-  <div class="container">
-    <blockquote>These are a few frames from a longer story.</blockquote>
-    <a href="#projects" class="quiet-link">Continue to the Portfolio <span>&rarr;</span></a>
-  </div>
-</section>
+<!-- Quiet closing / handoff into Projects -- removed 2026-09-09 per
+     Tan's direct request ("this is what you need to remove from the
+     website", the "These are a few frames from a longer story" /
+     "Continue to the Portfolio" block). Statement now hands off
+     straight to the Threshold/Street section below, same as the
+     mobile/reduced-motion fallback already did before this section
+     existed. CSS (.closing and related rules) and the now-fully-inert
+     legacy proximity JS that referenced #closing are left in place --
+     harmless with no matching element in the DOM -- rather than
+     touched, per the standing conservative-diff policy on this file. -->
 
 <!-- ============ The Photographic Threshold ============
      Isolated WebGL module (js/threshold.js) — see that file and the
