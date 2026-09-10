@@ -1315,7 +1315,7 @@ a.contact-value:hover{ color: var(--accent); }
    animation frame. ============================================================ */
 .threshold{
   position: relative;
-  height: 220vh; /* first-pass pacing — tune after visual review */
+  height: 110vh; /* reduced 2026-09-10 -- was 220vh, halved to close the dead-scroll gap between the statement and Projects; see Tan's request */
   background: var(--bg);
 }
 .threshold-pin{
