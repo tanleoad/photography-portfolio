@@ -909,20 +909,21 @@ document.addEventListener('DOMContentLoaded', () => {
       link.getAttribute('href').charAt(0) !== '#' &&
       link.href.indexOf(window.location.origin) === 0
     ) {
-      // retouching.html (the Beauty Archive corridor) is a fully
-      // standalone document -- its own <html>/<head>/<body>, no shared
-      // nav or footer, no [data-taxi-view] wrapper, none of the markup
-      // the onEnter/onLeave handlers in js/transitions.js expect to
-      // find on an incoming page. Routing it through
-      // window.siteTaxi.navigateTo() like every other internal link
-      // means Taxi fetches it, can't find what it's looking for, and
-      // the transition silently goes nowhere -- from the visitor's
-      // side, clicking "Photo Retouching" simply does nothing. A plain
-      // full navigation has always worked for this page, so it skips
-      // Taxi entirely, same as the CDN-blocked/offline fallback below
-      // already does for every link when the transition system never
-      // loaded at all.
-      const isStandaloneCorridor = /\/retouching\.html(?:[?#]|$)/.test(link.pathname);
+      // retouching.html (the Beauty Archive corridor) and street.html
+      // (the Street photographic wall, rebuilt 2026-09-10 from the
+      // approved prototype) are both fully standalone documents --
+      // their own <html>/<head>/<body>, no shared nav or footer, no
+      // [data-taxi-view] wrapper, none of the markup the onEnter/
+      // onLeave handlers in js/transitions.js expect to find on an
+      // incoming page. Routing either through window.siteTaxi.navigateTo()
+      // like every other internal link means Taxi fetches it, can't
+      // find what it's looking for, and the transition silently goes
+      // nowhere -- from the visitor's side, clicking "Photo Retouching"
+      // or "Street" simply does nothing. A plain full navigation has
+      // always worked for these pages, so both skip Taxi entirely, same
+      // as the CDN-blocked/offline fallback below already does for
+      // every link when the transition system never loaded at all.
+      const isStandaloneCorridor = /\/(retouching|street)\.html(?:[?#]|$)/.test(link.pathname);
       e.preventDefault();
       const dest = link.href;
       if (window.siteTaxi && !isStandaloneCorridor) {
