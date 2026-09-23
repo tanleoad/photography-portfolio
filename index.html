@@ -226,6 +226,62 @@
 </section>
 
 <!-- ============================================================
+     PORTRAIT / EDITORIAL (homepage restructuring, 2026-09-23)
+     New homepage stage requested in the brief: Portrait/Editorial gets
+     its own held moment on the homepage rather than living only as
+     one of the four wall photographs. Reuses the exact .about-presence
+     pattern already established below for About (same grid, same
+     .reveal/.photo-presence classes, zero new CSS) so this introduces
+     no new visual language. Copy is not invented: the eyebrow number,
+     title and mood line are the same "03 / Portraits / held /
+     unhurried" already written into the wall's own DATA array in
+     js/script.js -- copy is not invented. Photo: approved 2026-09-23
+     (After 1.JPG), replacing the wall's double-exposure-portrait.jpg
+     so this section reads as its own visual moment rather than a
+     repeat of the wall photo. -->
+<section class="about-presence" id="portraits">
+  <div class="about-presence-media reveal photo-presence">
+    <img src="images/After 1.JPG" alt="Editorial portrait in black fashion styling" width="2124" height="3188" loading="lazy">
+  </div>
+  <div class="about-presence-caption reveal">
+    <p class="eyebrow">03</p>
+    <h1>Portrait / Editorial</h1>
+    <p class="wall-label-mood">held / unhurried</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PHOTO RETOUCHING — doorway into The Beauty Archive
+     (homepage restructuring, 2026-09-23)
+     Same .about-presence pattern again, mirrored only in that the
+     caption sits in the first grid column this time so the section
+     reads as an entry point rather than a repeat of the beat above --
+     no new CSS, this is the same two-column grid taking its two
+     children in the other order. Eyebrow/title/mood are, again, the
+     wall's own existing "04 / Photo Retouching / careful / restrained"
+     copy, and the framing line is close to verbatim from the brief
+     itself ("the same eye that photographs the image also shapes the
+     final image"). The Beauty Archive itself (retouching.html) is a
+     separate, already-built WebGL experience and is not touched here
+     -- this section only links into it. Photo: approved 2026-09-23
+     (After 4.JPG), replacing the wall's
+     beauty-archive-warmth-shadow-depth.jpg with a current, film-
+     inspired retouching image so the section represents the present
+     Tanleo Retouch direction rather than an older wall photo. -->
+<section class="about-presence retouch-presence" id="retouch">
+  <div class="about-presence-caption reveal">
+    <p class="eyebrow">04</p>
+    <h1>Photo Retouching</h1>
+    <p class="wall-label-mood">careful / restrained</p>
+    <p class="retouch-lead reveal">The same eye that photographs the image also shapes the final image.</p>
+    <a href="retouching.html" class="quiet-link">Enter The Beauty Archive <span>&rarr;</span></a>
+  </div>
+  <div class="about-presence-media reveal photo-presence">
+    <img src="images/After 4.JPG" alt="Editorial beauty portrait highlighting skin, makeup and facial detail" width="2839" height="4259" loading="lazy">
+  </div>
+</section>
+
+<!-- ============================================================
      ABOUT — editorial sequence (Held Print coherence pass, 2026-09-07)
      Same real content as before (portrait, the two-sentence bio, the
      same seven recognition credits) restructured into sequential
@@ -303,6 +359,11 @@
         <span class="recognition-num">07</span>
         <span class="recognition-row-title">What's On Abu Dhabi</span>
         <span class="recognition-row-sub">Published Feature</span>
+      </li>
+      <li class="recognition-row reveal">
+        <span class="recognition-num">08</span>
+        <span class="recognition-row-title">Sony Workshops</span>
+        <span class="recognition-row-sub">Gearbox, Dubai — Color Grading for Street Photography</span>
       </li>
     </ol>
   </div>

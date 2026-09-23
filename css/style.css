@@ -1735,9 +1735,44 @@ a.contact-value:hover{ color: var(--accent); }
   letter-spacing: 0.06em;
   color: var(--text-dim);
 }
+/* Portrait/Editorial + Photo Retouching homepage stages (2026-09-23)
+   reuse .about-presence itself unmodified. .wall-label-mood already
+   carries the right type treatment for the reused "held / unhurried"
+   / "careful / restrained" copy; this rule just gives it the same
+   top margin .about-presence-location already uses, scoped so it
+   only applies inside this component (the wall's own .wall-label-mood
+   is untouched). .retouch-lead is the one genuinely new line (close
+   to verbatim from the brief) and .about-presence-caption .quiet-link
+   just needs breathing room above it -- everything else here is the
+   existing grid, gap and responsive stacking, untouched. */
+.about-presence-caption .wall-label-mood{ margin-top: 1rem; }
+.retouch-lead{
+  margin-top: 1.6rem;
+  max-width: 34ch;
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.about-presence-caption .quiet-link{ margin-top: 1.8rem; }
 @media (max-width: 800px){
   .about-presence{ grid-template-columns: 1fr; }
   .about-presence-media{ aspect-ratio: 5 / 4; }
+  /* Mobile overlap fix (2026-09-23). #retouch is the one section in
+     this family whose caption sits first in the grid (see the DOM
+     order in index.html) -- Portraits and About lead with the photo,
+     so at mobile widths their first on-screen pixels are the image,
+     never the text. Retouch's text was landing directly under the
+     fixed header (84px) + fixed side nav (bottom edge measured at
+     209px from viewport top, both position:fixed and unaffected by
+     scroll), because .about-presence's own mobile padding-top (96px,
+     the clamp's floor) clears neither. This overrides padding-top
+     for #retouch only -- not .about-presence, so Portraits/About are
+     untouched -- to 240px, clearing the nav with a small margin.
+     padding-bottom, the grid, the image, the copy, and every internal
+     gap between the eyebrow/heading/mood/lead/link are untouched --
+     this only moves where the block as a whole starts. Desktop is
+     unaffected: this rule only exists inside this media query. */
+  #retouch{ padding-top: 240px; }
 }
 
 .about-statement-wrap{ padding: clamp(1rem, 3vw, 2rem) var(--page-pad) clamp(3rem, 6vw, 4.5rem); }
