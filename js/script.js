@@ -281,11 +281,11 @@ function initPageContent() {
 
   /* ---- Projects archive: directional photographic drift ----
      Added 2026-09-23, round 2 ("do NOT add generic parallax"). Not
-     one identical effect applied to all three photographs -- each
+     one identical effect applied to both photographs -- each
      composition gets its own drift direction, matching the visual
-     rhythm of the layout itself (see css/style.css): Street and
-     Portrait/Editorial (both left/inset compositions) drift upward,
-     Architecture (the right/mirrored composition) drifts downward.
+     rhythm of the layout itself (see css/style.css): Street (the left
+     composition) drifts upward, Architecture (the right/mirrored
+     composition) drifts downward.
      Direction is read straight off .archive-entry--reverse, the same
      class that already puts Architecture's text and photograph on
      the right -- no separate data attribute needed. ~20px of total
@@ -307,8 +307,8 @@ function initPageContent() {
      photographs, unchanged and confirmed good. */
   const archivePhotos = Array.from(document.querySelectorAll('.archive-entry-photo img')).map(img => ({
     img,
-    // +1 = drifts upward over the scroll range (Street, Portrait/
-    // Editorial); -1 = drifts downward (Architecture).
+    // +1 = drifts upward over the scroll range (Street);
+    // -1 = drifts downward (Architecture).
     dir: img.closest('.archive-entry--reverse') ? -1 : 1
   }));
   const reduceMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');

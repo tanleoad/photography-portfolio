@@ -50,17 +50,9 @@ body{
   position: relative;
 }
 
-/* grain overlay */
-body::after{
-  content:"";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-}
+/* (A sitewide grain overlay -- body::after, overlay blend at 5% --
+   was removed 2026-09-25: it sat on top of every photograph and
+   altered the displayed colour of the supplied images.) */
 
 /* ---------------- Site-wide: camera cursor + shutter flash ----------------
    Added 2026-09-08. Desktop/fine-pointer only (see js/script.js,
@@ -532,9 +524,9 @@ body.intro-active{ overflow:hidden; }
 .chero:has(.story-link.is-active) .chero-base{ opacity: 0; }
 .chero-scrim{
   position:absolute; inset:0;
-  background:
-    linear-gradient(to top, rgba(8,7,6,0.88) 0%, rgba(8,7,6,0.28) 46%, rgba(8,7,6,0.45) 100%),
-    linear-gradient(to bottom, rgba(8,7,6,0.5) 0%, rgba(8,7,6,0) 26%);
+  /* No background: the darkening gradients that used to sit over the
+     hero photographs were removed 2026-09-25 -- photographs display
+     exactly as supplied. */
 }
 
 .chero-content{
@@ -745,11 +737,9 @@ body.intro-active{ overflow:hidden; }
   background-position: center;
   overflow:hidden;
 }
-.page-banner::before{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(to top, rgba(8,7,6,0.95), rgba(8,7,6,0.35) 60%, rgba(8,7,6,0.55));
-}
+/* (.page-banner::before -- a darkening gradient over the banner
+   photograph -- removed 2026-09-25: banner photographs display exactly
+   as supplied.) */
 .page-banner-inner{
   position:relative; z-index:1;
   padding: 0 var(--page-pad) 3rem;
@@ -827,10 +817,9 @@ body.intro-active{ overflow:hidden; }
 }
 .preview-item img{
   width:100%; height:100%; object-fit:cover;
-  transition: transform 0.8s ease, filter 0.8s ease;
-  filter: grayscale(0.08);
+  transition: transform 0.8s ease;
 }
-.preview-item:hover img{ transform: scale(1.06); filter: grayscale(0); }
+.preview-item:hover img{ transform: scale(1.06); }
 .preview-caption{
   position:absolute; left:1.2rem; bottom:1.2rem;
   font-size: 0.72rem;
@@ -1077,10 +1066,9 @@ body.intro-active{ overflow:hidden; }
 }
 .bento-item img{
   width:100%; height:100%; object-fit:cover;
-  transition: transform 0.9s ease, filter 0.9s ease;
-  filter: grayscale(0.1) contrast(1.02);
+  transition: transform 0.9s ease;
 }
-.bento-item:hover img{ transform: scale(1.055); filter: grayscale(0); }
+.bento-item:hover img{ transform: scale(1.055); }
 .bento-item.span-tall{ grid-row: span 2; }
 .bento-item.span-wide{ grid-column: span 2; }
 .bento-caption{
@@ -1188,8 +1176,8 @@ body.intro-active{ overflow:hidden; }
 .contact-hero-scrim{
   position: absolute; inset: 0;
   z-index: 1;
-  background:
-    linear-gradient(to bottom, rgba(8,7,6,0.8) 0%, rgba(8,7,6,0.5) 32%, rgba(8,7,6,0.6) 72%, rgba(8,7,6,0.85) 100%);
+  /* No background: the darkening gradient over the Contact photograph
+     was removed 2026-09-25 -- it displays exactly as supplied. */
 }
 .contact-hero-inner{
   position: relative;
@@ -1403,7 +1391,6 @@ a.contact-value:hover{ color: var(--accent); }
      Editorial", which still wraps at the slash as intended. */
   max-width: 30rem;
 }
-.archive-entry-text .eyebrow{ margin-bottom: 1rem; }
 .archive-entry-title{
   font-size: clamp(2rem, 4.2vw, 3.4rem);
   text-transform: uppercase;
@@ -1430,6 +1417,14 @@ a.contact-value:hover{ color: var(--accent); }
   width: 100%;
   height: auto;
   display: block;
+  /* One shared 4:5 frame for every homepage project photograph (Street,
+     Architecture, and the Portrait / Editorial section below), so the
+     source file's own proportions never decide the displayed size.
+     object-fit: cover crops to the frame, centred; the photographs
+     themselves are untouched. Width is the shared clamp on
+     .archive-entry-photo above (100% at <=700px). */
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
 }
 
 /* Photographic movement. Typography stays still -- only the
@@ -1472,50 +1467,37 @@ a.contact-value:hover{ color: var(--accent); }
    above is what now creates the "recede / black pause / emerge"
    rhythm, through real scroll distance rather than a simulated one.) */
 
-/* ---- Three distinct compositions, not one component repeated ----
+/* ---- Two distinct compositions, not one component repeated ----
    01 Street (base, no modifier): text and photograph both anchored
-   left; the most generous text-to-photograph distance of the three
-   -- the sequence's opening, unhurried beat.
+   left -- the sequence's opening, unhurried beat.
    02 Architecture (.archive-entry--reverse): text and photograph
    both shift right -- a genuine mirror, not just the photo moving,
-   so it reads as a deliberate counterpoint to Street -- with a
-   noticeably tighter text-to-photograph distance.
-   03 Portrait/Editorial (.archive-entry--center): text nudged
-   slightly inward rather than flush left, photograph inset from the
-   edge instead of flush (left/central, per the brief), run larger
-   and closer to its text than the other two -- the most intimate,
-   highest-tension pairing of the three, closing the sequence. */
+   so it reads as a deliberate counterpoint to Street.
+   (A third entry, 03 Portrait/Editorial, was removed 2026-09-25: its
+   photograph belongs to the Street body of work. The homepage's own
+   Portrait/Editorial section follows Projects directly.) */
 /* 2026-09-25: the shorter Street -> Architecture gap this override
    used to add (from an earlier "Architecture felt too disconnected"
    fix) is gone -- this pass explicitly wants a real, uniform black
    pause before every project, Architecture included, so it now just
-   inherits the general inter-project gap above like Portrait/Editorial does.
+   inherits the general inter-project gap above.
    Only the composition itself (text and photo shifted right) stays
    scoped here. */
 .archive-entry.archive-entry--reverse{ align-items: flex-end; }
 .archive-entry--reverse .archive-entry-text{ text-align: right; }
 .archive-entry--reverse .archive-entry-photo{ margin-top: clamp(2.5rem, 5vw, 4rem); }
 
-.archive-entry--center .archive-entry-text{ margin-left: clamp(0.5rem, 3vw, 2rem); }
-.archive-entry--center .archive-entry-photo{
-  width: clamp(540px, 58vw, 920px);
-  margin-top: clamp(3rem, 6.5vw, 5rem);
-  margin-left: clamp(2rem, 9vw, 7rem);
-}
-
 @media (max-width: 700px){
   .archive-entry-photo{ width: 100%; }
   .archive-entry--reverse{ align-items: flex-start; }
   .archive-entry--reverse .archive-entry-text{ text-align: left; }
-  .archive-entry--center .archive-entry-text{ margin-left: 0; }
-  .archive-entry--center .archive-entry-photo{ width: 100%; margin-left: 0; }
 }
 
 /* ---- Protected zone for the fixed side navigation ----
    The fixed .side-nav (Home / Projects / About / Contact) occupies a
    real column at the left edge of the viewport: measured at roughly
    x 35-130px on desktop and x 14-88px at <=780px. Left-anchored
-   project content (Street, Portrait/Editorial) was scrolling straight
+   project content (Street) was scrolling straight
    through that column. Solved with layout only -- .side-nav itself is
    untouched, and nothing is pushed down vertically.
    Desktop: the whole composition (text + photograph) starts clear of
@@ -1527,13 +1509,6 @@ a.contact-value:hover{ color: var(--accent); }
 @media (min-width: 781px){
   .projects-archive .container{
     padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1440px) / 2)));
-  }
-  /* Keeps the inset Portrait/Editorial photograph inside the page
-     just above the breakpoint (~781-800px), where the protected
-     zone leaves slightly less room than its minimum width + inset.
-     Has no effect at wider sizes. */
-  .archive-entry--center .archive-entry-photo{
-    max-width: calc(100% - clamp(2rem, 9vw, 7rem));
   }
 }
 @media (max-width: 780px){
@@ -1630,7 +1605,6 @@ a.contact-value:hover{ color: var(--accent); }
   box-shadow: 0 40px 90px -30px rgba(0,0,0,0.6);
   opacity: calc(0.35 + var(--proximity, 1) * 0.65);
   transform: translateY(calc((1 - var(--proximity, 1)) * 36px)) scale(calc(0.965 + var(--proximity, 1) * 0.035));
-  filter: saturate(calc(0.85 + var(--proximity, 1) * 0.15)) contrast(calc(0.94 + var(--proximity, 1) * 0.06));
 }
 
 /* ============================================================
@@ -1847,6 +1821,51 @@ a.contact-value:hover{ color: var(--accent); }
      this only moves where the block as a whole starts. Desktop is
      unaffected: this rule only exists inside this media query. */
   #retouch{ padding-top: 240px; }
+}
+
+/* ---- Portrait / Editorial homepage section: typography first ----
+   2026-09-25. Same composition language as the Projects entries --
+   title and mood line above, photograph below -- instead of the
+   shared .about-presence side-by-side grid. Scoped to #portraits only:
+   About and Photo Retouching keep .about-presence exactly as it is.
+   The markup order (caption before media) carries the "text first"
+   order; this only switches the layout from grid to a single column.
+   Photograph frame: identical to the Projects photographs -- same
+   width rule as .archive-entry-photo (clamp(500px, 55vw, 860px), 100%
+   at <=700px) and the same 4:5 ratio at every width (overriding the
+   shared 5:4 mobile ratio, for this section only). Unchanged: the
+   photograph itself, the heading's type scale, and the section's own
+   top/bottom padding (so the space after Architecture is unchanged).
+   Left edge and side-nav clearance match .projects-archive exactly, so
+   this section shares Street's left axis and never runs under the
+   fixed .side-nav column (see "Protected zone" above). */
+#portraits.about-presence{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 1440px;
+}
+#portraits .about-presence-caption{ max-width: 30rem; }
+#portraits .about-presence-media,
+#portraits.about-presence .about-presence-media{
+  width: clamp(500px, 55vw, 860px);
+  aspect-ratio: 4 / 5;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+@media (min-width: 781px){
+  #portraits.about-presence{
+    padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1440px) / 2)));
+  }
+}
+@media (max-width: 800px){
+  #portraits.about-presence .about-presence-media{ aspect-ratio: 4 / 5; }
+}
+@media (max-width: 700px){
+  #portraits.about-presence .about-presence-media{ width: 100%; }
+}
+@media (max-width: 780px){
+  #portraits .about-presence-caption{ padding-left: 6rem; }
 }
 
 .about-statement-wrap{ padding: clamp(1rem, 3vw, 2rem) var(--page-pad) clamp(3rem, 6vw, 4.5rem); }
