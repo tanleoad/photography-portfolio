@@ -35,8 +35,8 @@ let _projectsMql = null;
 let _projectsMqlHandler = null;
 let _projectsGateResizeHandler = null;
 let _portraitsDwellScrollHandler = null;
-let _wallScrollHandler = null;
-let _wallResizeHandler = null;
+let _archiveDriftScrollHandler = null;
+let _archiveDriftResizeHandler = null;
 let _sideNavObserver = null;
 let _sideNavClickHandlers = null;
 let _revealObserver = null;
@@ -62,8 +62,8 @@ function teardownPageContent() {
   if (_projectsMql && _projectsMqlHandler) { _projectsMql.removeEventListener('change', _projectsMqlHandler); _projectsMql = null; _projectsMqlHandler = null; }
   if (_projectsGateResizeHandler) { window.removeEventListener('resize', _projectsGateResizeHandler); _projectsGateResizeHandler = null; }
   if (_portraitsDwellScrollHandler) { window.removeEventListener('scroll', _portraitsDwellScrollHandler); _portraitsDwellScrollHandler = null; }
-  if (_wallScrollHandler) { window.removeEventListener('scroll', _wallScrollHandler); _wallScrollHandler = null; }
-  if (_wallResizeHandler) { window.removeEventListener('resize', _wallResizeHandler); _wallResizeHandler = null; }
+  if (_archiveDriftScrollHandler) { window.removeEventListener('scroll', _archiveDriftScrollHandler); _archiveDriftScrollHandler = null; }
+  if (_archiveDriftResizeHandler) { window.removeEventListener('resize', _archiveDriftResizeHandler); _archiveDriftResizeHandler = null; }
 
   if (_sideNavObserver) { _sideNavObserver.disconnect(); _sideNavObserver = null; }
   if (_sideNavClickHandlers) {
@@ -215,7 +215,13 @@ function initPageContent() {
   /* ---- Scroll reveal ----
      Elements are visible by default in CSS. Only after we confirm
      IntersectionObserver works do we opt them into the pre-animation
-     (hidden) state, so a JS failure never hides real content. */
+     (hidden) state, so a JS failure never hides real content.
+     2026-09-25: .archive-entry-text was briefly folded into this
+     observer so project typography would fade in with its photograph.
+     Reverted the same day (Tan, "PROJECTS -- REVIEW OF CURRENT
+     RENDER"): typography must never depend on IntersectionObserver
+     timing at all -- it should simply render normally, like type on a
+     page. .archive-entry-text is deliberately NOT selected here. */
   const revealEls = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window && revealEls.length) {
     revealEls.forEach(el => { el.classList.add('pre'); el.classList.remove('in'); });
@@ -260,187 +266,84 @@ function initPageContent() {
     }, 6000);
   }
 
-  /* ---- Projects index v2: moving photographic wall ----
-     Integrated 2026-09-09 from prototype/projects-index-v2.js,
-     verbatim, per "PUSH LOCKED WORK TO GITHUB — PRODUCTION
-     INTEGRATION ONLY": the prototype is the source of truth, no
-     retuning. Replaces the .project-photo-mat proximity system below
-     (left in place, now inert — see its own updated comment). Every
-     constant and function here — DATA, OFFSETS, TILT, HOLD=.15,
-     RANGE=.74, FADE=.16, passBump's +4.5% mid-transit scale bump,
-     presence()/opacityFor()/positionFor() — is copied unchanged from
-     the locked prototype; only the outer scaffolding differs, so this
-     plugs into the site's existing initPageContent()/
-     teardownPageContent() lifecycle (module-level handler vars,
-     torn down on every Taxi transition) instead of the prototype's
-     own one-shot IIFE. */
-  const wallStageWrap = document.querySelector('.wall-stage-wrap');
-  const wallPhotos = Array.from(document.querySelectorAll('.wall-photo'));
-  if (wallStageWrap && wallPhotos.length === 4) {
-    const N = 4;
-    const spotlight = document.querySelector('.wall-spotlight');
-    const labelEl = document.querySelector('.wall-label');
-    const labelNum = document.querySelector('.wall-label-num');
-    const labelTitle = document.querySelector('.wall-label-title');
-    const labelMood = document.querySelector('.wall-label-mood');
-    const progressCurrent = document.querySelector('.wall-progress-current');
+  /* ---- Projects index v2 (moving photographic wall) -- removed ----
+     Removed 2026-09-23, replaced by a plain-document-flow typographic
+     archive section in index.html / css/style.css (see "Projects --
+     typographic archive" in style.css). The old sticky 500vh stage
+     and its per-frame multi-property choreography (position, scale,
+     brightness, saturation, blur, z-index and pointer-events on 4
+     stacked photos at once) are gone entirely. The new Projects
+     entries reveal using the site's existing .reveal / .photo-presence
+     IntersectionObserver system above (unchanged), exactly like
+     About, Portrait/Editorial and Photo Retouching already do -- see
+     the much smaller, directional motion block directly below for
+     the one thing added back on top of that. */
 
-    const DATA = [
-      { num: '01', title: 'Street', mood: 'fleeting / oblique' },
-      { num: '02', title: 'Architecture', mood: 'quiet / structural' },
-      { num: '03', title: 'Portraits', mood: 'held / unhurried' },
-      { num: '04', title: 'Photo Retouching', mood: 'careful / restrained' }
-    ];
-
-    const OFFSETS = [
-      { entry: { x: 20, y: 13 },   home: { x: -15, y: -5 }, exit: { x: -40, y: -26 } },
-      { entry: { x: -40, y: -26 }, home: { x: 16, y: 3 },   exit: { x: 42, y: 24 } },
-      { entry: { x: 42, y: 24 },   home: { x: -13, y: 10 }, exit: { x: -38, y: -22 } },
-      { entry: { x: -38, y: -22 }, home: { x: 15, y: -6 },  exit: { x: 6, y: -20 } }
-    ];
-
-    const TILT = [-1.1, 0.9, -0.7, 1.2];
-
-    const smoothstep = u => u * u * (3 - 2 * u);
-    const clamp01 = u => Math.max(0, Math.min(1, u));
+  /* ---- Projects archive: directional photographic drift ----
+     Added 2026-09-23, round 2 ("do NOT add generic parallax"). Not
+     one identical effect applied to all three photographs -- each
+     composition gets its own drift direction, matching the visual
+     rhythm of the layout itself (see css/style.css): Street and
+     Portrait/Editorial (both left/inset compositions) drift upward,
+     Architecture (the right/mirrored composition) drifts downward.
+     Direction is read straight off .archive-entry--reverse, the same
+     class that already puts Architecture's text and photograph on
+     the right -- no separate data attribute needed. ~20px of total
+     travel per photograph, no easing/inertia of its own: the drift
+     value is a direct, linear function of scroll position each frame
+     (rAF-throttled, same pattern as every other scroll handler in
+     this file), so it reads as the photograph having a slight
+     physical presence on the page rather than as an animation.
+     Skipped entirely under prefers-reduced-motion, in which case
+     --archive-drift is simply never set and the CSS fallback (0px,
+     see .archive-entry-photo img in style.css) leaves the photos
+     static.
+     A companion exit-fade (--archive-fade) was tried 2026-09-24 and
+     removed 2026-09-25: it read as a conventional opacity animation
+     rather than a spatial exhibition handoff. The "recede / black
+     pause / emerge" rhythm now comes from the enlarged inter-entry
+     gap in css/style.css (real scroll distance, not a simulated
+     fade) -- this drift is the only motion left on these
+     photographs, unchanged and confirmed good. */
+  const archivePhotos = Array.from(document.querySelectorAll('.archive-entry-photo img')).map(img => ({
+    img,
+    // +1 = drifts upward over the scroll range (Street, Portrait/
+    // Editorial); -1 = drifts downward (Architecture).
+    dir: img.closest('.archive-entry--reverse') ? -1 : 1
+  }));
+  const reduceMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (archivePhotos.length && !reduceMotionMql.matches) {
+    const DRIFT_RANGE = 10; // px each way -- ~20px of total travel per photo
     const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
 
-    const HOLD = 0.15;
-    const RANGE = 0.74;
-    function presence(d) {
-      const ad = Math.abs(d);
-      if (ad >= RANGE) return 0;
-      if (ad <= HOLD) return 1;
-      const t = (ad - HOLD) / (RANGE - HOLD);
-      return 1 - smoothstep(t);
-    }
-
-    const FADE = 0.16;
-    function opacityFor(d) {
-      const ad = Math.abs(d);
-      if (ad >= RANGE) return 0;
-      const solidTo = RANGE - FADE;
-      if (ad <= solidTo) return 1;
-      const t = (ad - solidTo) / FADE;
-      return 1 - smoothstep(t);
-    }
-
-    function passBump(t) {
-      const at = Math.abs(t);
-      if (at <= 0 || at >= 1) return 0;
-      const peak = 0.34;
-      const rise = smoothstep(clamp01(at / peak));
-      const fall = 1 - smoothstep(clamp01((at - peak) / (1 - peak)));
-      return rise * fall;
-    }
-
-    function positionFor(off, d) {
-      const t = clampN(d, -1, 1);
-      if (t <= 0) {
-        const u = smoothstep(t + 1);
-        return { x: lerp(off.entry.x, off.home.x, u), y: lerp(off.entry.y, off.home.y, u) };
-      }
-      const u = smoothstep(t);
-      return { x: lerp(off.home.x, off.exit.x, u), y: lerp(off.home.y, off.exit.y, u) };
-    }
-
-    let wallWrapTop = 0;
-    let wallScrollable = 0;
-    function measureWall() {
-      const rect = wallStageWrap.getBoundingClientRect();
-      wallWrapTop = rect.top + window.scrollY;
-      wallScrollable = wallStageWrap.offsetHeight - window.innerHeight;
-    }
-
-    let wallCurrentActive = -1;
-    // Performance fix, 2026-09-09 (Tan: "why is it lagging"). The four
-    // source photographs are full-resolution photography (well beyond
-    // their on-screen display size), and re-running a brightness/
-    // saturate/blur filter on all four of them every single scroll
-    // frame -- including the two typically sitting fully out of range
-    // and invisible at any given moment -- is expensive work the
-    // browser was doing for nothing. Once a photo is fully outside
-    // RANGE (opacity 0, presence 0), its resting values never change
-    // frame-to-frame, so this writes that resting state ONCE and then
-    // skips all further work for it until it re-enters range. The
-    // values written are byte-identical to what the full computation
-    // would have produced (opacity 0, pointerEvents none, zIndex 0) --
-    // purely a perf fix, no change to the locked choreography itself.
-    const wallOffState = [false, false, false, false];
-    function renderWall() {
-      if (wallScrollable <= 0) return;
-      const raw = clamp01((window.scrollY - wallWrapTop) / wallScrollable);
-      const progress = raw * (N + 1) - 0.5;
-
-      wallPhotos.forEach((el, i) => {
-        const d = progress - i;
-        const p = presence(d);
-        const isOff = p === 0 && opacityFor(d) === 0;
-        if (isOff) {
-          if (!wallOffState[i]) {
-            el.style.opacity = '0';
-            el.style.pointerEvents = 'none';
-            el.style.zIndex = '0';
-            wallOffState[i] = true;
-          }
-          return;
-        }
-        wallOffState[i] = false;
-        const pos = positionFor(OFFSETS[i], d);
-        const t = clampN(d, -1, 1);
-        const scale = (0.44 + 0.56 * p) * (1 + 0.045 * passBump(t));
-        const bright = 0.42 + 0.58 * p;
-        const sat = 0.55 + 0.45 * p;
-        const blur = (1 - p) * 2.2;
-        el.style.transform =
-          `translate(-50%, -50%) translate(${pos.x}vw, ${pos.y}vh) scale(${scale}) rotate(${TILT[i]}deg)`;
-        el.style.opacity = String(opacityFor(d));
-        el.style.filter = `brightness(${bright}) saturate(${sat}) blur(${blur}px)`;
-        el.style.zIndex = String(Math.round(p * 100));
-        el.style.pointerEvents = p > 0.5 ? 'auto' : 'none';
+    function renderArchiveDrift() {
+      const vh = window.innerHeight;
+      archivePhotos.forEach(({ img, dir }) => {
+        const rect = img.getBoundingClientRect();
+        // Normalised by the photo's own full transit distance (viewport
+        // height + the photo's own height), so the drift covers the
+        // photo's entire time on screen evenly regardless of its height
+        // relative to the viewport -- 0 as it first enters from the
+        // bottom, 1 once it has fully exited the top, smooth and linear
+        // the whole way, never saturating early.
+        const total = vh + rect.height;
+        const progress = clampN((vh - rect.top) / total, 0, 1);
+        const drift = dir * (1 - 2 * progress) * DRIFT_RANGE;
+        img.style.setProperty('--archive-drift', drift.toFixed(1) + 'px');
       });
-
-      const lo = clampN(Math.floor(progress), 0, N - 1);
-      const hi = clampN(Math.ceil(progress), 0, N - 1);
-      const frac = clamp01(progress - lo);
-      const homeLo = OFFSETS[lo].home;
-      const homeHi = OFFSETS[hi].home;
-      const sx = lerp(homeLo.x, homeHi.x, smoothstep(frac));
-      const sy = lerp(homeLo.y, homeHi.y, smoothstep(frac));
-      if (spotlight) {
-        spotlight.style.background =
-          `radial-gradient(46vw 46vh at calc(50% + ${sx}vw) calc(50% + ${sy}vh), rgba(214,196,168,0.10) 0%, rgba(214,196,168,0.04) 38%, transparent 68%)`;
-      }
-
-      const activeIndex = clampN(Math.round(progress), 0, N - 1);
-      const dActive = progress - activeIndex;
-      const labelPresence = presence(dActive);
-      const labelOpacity = opacityFor(dActive);
-      if (activeIndex !== wallCurrentActive) {
-        wallCurrentActive = activeIndex;
-        const d = DATA[activeIndex];
-        labelNum.textContent = d.num;
-        labelTitle.textContent = d.title;
-        labelMood.textContent = d.mood;
-        progressCurrent.textContent = d.num;
-      }
-      labelEl.style.opacity = String(labelOpacity);
-      labelEl.style.transform = `translateY(${(1 - labelPresence) * 10}px)`;
     }
 
-    let wallTicking = false;
-    _wallScrollHandler = () => {
-      if (wallTicking) return;
-      wallTicking = true;
-      requestAnimationFrame(() => { renderWall(); wallTicking = false; });
+    let archiveDriftTicking = false;
+    _archiveDriftScrollHandler = () => {
+      if (archiveDriftTicking) return;
+      archiveDriftTicking = true;
+      requestAnimationFrame(() => { renderArchiveDrift(); archiveDriftTicking = false; });
     };
-    _wallResizeHandler = () => { measureWall(); renderWall(); };
-    window.addEventListener('scroll', _wallScrollHandler, { passive: true });
-    window.addEventListener('resize', _wallResizeHandler);
+    _archiveDriftResizeHandler = renderArchiveDrift;
+    window.addEventListener('scroll', _archiveDriftScrollHandler, { passive: true });
+    window.addEventListener('resize', _archiveDriftResizeHandler);
 
-    measureWall();
-    renderWall();
+    renderArchiveDrift();
   }
 
   /* ---- Superseded 2026-09-09 by Projects index v2 above ----

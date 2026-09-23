@@ -1339,127 +1339,219 @@ a.contact-value:hover{ color: var(--accent); }
 }
 
 /* ============================================================
-   Projects Index v2 — moving photographic wall
-   Integrated 2026-09-09 from prototype/projects-index-v2.css,
-   verbatim (per "PUSH LOCKED WORK TO GITHUB — PRODUCTION INTEGRATION
-   ONLY": the prototype is the source of truth, no redesign). One
-   continuous sticky stage; all sizing/transform/opacity/filter math
-   is driven per-frame by js/script.js from scroll position — nothing
-   below animates on its own. Photographs are matted prints at (near
-   enough) their natural aspect ratio, borrowing the same padded-mat +
-   shadow language the old .project-photo-frame used, at a size and
-   off-centre home position that alternates left/right per chapter.
-   ============================================================ */
-.wall-projects{
-  position: relative;
+   Projects — typographic archive
+   Replaces the "Projects Index v2" moving photographic wall above,
+   2026-09-09/23. Visual composition revised 2026-09-23 ("VISUAL
+   REDESIGN / ART DIRECTION") to give the photography visual
+   authority: larger images, three genuinely distinct spatial
+   compositions rather than one component repeated three times. No
+   sticky/pinned stage, no scroll-driven transform math, no
+   plaque/scrim/card around the photograph. Reveal timing reuses the
+   site's existing .reveal / .photo-presence IntersectionObserver
+   fades (defined above in this file) exactly as About,
+   Portrait/Editorial and Photo Retouching already do -- no new
+   animation system. (A scroll-tied photographic drift was
+   prototyped and then paused the same day, pending approval of this
+   static composition first -- see js/script.js.) */
+.projects-archive{
   background: var(--bg);
 }
-.wall-stage-wrap{
-  position: relative;
-  height: 500vh; /* 4 chapters + a half-unit of lead-in/out */
+.projects-archive .container{
+  display: flex;
+  flex-direction: column;
+  /* Opening padding trimmed to roughly half the closing value,
+     2026-09-24: Tan felt the Threshold's TANLEO_ mark was spending a
+     full visual beat re-introducing the brand before the photography
+     itself began. Closing padding-bottom is untouched -- this is
+     specifically about how soon Street's composition enters the
+     visitor's field after Threshold, not the section's overall
+     rhythm or negative-space philosophy. */
+  padding-top: clamp(3rem, 6vw, 4.5rem);
+  padding-bottom: clamp(6rem, 12vw, 9rem);
 }
-.wall-stage{
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--bg);
+.archive-entry{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-
-/* Soft tracking glow behind the photographs -- interpolated by JS
-   between the chapters straddling the current scroll position, so
-   the black field reads as a space with light moving through it
-   rather than flat webpage background. Pure CSS gradient, no canvas,
-   no particles. */
-.wall-spotlight{
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  mix-blend-mode: screen;
+/* Project typography is part of the printed layout: always visible,
+   never waiting on IntersectionObserver timing. .archive-entry carries
+   .reveal in the markup, and a parent's opacity composites over
+   everything inside it -- so its pre-state was hiding the number/
+   title/mood too. Pinned to its resting state here. (The photographs
+   are pinned the same way further down.) */
+.projects-archive .archive-entry.reveal,
+.projects-archive .archive-entry.reveal.pre{
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
-
-/* Matted print: padded frame + shadow, echoing the site's own
-   photograph-as-object language. transform/opacity/filter/z-index
-   are all set per-frame by js/script.js from scroll position --
-   nothing here animates on its own. Each .wall-photo is a real link
-   to its category page (see index.html) with pointer-events toggled
-   by script based on presence, so only the photograph currently at
-   or near full presence is actually clickable. */
-.wall-photo{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 2;
-  box-sizing: border-box;
-  overflow: hidden;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  padding: clamp(14px, 1.8vw, 30px);
-  box-shadow: 0 44px 100px -32px rgba(0,0,0,0.65);
-  will-change: transform, opacity, filter;
+/* The black breathing room between exhibited works -- an editorial
+   page turn, not an empty viewport. 2026-09-25: briefly 108vh (a full
+   blank screen, read as a broken page); reduced the same day to a
+   moderate, viewport-relative pause, uniform before every project. */
+.archive-entry + .archive-entry{
+  margin-top: 40vh;
 }
-.wall-photo img{
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
+.archive-entry-text{
+  /* Fixed rem cap rather than ch: ch is measured against the body's
+     own font size, which is far smaller than this component's own
+     display type, and at 30ch that under-measured cap was clipping
+     "Architecture" (single word, no break opportunity) right off the
+     edge of the viewport once it was right-aligned. 30rem comfortably
+     fits every current title on one line except "Portrait /
+     Editorial", which still wraps at the slash as intended. */
+  max-width: 30rem;
 }
-
-/* Uniform sizing -- 2026-09-09, per Tan: "the street and photo
-   retouching cover pages are the same crop size but the rest of the
-   two aren't. I want them all aligned and for them to be the same
-   crop size please." All four source photographs previously kept
-   their own native aspect-ratio inside object-fit:contain, which is
-   what produced the mismatch (Street/Retouching at 2:3, Architecture/
-   Portraits at 4:5, and none of the four actually sharing the same
-   box size either). One shared aspect-ratio and one shared height
-   clamp now apply to every chapter, with object-fit:cover (above)
-   doing the actual cropping to fill that box -- 4:5 chosen since it's
-   already the native ratio of two of the four photographs, so it's
-   the gentler crop of the two ratio families rather than forcing
-   everything to 2:3. The height clamp is the average of the four
-   previous per-chapter clamps, keeping overall photographic presence
-   the same as before this change. */
-.wall-photo[data-i]{ height: clamp(460px, 70vh, 780px); aspect-ratio: 4 / 5; }
-
-@media (max-width: 900px){
-  .wall-photo[data-i]{ height: clamp(355px, 55vh, 565px); }
-}
-
-/* ---------------- Exhibition label ----------------
-   Restrained wall-plaque reading order: number -> title -> a short
-   mood pair ("fleeting / oblique"), kept small and subordinate to the
-   photograph. A faint scrim behind it keeps it legible regardless of
-   which asymmetric photo position happens to sit nearby. */
-.wall-label{
-  position: absolute;
-  left: var(--page-pad);
-  bottom: clamp(2rem, 5.6vw, 3.1rem);
-  z-index: 500;
-  max-width: 26ch;
-  padding: 0.6rem 0.85rem 0.7rem;
-  background: rgba(10,9,8,0.38);
-  backdrop-filter: blur(6px);
-  pointer-events: none;
-}
-.wall-label-num{
-  display: block;
-  margin-bottom: 0.6rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
-  color: var(--text-faint);
-}
-.wall-label-title{
-  font-family: 'Fraunces', serif;
-  font-weight: 500;
+.archive-entry-text .eyebrow{ margin-bottom: 1rem; }
+.archive-entry-title{
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
   text-transform: uppercase;
-  font-size: clamp(1.3rem, 2.5vw, 1.9rem);
-  line-height: 1.02;
-  letter-spacing: 0.01em;
-  color: var(--text);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.6rem;
 }
+.archive-entry-text .wall-label-mood{ font-size: 0.85rem; }
+
+/* The photograph itself: no border, no shadow, no mat, no
+   background card -- just the image, large enough to lead the
+   composition (roughly half the viewport's width) but never
+   full-bleed, so the negative space around it stays part of the
+   design rather than being crowded out. */
+.archive-entry-photo{
+  display: block;
+  width: clamp(500px, 55vw, 860px);
+  /* Trimmed 2026-09-24, same opening-dead-space pass as the container
+     padding-top above. Architecture and Portrait/Editorial each carry
+     their own margin-top override below, so this base value is in
+     practice Street's alone -- now matching Architecture's existing
+     text-to-photograph distance rather than sitting nearly double it. */
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+.archive-entry-photo img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Photographic movement. Typography stays still -- only the
+   photographs move, and only by a few pixels, through the drift below.
+
+   No entrance animation: the photographs simply exist in their
+   composition. The <a> still carries .reveal/.photo-presence in the
+   markup (shared with About/Contact, untouched there), so it is
+   pinned to its resting state here -- no fade, no scale settle.
+   (A one-time 1.012 -> 1 scale + fade entrance was removed
+   2026-09-25.) */
+.projects-archive .archive-entry-photo.reveal,
+.projects-archive .archive-entry-photo.reveal.pre,
+.projects-archive .archive-entry-photo.reveal.in{
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* A continuous, very subtle vertical drift tied directly to
+   scroll position -- about 20px of total travel as each photograph
+   crosses the viewport, no easing/inertia of its own. Direction is
+   set per composition, not the same for every photo (see
+   js/script.js): Street and Portrait/Editorial drift upward,
+   Architecture drifts downward, so the sequence reads LEFT-up ->
+   RIGHT-down -> INSET-up rather than one identical effect applied
+   three times. --archive-drift is written by js/script.js and
+   defaults to 0px, so the photo sits still if JS never runs or
+   prefers-reduced-motion is set. Applied to the <img> itself. */
+.archive-entry-photo img{
+  transform: translateY(var(--archive-drift, 0px));
+  will-change: transform;
+  /* No mask, overlay, filter or gradient: the photographs render
+     exactly as supplied. (A top-edge mask-image was tried and removed
+     2026-09-25.) */
+}
+/* (A scroll-tied exit-fade was tried here 2026-09-24 and removed
+   2026-09-25 -- it read as a conventional opacity animation rather
+   than a spatial exhibition handoff. The enlarged inter-entry gap
+   above is what now creates the "recede / black pause / emerge"
+   rhythm, through real scroll distance rather than a simulated one.) */
+
+/* ---- Three distinct compositions, not one component repeated ----
+   01 Street (base, no modifier): text and photograph both anchored
+   left; the most generous text-to-photograph distance of the three
+   -- the sequence's opening, unhurried beat.
+   02 Architecture (.archive-entry--reverse): text and photograph
+   both shift right -- a genuine mirror, not just the photo moving,
+   so it reads as a deliberate counterpoint to Street -- with a
+   noticeably tighter text-to-photograph distance.
+   03 Portrait/Editorial (.archive-entry--center): text nudged
+   slightly inward rather than flush left, photograph inset from the
+   edge instead of flush (left/central, per the brief), run larger
+   and closer to its text than the other two -- the most intimate,
+   highest-tension pairing of the three, closing the sequence. */
+/* 2026-09-25: the shorter Street -> Architecture gap this override
+   used to add (from an earlier "Architecture felt too disconnected"
+   fix) is gone -- this pass explicitly wants a real, uniform black
+   pause before every project, Architecture included, so it now just
+   inherits the general inter-project gap above like Portrait/Editorial does.
+   Only the composition itself (text and photo shifted right) stays
+   scoped here. */
+.archive-entry.archive-entry--reverse{ align-items: flex-end; }
+.archive-entry--reverse .archive-entry-text{ text-align: right; }
+.archive-entry--reverse .archive-entry-photo{ margin-top: clamp(2.5rem, 5vw, 4rem); }
+
+.archive-entry--center .archive-entry-text{ margin-left: clamp(0.5rem, 3vw, 2rem); }
+.archive-entry--center .archive-entry-photo{
+  width: clamp(540px, 58vw, 920px);
+  margin-top: clamp(3rem, 6.5vw, 5rem);
+  margin-left: clamp(2rem, 9vw, 7rem);
+}
+
+@media (max-width: 700px){
+  .archive-entry-photo{ width: 100%; }
+  .archive-entry--reverse{ align-items: flex-start; }
+  .archive-entry--reverse .archive-entry-text{ text-align: left; }
+  .archive-entry--center .archive-entry-text{ margin-left: 0; }
+  .archive-entry--center .archive-entry-photo{ width: 100%; margin-left: 0; }
+}
+
+/* ---- Protected zone for the fixed side navigation ----
+   The fixed .side-nav (Home / Projects / About / Contact) occupies a
+   real column at the left edge of the viewport: measured at roughly
+   x 35-130px on desktop and x 14-88px at <=780px. Left-anchored
+   project content (Street, Portrait/Editorial) was scrolling straight
+   through that column. Solved with layout only -- .side-nav itself is
+   untouched, and nothing is pushed down vertically.
+   Desktop: the whole composition (text + photograph) starts clear of
+   the column, ~176px from the viewport edge at minimum. On wide
+   screens where the centred container already sits further in than
+   that, this resolves to the normal page padding and changes nothing.
+   Narrow screens (<=780px): only the typography is inset, so the
+   photograph can stay full-width and dominant. */
+@media (min-width: 781px){
+  .projects-archive .container{
+    padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1440px) / 2)));
+  }
+  /* Keeps the inset Portrait/Editorial photograph inside the page
+     just above the breakpoint (~781-800px), where the protected
+     zone leaves slightly less room than its minimum width + inset.
+     Has no effect at wider sizes. */
+  .archive-entry--center .archive-entry-photo{
+    max-width: calc(100% - clamp(2rem, 9vw, 7rem));
+  }
+}
+@media (max-width: 780px){
+  .archive-entry-text{ padding-left: 6rem; }
+}
+/* Narrow phones only: "ARCHITECTURE" is one unbreakable word, and at
+   the site's 2rem mobile minimum it is wider than the space left
+   beside the side-nav column on a 360-400px screen. Scaled down just
+   enough to fit there; unchanged at 2rem from ~430px up. */
+@media (max-width: 430px){
+  .archive-entry-title{ font-size: clamp(1.5rem, 7.4vw, 2rem); }
+}
+
+/* Shared mood-line typography -- relocated unchanged from the old
+   wall component. Also used by the Portrait/Editorial and Photo
+   Retouching homepage stages further down (see
+   .about-presence-caption .wall-label-mood below), so this stays in
+   place under its original class name rather than being renamed. */
 .wall-label-mood{
   font-family: 'Fraunces', serif;
   font-style: italic;
@@ -1467,24 +1559,6 @@ a.contact-value:hover{ color: var(--accent); }
   font-size: 0.8rem;
   letter-spacing: 0.03em;
   color: var(--text-dim);
-}
-
-/* ---------------- Progress ---------------- */
-.wall-progress{
-  position: absolute;
-  right: var(--page-pad);
-  bottom: clamp(2rem, 5.6vw, 3.1rem);
-  z-index: 500;
-  font-family: 'Fraunces', serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  color: var(--text-faint);
-  pointer-events: none;
-}
-.wall-progress-current{ color: var(--accent); }
-
-@media (prefers-reduced-motion: reduce){
-  .wall-photo{ transition: none; }
 }
 
 /* ============================================================
