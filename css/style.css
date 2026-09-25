@@ -1327,199 +1327,290 @@ a.contact-value:hover{ color: var(--accent); }
 }
 
 /* ============================================================
-   Projects — typographic archive
-   Replaces the "Projects Index v2" moving photographic wall above,
-   2026-09-09/23. Visual composition revised 2026-09-23 ("VISUAL
-   REDESIGN / ART DIRECTION") to give the photography visual
-   authority: larger images, three genuinely distinct spatial
-   compositions rather than one component repeated three times. No
-   sticky/pinned stage, no scroll-driven transform math, no
-   plaque/scrim/card around the photograph. Reveal timing reuses the
-   site's existing .reveal / .photo-presence IntersectionObserver
-   fades (defined above in this file) exactly as About,
-   Portrait/Editorial and Photo Retouching already do -- no new
-   animation system. (A scroll-tied photographic drift was
-   prototyped and then paused the same day, pending approval of this
-   static composition first -- see js/script.js.) */
+   Projects -- a small photographic exhibition (redesign 2026-09-25,
+   exhibition choreography pass)
+   Street, Architecture, Portrait / Editorial, Photo Retouching as one
+   sequence with a beginning, a development, a climax and a release --
+   not four blocks. Opened by one small label ("Selected Work", the
+   site's own .eyebrow) sitting on the same left line the final work
+   returns to.
+
+   System (identical for all four):
+   - title + mood directly above the photograph, left-aligned to its
+     edge, always the same distance from it (--label-h, --label-gap);
+     one type size for every title, one for every mood line;
+   - one 4:5 plate (object-fit: cover; no filter, overlay, blend or
+     opacity -- the photograph displays exactly as supplied). Portrait
+     / Editorial uses --plate-lg, the same 4:5 a size larger: the
+     human moment of the sequence. Plates are sized from the screen
+     height, so a held photograph always fits whole below its title.
+
+   Pacing (desktop, 1024px+, motion allowed) -- every hold is
+   position: sticky, every gap is plain layout, so the choreography
+   is carried by the page's own scrolling:
+   - Street arrives and is held, alone, for a long still stretch.
+   - Handoff 1, the spread: Architecture rises on the opposite side
+     while Street is still held; both then rest on the same top line,
+     like two pages of a book, for --spread of scroll; then Street is
+     released and leaves, and Architecture comes forward.
+     (Architecture's negative margin = Street's column height +
+     --spread, which is exactly what makes both hold together.)
+   - Handoff 2, silence: Architecture leaves completely, then a short
+     stretch of empty black before Portrait / Editorial rises from
+     the centre -- the tempo change. Its hold is the longest.
+   - Handoff 3, carry: Photo Retouching starts rising just after
+     Portrait / Editorial lifts away; it is held, then released.
+   - Release: a longer stretch of black after the final work before
+     the next section.
+   js/script.js eases every arrival and departure (so no plate ever
+   starts or stops abruptly) and adds the restrained sideways travel
+   and scale -- transform only.
+   Below 1024px the same sequence runs as a single column: holds
+   centred on screen, vertical travel only, same tempo changes.
+   With prefers-reduced-motion: no holds, no movement -- the same
+   compositions simply stacked.
+   Side navigation: everything starts clear of the fixed .side-nav
+   column (about 176px from the edge on desktop, 104px on phones).
+   ============================================================ */
 .projects-archive{
   background: var(--bg);
+  /* Nothing here may ever widen the page while it moves. (clip, not
+     hidden: it creates no scroll container, so sticky still works.) */
+  overflow-x: clip;
+  --spread: 16vh;
+  /* Pacing (see "Desktop pacing"): share of the full rise over which a
+     work arrives, and how much faster than the page it lifts away. 1 /
+     0 = exactly with the page (single column, unchanged). */
+  --arrive: 1;
+  --lift: 0;
+  --label-gap: 1.15rem;
+  --title-size: clamp(1.35rem, 2.6vw, 2.25rem);
+  --label-h: calc(var(--title-size) * 1.08 + 0.35rem + 0.85rem * 1.45);
+  /* Desktop geometry. 100cqi = the container's content width. */
+  --hold-top: calc(var(--nav-h) + 3vh);
+  --inset-street: clamp(0px, 2vw, 2rem);
+  --inset-arch: clamp(0px, 5vw, 5rem);
+  --inset-retouch: clamp(0px, 3vw, 3rem);
+  --avail: calc(100vh - var(--hold-top) - var(--label-h) - var(--label-gap) - 4vh);
+  --plate: min(calc(var(--avail) * 0.78), calc((100cqi - 6vw - var(--inset-street) - var(--inset-arch)) / 2), 760px);
+  --plate-lg: min(calc(var(--avail) * 0.8), 46cqi, 820px);
+  --col: calc(var(--label-h) + var(--label-gap) + var(--plate) * 1.25);
+  --col-lg: calc(var(--label-h) + var(--label-gap) + var(--plate-lg) * 1.25);
 }
 .projects-archive .container{
+  max-width: 1760px;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  /* Opening padding trimmed to roughly half the closing value,
-     2026-09-24: Tan felt the Threshold's TANLEO_ mark was spending a
-     full visual beat re-introducing the brand before the photography
-     itself began. Closing padding-bottom is untouched -- this is
-     specifically about how soon Street's composition enters the
-     visitor's field after Threshold, not the section's overall
-     rhythm or negative-space philosophy. */
   padding-top: clamp(3rem, 6vw, 4.5rem);
   padding-bottom: clamp(6rem, 12vw, 9rem);
 }
-.archive-entry{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-/* Project typography is part of the printed layout: always visible,
-   never waiting on IntersectionObserver timing. .archive-entry carries
-   .reveal in the markup, and a parent's opacity composites over
-   everything inside it -- so its pre-state was hiding the number/
-   title/mood too. Pinned to its resting state here. (The photographs
-   are pinned the same way further down.) */
-.projects-archive .archive-entry.reveal,
-.projects-archive .archive-entry.reveal.pre{
-  opacity: 1;
-  transform: none;
-  transition: none;
-}
-/* The black breathing room between exhibited works -- an editorial
-   page turn, not an empty viewport. 2026-09-25: briefly 108vh (a full
-   blank screen, read as a broken page); reduced the same day to a
-   moderate, viewport-relative pause, uniform before every project. */
-.archive-entry + .archive-entry{
-  margin-top: 40vh;
-}
-.archive-entry-text{
-  /* Fixed rem cap rather than ch: ch is measured against the body's
-     own font size, which is far smaller than this component's own
-     display type, and at 30ch that under-measured cap was clipping
-     "Architecture" (single word, no break opportunity) right off the
-     edge of the viewport once it was right-aligned. 30rem comfortably
-     fits every current title on one line except "Portrait /
-     Editorial", which still wraps at the slash as intended. */
-  max-width: 30rem;
-}
-.archive-entry-title{
-  font-size: clamp(2rem, 4.2vw, 3.4rem);
-  text-transform: uppercase;
-  margin: 0 0 0.6rem;
-}
-.archive-entry-text .wall-label-mood{ font-size: 0.85rem; }
-
-/* The photograph itself: no border, no shadow, no mat, no
-   background card -- just the image, large enough to lead the
-   composition (roughly half the viewport's width) but never
-   full-bleed, so the negative space around it stays part of the
-   design rather than being crowded out. */
-.archive-entry-photo{
-  display: block;
-  width: clamp(500px, 55vw, 860px);
-  /* Trimmed 2026-09-24, same opening-dead-space pass as the container
-     padding-top above. Architecture and Portrait/Editorial each carry
-     their own margin-top override below, so this base value is in
-     practice Street's alone -- now matching Architecture's existing
-     text-to-photograph distance rather than sitting nearly double it. */
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-}
-.archive-entry-photo img{
-  width: 100%;
-  height: auto;
-  display: block;
-  /* One shared 4:5 frame for every homepage project photograph (Street,
-     Architecture, and the Portrait / Editorial section below), so the
-     source file's own proportions never decide the displayed size.
-     object-fit: cover crops to the frame, centred; the photographs
-     themselves are untouched. Width is the shared clamp on
-     .archive-entry-photo above (100% at <=700px). */
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-}
-
-/* Photographic movement. Typography stays still -- only the
-   photographs move, and only by a few pixels, through the drift below.
-
-   No entrance animation: the photographs simply exist in their
-   composition. The <a> still carries .reveal/.photo-presence in the
-   markup (shared with About/Contact, untouched there), so it is
-   pinned to its resting state here -- no fade, no scale settle.
-   (A one-time 1.012 -> 1 scale + fade entrance was removed
-   2026-09-25.) */
-.projects-archive .archive-entry-photo.reveal,
-.projects-archive .archive-entry-photo.reveal.pre,
-.projects-archive .archive-entry-photo.reveal.in{
-  opacity: 1;
-  transform: none;
-  transition: none;
-}
-
-/* A continuous, very subtle vertical drift tied directly to
-   scroll position -- about 20px of total travel as each photograph
-   crosses the viewport, no easing/inertia of its own. Direction is
-   set per composition, not the same for every photo (see
-   js/script.js): Street and Portrait/Editorial drift upward,
-   Architecture drifts downward, so the sequence reads LEFT-up ->
-   RIGHT-down -> INSET-up rather than one identical effect applied
-   three times. --archive-drift is written by js/script.js and
-   defaults to 0px, so the photo sits still if JS never runs or
-   prefers-reduced-motion is set. Applied to the <img> itself. */
-.archive-entry-photo img{
-  transform: translateY(var(--archive-drift, 0px));
-  will-change: transform;
-  /* No mask, overlay, filter or gradient: the photographs render
-     exactly as supplied. (A top-edge mask-image was tried and removed
-     2026-09-25.) */
-}
-/* (A scroll-tied exit-fade was tried here 2026-09-24 and removed
-   2026-09-25 -- it read as a conventional opacity animation rather
-   than a spatial exhibition handoff. The enlarged inter-entry gap
-   above is what now creates the "recede / black pause / emerge"
-   rhythm, through real scroll distance rather than a simulated one.) */
-
-/* ---- Two distinct compositions, not one component repeated ----
-   01 Street (base, no modifier): text and photograph both anchored
-   left -- the sequence's opening, unhurried beat.
-   02 Architecture (.archive-entry--reverse): text and photograph
-   both shift right -- a genuine mirror, not just the photo moving,
-   so it reads as a deliberate counterpoint to Street.
-   (A third entry, 03 Portrait/Editorial, was removed 2026-09-25: its
-   photograph belongs to the Street body of work. The homepage's own
-   Portrait/Editorial section follows Projects directly.) */
-/* 2026-09-25: the shorter Street -> Architecture gap this override
-   used to add (from an earlier "Architecture felt too disconnected"
-   fix) is gone -- this pass explicitly wants a real, uniform black
-   pause before every project, Architecture included, so it now just
-   inherits the general inter-project gap above.
-   Only the composition itself (text and photo shifted right) stays
-   scoped here. */
-.archive-entry.archive-entry--reverse{ align-items: flex-end; }
-.archive-entry--reverse .archive-entry-text{ text-align: right; }
-.archive-entry--reverse .archive-entry-photo{ margin-top: clamp(2.5rem, 5vw, 4rem); }
-
-@media (max-width: 700px){
-  .archive-entry-photo{ width: 100%; }
-  .archive-entry--reverse{ align-items: flex-start; }
-  .archive-entry--reverse .archive-entry-text{ text-align: left; }
-}
-
-/* ---- Protected zone for the fixed side navigation ----
-   The fixed .side-nav (Home / Projects / About / Contact) occupies a
-   real column at the left edge of the viewport: measured at roughly
-   x 35-130px on desktop and x 14-88px at <=780px. Left-anchored
-   project content (Street) was scrolling straight
-   through that column. Solved with layout only -- .side-nav itself is
-   untouched, and nothing is pushed down vertically.
-   Desktop: the whole composition (text + photograph) starts clear of
-   the column, ~176px from the viewport edge at minimum. On wide
-   screens where the centred container already sits further in than
-   that, this resolves to the normal page padding and changes nothing.
-   Narrow screens (<=780px): only the typography is inset, so the
-   photograph can stay full-width and dominant. */
 @media (min-width: 781px){
   .projects-archive .container{
-    padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1440px) / 2)));
+    padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1760px) / 2)));
   }
 }
-@media (max-width: 780px){
-  .archive-entry-text{ padding-left: 6rem; }
+
+/* The opening label: an exhibition label, not a heading. */
+.archive-opening{
+  margin: 0 0 clamp(4rem, 12vh, 7rem);
 }
-/* Narrow phones only: "ARCHITECTURE" is one unbreakable word, and at
-   the site's 2rem mobile minimum it is wider than the space left
-   beside the side-nav column on a 360-400px screen. Scaled down just
-   enough to fit there; unchanged at 2rem from ~430px up. */
-@media (max-width: 430px){
-  .archive-entry-title{ font-size: clamp(1.5rem, 7.4vw, 2rem); }
+
+.archive-entry{ position: relative; }
+.archive-entry-inner{
+  display: flex;
+  flex-direction: column;
+  gap: var(--label-gap);
+}
+.archive-entry-text{
+  width: var(--plate);
+  max-width: 100%;
+  height: var(--label-h);
+  /* Bottom-aligned, so the mood line always sits exactly --label-gap
+     above its photograph. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Moves only with its photograph (script); never fades. */
+  transform: translate3d(var(--text-x, 0px), var(--text-y, 0px), 0);
+}
+/* One type size for every project title, one for every mood line. */
+.archive-entry-title{
+  /* Never wider than the plate it names: on small plates every title
+     steps down together (the longest, PORTRAIT / EDITORIAL, sets it). */
+  font-size: min(var(--title-size), calc(var(--plate-lg) * 0.082));
+  line-height: 1.08;
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin: 0 0 0.35rem;
+}
+.archive-entry-text .wall-label-mood{
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* The plate: identical 4:5 frame for every photograph. */
+.archive-entry-photo{
+  display: block;
+  flex: none;
+  width: var(--plate);
+  aspect-ratio: 4 / 5;
+  /* min-height: 0 lets the 4:5 ratio win over the image's own
+     intrinsic height when the plate is a flex item. */
+  min-height: 0;
+  overflow: hidden;
+  transform: translate3d(var(--plate-x, 0px), var(--plate-y, 0px), 0) scale(var(--plate-s, 1));
+  transform-origin: top left;
+  will-change: transform;
+}
+/* At rest the photograph is exactly object-fit: cover in its frame.
+   Only while a plate is arriving does the script let the photograph
+   sit a few percent larger inside its frame and travel slightly
+   against it, so the frame seems to open onto the photograph rather
+   than slide it in; both settle to exactly 1 and 0 on arrival. */
+.archive-entry-photo img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translate3d(var(--img-x, 0px), var(--img-y, 0px), 0) scale(var(--img-s, 1));
+}
+/* Scale anchors: each plate grows from / recedes toward its own side. */
+.archive-entry--street .archive-entry-photo{ transform-origin: top right; }
+.archive-entry--portrait .archive-entry-photo{ transform-origin: top center; }
+
+/* ---- Desktop placement ----
+   Street right-weighted, Architecture left-weighted (set further in
+   than Street is from its edge), Portrait / Editorial on the centre
+   line, Photo Retouching back on the left, on the opening label's
+   line. */
+@media (min-width: 1024px){
+  .archive-opening{ padding-left: var(--inset-retouch); }
+  .archive-entry--street .archive-entry-inner{ align-items: flex-end; padding-right: var(--inset-street); }
+  .archive-entry--architecture .archive-entry-inner{ align-items: flex-start; padding-left: var(--inset-arch); }
+  .archive-entry--portrait .archive-entry-inner{ align-items: center; }
+  .archive-entry--portrait .archive-entry-photo,
+  .archive-entry--portrait .archive-entry-text{ width: var(--plate-lg); }
+  .archive-entry--retouching .archive-entry-inner{ align-items: flex-start; padding-left: var(--inset-retouch); }
+}
+
+/* ---- Desktop pacing ----
+   Each work still travels the full height of the screen to arrive and
+   to leave, but over a little less of the page: it arrives over 72% of
+   the scroll a full-speed rise would take (Portrait / Editorial 84%,
+   so it stays the slowest), and once released lifts away up to 1.5x
+   the page's speed (js/script.js reads --arrive / --lift). The holds,
+   the spread and the two breaths below are then pure layout:
+     --solo-*   : held entirely on its own
+     --silence  : the empty breath before Portrait / Editorial
+     --breath   : the empty breath after Photo Retouching
+   --depart = the scroll it takes a released work to clear the top of
+   the screen. */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference){
+  .projects-archive{
+    --arrive: 0.72;
+    --lift: 0.5;
+    --rise: calc(100vh - var(--hold-top));
+    --arrive-d: calc(var(--rise) * var(--arrive));
+    --arrive-d-portrait: calc(var(--rise) * 0.84);
+    --depart: calc((var(--col) + var(--hold-top) - var(--nav-h)) / (1 + var(--lift)));
+    --solo-street: 20vh;
+    --solo-arch: 24vh;
+    --silence: 17vh;
+    --breath: 14vh;
+  }
+  .archive-opening{ margin-bottom: 16vh; }
+  .archive-entry-inner{
+    position: sticky;
+    top: var(--hold-top);
+  }
+  .archive-entry::after{
+    content: "";
+    display: block;
+    height: var(--hold);
+  }
+  /* Street: held alone, then Architecture's rise, then the spread. */
+  .archive-entry--street{ --hold: calc(var(--solo-street) + var(--arrive-d) + var(--spread)); }
+  /* Architecture: the spread, Street leaving, then held alone. */
+  .archive-entry--architecture{
+    margin-top: calc(-1 * (var(--col) + var(--spread)));
+    --hold: calc(var(--spread) + var(--depart) + var(--solo-arch));
+  }
+  /* Portrait / Editorial: rises only once Architecture has gone and
+     --silence of empty black has passed; the longest hold. */
+  .archive-entry--portrait{
+    margin-top: calc(var(--arrive-d-portrait) + var(--depart) - var(--col) + var(--silence));
+    --hold: 44vh;
+  }
+  /* Photo Retouching: starts rising just after Portrait / Editorial
+     is released. */
+  .archive-entry--retouching{
+    margin-top: calc(var(--arrive-d) - var(--col-lg) + 10vh);
+    --hold: 28vh;
+  }
+  /* The release: Photo Retouching clears the screen, --breath of
+     black, then About. */
+  .projects-archive .container{ padding-bottom: calc(100vh - var(--hold-top) + var(--depart) - var(--col) + var(--breath)); }
+}
+/* Desktop without motion: the same compositions, simply stacked. */
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce){
+  .archive-entry + .archive-entry{ margin-top: clamp(4rem, 10vh, 7rem); }
+}
+
+/* ---- Single column (below 1024px) ----
+   One plate size for all four, sized to fit whole on screen below its
+   title; alternating alignment, Portrait / Editorial on the centre
+   line. */
+@media (max-width: 1023px){
+  .projects-archive{
+    --avail: calc(100svh - var(--nav-h) - 48px - var(--label-h) - var(--label-gap));
+    --plate: min(100cqi, 30rem, calc(var(--avail) * 0.8));
+    --plate-lg: var(--plate);
+    --hold-top: max(calc(var(--nav-h) + 12px), calc((100svh - var(--col)) / 2));
+  }
+  .archive-entry--street .archive-entry-inner{ align-items: flex-end; }
+  .archive-entry--portrait .archive-entry-inner{ align-items: center; }
+}
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference){
+  .archive-opening{ margin-bottom: 24vh; }
+  .archive-entry-inner{
+    position: sticky;
+    top: var(--hold-top);
+  }
+  .archive-entry::after{
+    content: "";
+    display: block;
+    height: var(--hold);
+  }
+  .archive-entry--street{ --hold: 30vh; }
+  /* Architecture rises as Street is released: the two share the
+     screen as one lifts and the other arrives. */
+  .archive-entry--architecture{
+    margin-top: calc(100svh - var(--hold-top) - var(--col) + 3vh);
+    --hold: 30vh;
+  }
+  /* The same silence before Portrait / Editorial, the longest hold. */
+  .archive-entry--portrait{
+    margin-top: calc(100svh - var(--nav-h) - 2vh);
+    --hold: 50vh;
+  }
+  .archive-entry--retouching{
+    margin-top: calc(100svh - var(--hold-top) - var(--col) + 3vh);
+    --hold: 26vh;
+  }
+  /* The release: Photo Retouching clears the screen, a short breath
+     of black, then About. */
+  .projects-archive .container{ padding-bottom: calc(100svh - var(--nav-h) + 15vh); }
+}
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce){
+  .archive-entry--architecture{ margin-top: clamp(3rem, 10vw, 5rem); }
+  .archive-entry--portrait{ margin-top: clamp(4.5rem, 16vw, 7.5rem); }
+  .archive-entry--retouching{ margin-top: clamp(3rem, 12vw, 5.5rem); }
+}
+/* Phones: the fixed side navigation occupies x 14-88px, so the whole
+   project column starts at 104px and nothing ever sits beneath it. */
+@media (max-width: 780px){
+  .projects-archive .container{ padding-left: max(var(--page-pad), 6.5rem); }
 }
 
 /* Shared mood-line typography -- relocated unchanged from the old
@@ -1794,78 +1885,10 @@ a.contact-value:hover{ color: var(--accent); }
    just needs breathing room above it -- everything else here is the
    existing grid, gap and responsive stacking, untouched. */
 .about-presence-caption .wall-label-mood{ margin-top: 1rem; }
-.retouch-lead{
-  margin-top: 1.6rem;
-  max-width: 34ch;
-  color: var(--text-dim);
-  font-size: 1rem;
-  line-height: 1.65;
-}
 .about-presence-caption .quiet-link{ margin-top: 1.8rem; }
 @media (max-width: 800px){
   .about-presence{ grid-template-columns: 1fr; }
   .about-presence-media{ aspect-ratio: 5 / 4; }
-  /* Mobile overlap fix (2026-09-23). #retouch is the one section in
-     this family whose caption sits first in the grid (see the DOM
-     order in index.html) -- Portraits and About lead with the photo,
-     so at mobile widths their first on-screen pixels are the image,
-     never the text. Retouch's text was landing directly under the
-     fixed header (84px) + fixed side nav (bottom edge measured at
-     209px from viewport top, both position:fixed and unaffected by
-     scroll), because .about-presence's own mobile padding-top (96px,
-     the clamp's floor) clears neither. This overrides padding-top
-     for #retouch only -- not .about-presence, so Portraits/About are
-     untouched -- to 240px, clearing the nav with a small margin.
-     padding-bottom, the grid, the image, the copy, and every internal
-     gap between the eyebrow/heading/mood/lead/link are untouched --
-     this only moves where the block as a whole starts. Desktop is
-     unaffected: this rule only exists inside this media query. */
-  #retouch{ padding-top: 240px; }
-}
-
-/* ---- Portrait / Editorial homepage section: typography first ----
-   2026-09-25. Same composition language as the Projects entries --
-   title and mood line above, photograph below -- instead of the
-   shared .about-presence side-by-side grid. Scoped to #portraits only:
-   About and Photo Retouching keep .about-presence exactly as it is.
-   The markup order (caption before media) carries the "text first"
-   order; this only switches the layout from grid to a single column.
-   Photograph frame: identical to the Projects photographs -- same
-   width rule as .archive-entry-photo (clamp(500px, 55vw, 860px), 100%
-   at <=700px) and the same 4:5 ratio at every width (overriding the
-   shared 5:4 mobile ratio, for this section only). Unchanged: the
-   photograph itself, the heading's type scale, and the section's own
-   top/bottom padding (so the space after Architecture is unchanged).
-   Left edge and side-nav clearance match .projects-archive exactly, so
-   this section shares Street's left axis and never runs under the
-   fixed .side-nav column (see "Protected zone" above). */
-#portraits.about-presence{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-  max-width: 1440px;
-}
-#portraits .about-presence-caption{ max-width: 30rem; }
-#portraits .about-presence-media,
-#portraits.about-presence .about-presence-media{
-  width: clamp(500px, 55vw, 860px);
-  aspect-ratio: 4 / 5;
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-}
-@media (min-width: 781px){
-  #portraits.about-presence{
-    padding-left: max(var(--page-pad), calc(11rem - max(0px, (100vw - 1440px) / 2)));
-  }
-}
-@media (max-width: 800px){
-  #portraits.about-presence .about-presence-media{ aspect-ratio: 4 / 5; }
-}
-@media (max-width: 700px){
-  #portraits.about-presence .about-presence-media{ width: 100%; }
-}
-@media (max-width: 780px){
-  #portraits .about-presence-caption{ padding-left: 6rem; }
 }
 
 .about-statement-wrap{ padding: clamp(1rem, 3vw, 2rem) var(--page-pad) clamp(3rem, 6vw, 4.5rem); }

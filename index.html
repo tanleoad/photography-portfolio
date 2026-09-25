@@ -162,115 +162,87 @@
 </section>
 
 <!-- ============================================================
-     PROJECTS INDEX — moving photographic wall (Projects v2)
-     Integrated 2026-09-09 from prototype/projects-index-v2 per Tan's
-     explicit approval and "PUSH LOCKED WORK TO GITHUB — PRODUCTION
-     INTEGRATION ONLY" instruction: no redesign, the prototype is the
-     source of truth. Replaces the earlier "Threshold + Case-Study
-     Depth" four-stacked-thresholds layout (678f012 onward) with a
-     single sticky stage: one continuous scroll-driven field where all
-     four photographs are always present, each threaded so its exit
-     hands off cleanly to the next chapter's entry (see the OFFSETS
-     chain in js/script.js). Choreography constants — HOLD=.15,
-     RANGE=.74, FADE=.16, the +4.5% passBump on mid-transit scale — are
-     unchanged from the locked prototype, copied verbatim, not
-     retuned.
-     One addition beyond the prototype, needed only because the
-     prototype was an isolated, non-navigable preview: each
-     .wall-photo is an anchor element, not a plain div, carrying the
-     same real destination and aria-label the old .project-photo-mat links used,
-     so the site's actual navigation function (clicking a photograph
-     to reach its category page) is preserved. data-morph-id is
-     likewise carried over unchanged, for the same future Flip-morph
-     hook noted on the old markup. Photo Retouching (retouching.html)
-     is still a standalone document that bypasses Taxi entirely
-     (isStandaloneCorridor in js/script.js) — unchanged, per Tan's "do
-     not restructure Beauty Archive" instruction; the Beauty Archive
-     corridor itself is untouched by this integration.
-     The superseded .projects-index/.project-threshold/--proximity CSS
-     (css/style.css) and its matching JS block (js/script.js) are left
-     in place, inert — nothing in the page references those selectors
-     anymore, so they no longer run, but they were not part of this
-     integration's scope and are left for Tan to decide whether to
-     remove later.
+     PROJECTS — a small photographic exhibition (redesign 2026-09-25,
+     exhibition choreography pass)
+     One exhibition of four bodies of work, opened by a single small
+     label: Street, Architecture, Portrait / Editorial, Photo
+     Retouching. Portrait / Editorial and Photo Retouching used to be
+     separate homepage sections; they live here now and keep their old
+     ids (#portraits, #retouch) so existing links (e.g. portraits.html
+     -> index.html#portraits) still land.
+     Each entry is the same information -- title, mood, photograph --
+     in the same 4:5 plate. The pacing between them is deliberately
+     not the same (css/style.css "Projects -- a small photographic
+     exhibition"; js/script.js "Projects archive: exhibition
+     choreography"). Per entry:
+       data-enter  = x,y px the plate travels from as it arrives
+       data-exit   = x,y px it drifts toward as it leaves
+       data-scale  = its size at the start of its arrival, and the
+                     size it recedes to as it leaves
+       data-recede = (Street) size and sideways drift as the next work
+                     rises beside it
+       data-closer = (Architecture) size it comes forward to as the
+                     previous work lifts away
+       data-ease   = "slow": a slower, softer arrival (Portrait)
+       data-arrive = (Portrait) share of the full rise its arrival
+                     takes on desktop -- more than the others'
+                     (css/style.css --arrive-d-portrait matches it)
+     Only real destinations are links: Street -> street.html,
+     Photo Retouching -> retouching.html (Beauty Archive).
      ============================================================ -->
 <section class="projects-archive" id="projects">
   <div class="container">
 
-    <article class="archive-entry reveal">
-      <div class="archive-entry-text">
-        <h2 class="archive-entry-title">Street</h2>
-        <p class="wall-label-mood">fleeting / oblique</p>
+    <p class="eyebrow archive-opening">Selected Work</p>
+
+    <article class="archive-entry archive-entry--street" data-enter="80,0" data-exit="40,-40" data-scale="0.92,0.96" data-recede="0.96,16">
+      <div class="archive-entry-inner">
+        <div class="archive-entry-text">
+          <h2 class="archive-entry-title">Street</h2>
+          <p class="wall-label-mood">fleeting / oblique</p>
+        </div>
+        <a class="archive-entry-photo" href="street.html" aria-label="View Street">
+          <img src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
+        </a>
       </div>
-      <a class="archive-entry-photo reveal photo-presence" href="street.html" aria-label="View Street">
-        <img src="images/corniche-beach-skyline.jpg" alt="Figures along the Corniche with the Abu Dhabi skyline behind" width="1600" height="2400" loading="lazy">
-      </a>
     </article>
 
-    <article class="archive-entry archive-entry--reverse reveal">
-      <div class="archive-entry-text">
-        <h2 class="archive-entry-title">Architecture</h2>
-        <p class="wall-label-mood">light / structure</p>
+    <article class="archive-entry archive-entry--architecture" data-enter="-72,0" data-exit="-32,-40" data-scale="0.92,0.94" data-closer="1.03">
+      <div class="archive-entry-inner">
+        <div class="archive-entry-text">
+          <h2 class="archive-entry-title">Architecture</h2>
+          <p class="wall-label-mood">light / structure</p>
+        </div>
+        <div class="archive-entry-photo">
+          <img src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" width="1600" height="2000" loading="lazy">
+        </div>
       </div>
-      <a class="archive-entry-photo reveal photo-presence" href="architecture.html" aria-label="View Architecture">
-        <img src="images/badshahi-mosque.jpg" alt="Badshahi Mosque studied for the way light moves through its arches" width="1600" height="2000" loading="lazy">
-      </a>
     </article>
 
-  </div>
-</section>
+    <article class="archive-entry archive-entry--portrait" id="portraits" data-enter="0,0" data-exit="0,-56" data-scale="0.94,0.97" data-ease="slow" data-arrive="0.84">
+      <div class="archive-entry-inner">
+        <div class="archive-entry-text">
+          <h2 class="archive-entry-title">Portrait / Editorial</h2>
+          <p class="wall-label-mood">held / unhurried</p>
+        </div>
+        <div class="archive-entry-photo">
+          <img src="images/After 1.JPG" alt="Editorial portrait in black fashion styling" width="2124" height="3188" loading="lazy">
+        </div>
+      </div>
+    </article>
 
-<!-- ============================================================
-     PORTRAIT / EDITORIAL (homepage restructuring, 2026-09-23)
-     New homepage stage requested in the brief: Portrait/Editorial gets
-     its own held moment on the homepage rather than living only as
-     one of the four wall photographs. Reuses the exact .about-presence
-     pattern already established below for About (same grid, same
-     .reveal/.photo-presence classes, zero new CSS) so this introduces
-     no new visual language. Copy is not invented: the eyebrow number,
-     title and mood line are the same "03 / Portraits / held /
-     unhurried" already written into the wall's own DATA array in
-     js/script.js -- copy is not invented. Photo: approved 2026-09-23
-     (After 1.JPG), replacing the wall's double-exposure-portrait.jpg
-     so this section reads as its own visual moment rather than a
-     repeat of the wall photo. -->
-<section class="about-presence" id="portraits">
-  <div class="about-presence-caption reveal">
-    <h1>Portrait / Editorial</h1>
-    <p class="wall-label-mood">held / unhurried</p>
-  </div>
-  <div class="about-presence-media reveal photo-presence">
-    <img src="images/After 1.JPG" alt="Editorial portrait in black fashion styling" width="2124" height="3188" loading="lazy">
-  </div>
-</section>
+    <article class="archive-entry archive-entry--retouching" id="retouch" data-enter="-64,0" data-exit="0,0" data-scale="0.92,1">
+      <div class="archive-entry-inner">
+        <div class="archive-entry-text">
+          <h2 class="archive-entry-title">Photo Retouching</h2>
+          <p class="wall-label-mood">careful / restrained</p>
+        </div>
+        <a class="archive-entry-photo" href="retouching.html" aria-label="Enter the Beauty Archive">
+          <img src="images/After 4.JPG" alt="Editorial beauty portrait highlighting skin, makeup and facial detail" width="2839" height="4259" loading="lazy">
+        </a>
+      </div>
+    </article>
 
-<!-- ============================================================
-     PHOTO RETOUCHING — doorway into The Beauty Archive
-     (homepage restructuring, 2026-09-23)
-     Same .about-presence pattern again, mirrored only in that the
-     caption sits in the first grid column this time so the section
-     reads as an entry point rather than a repeat of the beat above --
-     no new CSS, this is the same two-column grid taking its two
-     children in the other order. Eyebrow/title/mood are, again, the
-     wall's own existing "04 / Photo Retouching / careful / restrained"
-     copy, and the framing line is close to verbatim from the brief
-     itself ("the same eye that photographs the image also shapes the
-     final image"). The Beauty Archive itself (retouching.html) is a
-     separate, already-built WebGL experience and is not touched here
-     -- this section only links into it. Photo: approved 2026-09-23
-     (After 4.JPG), replacing the wall's
-     beauty-archive-warmth-shadow-depth.jpg with a current, film-
-     inspired retouching image so the section represents the present
-     Tanleo Retouch direction rather than an older wall photo. -->
-<section class="about-presence retouch-presence" id="retouch">
-  <div class="about-presence-caption reveal">
-    <h1>Photo Retouching</h1>
-    <p class="wall-label-mood">careful / restrained</p>
-    <p class="retouch-lead reveal">The same eye that photographs the image also shapes the final image.</p>
-    <a href="retouching.html" class="quiet-link">Enter The Beauty Archive <span>&rarr;</span></a>
-  </div>
-  <div class="about-presence-media reveal photo-presence">
-    <img src="images/After 4.JPG" alt="Editorial beauty portrait highlighting skin, makeup and facial detail" width="2839" height="4259" loading="lazy">
   </div>
 </section>
 

@@ -266,84 +266,179 @@ function initPageContent() {
     }, 6000);
   }
 
-  /* ---- Projects index v2 (moving photographic wall) -- removed ----
-     Removed 2026-09-23, replaced by a plain-document-flow typographic
-     archive section in index.html / css/style.css (see "Projects --
-     typographic archive" in style.css). The old sticky 500vh stage
-     and its per-frame multi-property choreography (position, scale,
-     brightness, saturation, blur, z-index and pointer-events on 4
-     stacked photos at once) are gone entirely. The new Projects
-     entries reveal using the site's existing .reveal / .photo-presence
-     IntersectionObserver system above (unchanged), exactly like
-     About, Portrait/Editorial and Photo Retouching already do -- see
-     the much smaller, directional motion block directly below for
-     the one thing added back on top of that. */
-
-  /* ---- Projects archive: directional photographic drift ----
-     Added 2026-09-23, round 2 ("do NOT add generic parallax"). Not
-     one identical effect applied to both photographs -- each
-     composition gets its own drift direction, matching the visual
-     rhythm of the layout itself (see css/style.css): Street (the left
-     composition) drifts upward, Architecture (the right/mirrored
-     composition) drifts downward.
-     Direction is read straight off .archive-entry--reverse, the same
-     class that already puts Architecture's text and photograph on
-     the right -- no separate data attribute needed. ~20px of total
-     travel per photograph, no easing/inertia of its own: the drift
-     value is a direct, linear function of scroll position each frame
-     (rAF-throttled, same pattern as every other scroll handler in
-     this file), so it reads as the photograph having a slight
-     physical presence on the page rather than as an animation.
-     Skipped entirely under prefers-reduced-motion, in which case
-     --archive-drift is simply never set and the CSS fallback (0px,
-     see .archive-entry-photo img in style.css) leaves the photos
-     static.
-     A companion exit-fade (--archive-fade) was tried 2026-09-24 and
-     removed 2026-09-25: it read as a conventional opacity animation
-     rather than a spatial exhibition handoff. The "recede / black
-     pause / emerge" rhythm now comes from the enlarged inter-entry
-     gap in css/style.css (real scroll distance, not a simulated
-     fade) -- this drift is the only motion left on these
-     photographs, unchanged and confirmed good. */
-  const archivePhotos = Array.from(document.querySelectorAll('.archive-entry-photo img')).map(img => ({
-    img,
-    // +1 = drifts upward over the scroll range (Street);
-    // -1 = drifts downward (Architecture).
-    dir: img.closest('.archive-entry--reverse') ? -1 : 1
-  }));
+  /* ---- Projects archive: exhibition choreography (redesign 2026-09-25) ----
+     Every value is a direct function of scroll position, computed in a
+     rAF-throttled scroll handler: nothing runs on a timer, nothing plays
+     by itself -- stop scrolling and the exhibition stops with you. The
+     holds, the spread and the silences are CSS (position: sticky and
+     plain layout, see css/style.css "Projects -- a small photographic
+     exhibition"); this adds, per entry, measured from the entry's
+     untransformed layout:
+       ARRIVAL  -- the column (title + photograph together) is eased
+                   into its held position: it starts slowly, and comes
+                   to rest instead of stopping dead where sticky
+                   catches it. Portrait / Editorial (data-ease="slow")
+                   uses a softer curve, so it rises more quietly and
+                   settles longer. On desktop the rise takes a set share
+                   of a full-page scroll (css --arrive, 72%; Portrait
+                   data-arrive 84%): it enters at the page's own speed
+                   and eases to rest. Meanwhile the plate travels in from
+                   its side (data-enter, desktop only) and grows from
+                   its first data-scale value to full size; inside the
+                   frame the photograph starts a few percent larger and
+                   travels slightly against the frame, so the frame
+                   seems to open onto it. The title travels with the
+                   plate at a little over half its speed and settles
+                   into alignment with the plate's edge exactly as the
+                   photograph comes to rest.
+       HOLD     -- nothing moves.
+       HANDOFFS -- Street (data-recede) recedes a touch and gives way
+                   sideways as Architecture rises beside it; the two
+                   then rest on one line together. Architecture
+                   (data-closer) comes forward slightly as Street lifts
+                   away, into the space Street leaves.
+       DEPARTURE-- released, the column lifts off gently (it does not
+                   jump to scroll speed; on desktop it eases up to 1.5x
+                   the page's speed, css --lift), drifts toward data-exit and
+                   recedes to its second data-scale value. The title
+                   stays with its photograph throughout.
+     Below 1024px: no sideways travel (half the drift on phones).
+     Position and scale only -- the photograph's colours are never
+     touched (no opacity, filter, blend). Skipped entirely under
+     prefers-reduced-motion. */
+  const archiveEntries = Array.from(document.querySelectorAll('.archive-entry')).map(entry => {
+    const list = (v, d) => ((v || d).split(',').map(Number));
+    const [ex, ey] = list(entry.dataset.enter, '0,0');
+    const [xx, xy] = list(entry.dataset.exit, '0,0');
+    const [s0, sx] = list(entry.dataset.scale, '1,1');
+    const [rs, rx] = list(entry.dataset.recede, '1,0');
+    return {
+      entry,
+      inner: entry.querySelector('.archive-entry-inner'),
+      plate: entry.querySelector('.archive-entry-photo'),
+      text: entry.querySelector('.archive-entry-text'),
+      img: entry.querySelector('.archive-entry-photo img'),
+      ex, ey, xx, xy, s0, sx, rs, rx,
+      closer: parseFloat(entry.dataset.closer) || 1,
+      slow: entry.dataset.ease === 'slow',
+      arrive: parseFloat(entry.dataset.arrive) || 0,
+      T: 0, sticky: false, w: 0, h: 0, ox: 0
+    };
+  }).filter(e => e.inner && e.plate && e.text);
   const reduceMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (archivePhotos.length && !reduceMotionMql.matches) {
-    const DRIFT_RANGE = 10; // px each way -- ~20px of total travel per photo
-    const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  if (archiveEntries.length && !reduceMotionMql.matches) {
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const clampN = (v, m) => Math.max(-m, Math.min(m, v));
+    const smooth = t => t * t * (3 - 2 * t);
+    const smoother = t => t * t * t * (t * (t * 6 - 15) + 10);
+    // Desktop arrival curve over a shortened rise (c < 1): enters at
+    // exactly the page's speed, eases to rest with no jolt.
+    const arrivalCurve = c => t => c * t + (3 - 2 * c) * t * t + (c - 2) * t * t * t;
+    const archiveSection = document.querySelector('.projects-archive');
+    let arriveShare = 1, liftK = 0;
 
-    function renderArchiveDrift() {
-      const vh = window.innerHeight;
-      archivePhotos.forEach(({ img, dir }) => {
-        const rect = img.getBoundingClientRect();
-        // Normalised by the photo's own full transit distance (viewport
-        // height + the photo's own height), so the drift covers the
-        // photo's entire time on screen evenly regardless of its height
-        // relative to the viewport -- 0 as it first enters from the
-        // bottom, 1 once it has fully exited the top, smooth and linear
-        // the whole way, never saturating early.
-        const total = vh + rect.height;
-        const progress = clampN((vh - rect.top) / total, 0, 1);
-        const drift = dir * (1 - 2 * progress) * DRIFT_RANGE;
-        img.style.setProperty('--archive-drift', drift.toFixed(1) + 'px');
+    // Static measurements: only change on resize.
+    function measureArchive() {
+      if (archiveSection) {
+        const cs = getComputedStyle(archiveSection);
+        arriveShare = parseFloat(cs.getPropertyValue('--arrive')) || 1;
+        liftK = parseFloat(cs.getPropertyValue('--lift')) || 0;
+      }
+      archiveEntries.forEach(e => {
+        e.c = arriveShare < 1 ? (e.arrive || arriveShare) : 1;
+        e.ease = e.c < 1 ? arrivalCurve(e.c) : (e.slow ? smoother : smooth);
+        const cs = getComputedStyle(e.inner);
+        e.sticky = cs.position === 'sticky';
+        e.T = e.sticky ? parseFloat(cs.top) : window.innerHeight * 0.2;
+        e.I = e.inner.offsetHeight;
+        e.w = e.plate.offsetWidth;
+        e.h = e.plate.offsetHeight;
+        e.ox = parseFloat(getComputedStyle(e.plate).transformOrigin) || 0;
       });
     }
 
-    let archiveDriftTicking = false;
+    function renderArchiveChoreography() {
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const kx = vw >= 1024 ? Math.min(1, vw / 1440) : 0;
+      const ky = vw <= 780 ? 0.5 : 1;
+      const R = vh * 0.5; // distance over which a released column lifts off
+
+      // Read everything first...
+      const st = archiveEntries.map(e => {
+        const a = e.entry.getBoundingClientRect();
+        // The column's layout top (sticky: held at T inside its entry).
+        const Y = e.sticky ? Math.min(Math.max(a.top, e.T), a.bottom - e.I) : a.top;
+        const d = Math.max(1, e.c * (vh - e.T));                  // arrival distance
+        const p = clamp01((e.T + d - a.top) / d);                 // arrival
+        const q = Math.max(0, e.T - Y);                           // px since release
+        return { a, p, d, E: e.ease(p), q };
+      });
+
+      // ...then write.
+      archiveEntries.forEach((e, i) => {
+        const { a, p, d, E, q } = st[i];
+        // Arrival: eased path from the bottom of the screen to T. Until
+        // the arrival begins, the column waits just below the screen.
+        const arrive = a.top <= e.T ? 0
+          : a.top > e.T + d ? Math.max(0, vh - a.top)
+          : (vh - (vh - e.T) * E) - a.top;
+        // Departure: lifts off from rest, easing up to (1 + liftK) x
+        // the page's speed over R.
+        const u = clamp01(q / R);
+        const depart = q > 0
+          ? R * u * (1 - u) * (1 - u) - liftK * (q - R * (u - u * u / 2))
+          : 0;
+        const t = smooth(clamp01(q / Math.max(1, e.I * 0.8)));
+
+        const next = st[i + 1];
+        const rn = (e.rs !== 1 || e.rx) && next ? next.E : 0;
+        const prev = st[i - 1];
+        const cp = e.closer !== 1 && prev ? smooth(clamp01(prev.q / R)) : 0;
+
+        const s = (e.s0 + (1 - e.s0) * E)
+          * (1 - (1 - e.rs) * rn)
+          * (1 + (e.closer - 1) * cp)
+          * (1 - (1 - e.sx) * t);
+        const xArrive = kx * e.ex * (1 - E);
+        const x = xArrive + kx * (e.rx * rn + e.xx * t);
+        const y = arrive + depart + ky * (e.ey * (1 - E) + e.xy * t);
+
+        // The title follows the plate's left edge: at 55% while the
+        // photograph arrives, exactly once it has.
+        const edge = x + (1 - s) * e.ox;
+        const tx = edge * (p < 1 ? 0.55 : 1);
+
+        // The frame opening onto the photograph (arrival only).
+        const is = 1 + 0.06 * (1 - E);
+        const ix = clampN(-0.3 * xArrive, (is - 1) * e.w / 2);
+        const iy = clampN(-0.3 * arrive, (is - 1) * e.h / 2);
+
+        e.plate.style.setProperty('--plate-x', x.toFixed(1) + 'px');
+        e.plate.style.setProperty('--plate-y', y.toFixed(1) + 'px');
+        e.plate.style.setProperty('--plate-s', s.toFixed(4));
+        e.text.style.setProperty('--text-x', tx.toFixed(1) + 'px');
+        e.text.style.setProperty('--text-y', y.toFixed(1) + 'px');
+        if (e.img) {
+          e.img.style.setProperty('--img-x', ix.toFixed(1) + 'px');
+          e.img.style.setProperty('--img-y', iy.toFixed(1) + 'px');
+          e.img.style.setProperty('--img-s', is.toFixed(4));
+        }
+      });
+    }
+
+    let archiveTicking = false;
     _archiveDriftScrollHandler = () => {
-      if (archiveDriftTicking) return;
-      archiveDriftTicking = true;
-      requestAnimationFrame(() => { renderArchiveDrift(); archiveDriftTicking = false; });
+      if (archiveTicking) return;
+      archiveTicking = true;
+      requestAnimationFrame(() => { renderArchiveChoreography(); archiveTicking = false; });
     };
-    _archiveDriftResizeHandler = renderArchiveDrift;
+    _archiveDriftResizeHandler = () => { measureArchive(); renderArchiveChoreography(); };
     window.addEventListener('scroll', _archiveDriftScrollHandler, { passive: true });
     window.addEventListener('resize', _archiveDriftResizeHandler);
 
-    renderArchiveDrift();
+    measureArchive();
+    renderArchiveChoreography();
   }
 
   /* ---- Superseded 2026-09-09 by Projects index v2 above ----
