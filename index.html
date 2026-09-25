@@ -171,22 +171,20 @@
      ids (#portraits, #retouch) so existing links (e.g. portraits.html
      -> index.html#portraits) still land.
      Each entry is the same information -- title, mood, photograph --
-     in the same 4:5 plate. The pacing between them is deliberately
-     not the same (css/style.css "Projects -- a small photographic
-     exhibition"; js/script.js "Projects archive: exhibition
-     choreography"). Per entry:
+     in the same 4:5 plate, and all four move by the same rules: each
+     work rises in beside the one before while it is still held, the
+     two rest together briefly, the earlier one lifts away and the new
+     one holds; only the length of each hold differs (css/style.css
+     "Projects -- a small photographic exhibition"; js/script.js
+     "Projects archive: exhibition choreography"). Per entry:
        data-enter  = x,y px the plate travels from as it arrives
        data-exit   = x,y px it drifts toward as it leaves
        data-scale  = its size at the start of its arrival, and the
                      size it recedes to as it leaves
-       data-recede = (Street) size and sideways drift as the next work
-                     rises beside it
-       data-closer = (Architecture) size it comes forward to as the
-                     previous work lifts away
-       data-ease   = "slow": a slower, softer arrival (Portrait)
-       data-arrive = (Portrait) share of the full rise its arrival
-                     takes on desktop -- more than the others'
-                     (css/style.css --arrive-d-portrait matches it)
+       data-recede = size and sideways drift as the next work rises
+                     beside it (every work that has a successor)
+       data-closer = size it comes forward to as the previous work
+                     lifts away (every work that has a predecessor)
      Only real destinations are links: Street -> street.html,
      Photo Retouching -> retouching.html (Beauty Archive).
      ============================================================ -->
@@ -207,7 +205,7 @@
       </div>
     </article>
 
-    <article class="archive-entry archive-entry--architecture" data-enter="-72,0" data-exit="-32,-40" data-scale="0.92,0.94" data-closer="1.03">
+    <article class="archive-entry archive-entry--architecture" data-enter="-72,0" data-exit="-32,-40" data-scale="0.92,0.96" data-recede="0.96,-16" data-closer="1.03">
       <div class="archive-entry-inner">
         <div class="archive-entry-text">
           <h2 class="archive-entry-title">Architecture</h2>
@@ -219,7 +217,7 @@
       </div>
     </article>
 
-    <article class="archive-entry archive-entry--portrait" id="portraits" data-enter="0,0" data-exit="0,-56" data-scale="0.94,0.97" data-ease="slow" data-arrive="0.84">
+    <article class="archive-entry archive-entry--portrait" id="portraits" data-enter="80,0" data-exit="40,-40" data-scale="0.92,0.96" data-recede="0.96,16" data-closer="1.03">
       <div class="archive-entry-inner">
         <div class="archive-entry-text">
           <h2 class="archive-entry-title">Portrait / Editorial</h2>
@@ -231,7 +229,7 @@
       </div>
     </article>
 
-    <article class="archive-entry archive-entry--retouching" id="retouch" data-enter="-64,0" data-exit="0,0" data-scale="0.92,1">
+    <article class="archive-entry archive-entry--retouching" id="retouch" data-enter="-72,0" data-exit="-32,-40" data-scale="0.92,0.92" data-closer="1.03">
       <div class="archive-entry-inner">
         <div class="archive-entry-text">
           <h2 class="archive-entry-title">Photo Retouching</h2>

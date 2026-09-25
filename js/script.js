@@ -270,19 +270,18 @@ function initPageContent() {
      Every value is a direct function of scroll position, computed in a
      rAF-throttled scroll handler: nothing runs on a timer, nothing plays
      by itself -- stop scrolling and the exhibition stops with you. The
-     holds, the spread and the silences are CSS (position: sticky and
+     holds and the spreads are CSS (position: sticky and
      plain layout, see css/style.css "Projects -- a small photographic
      exhibition"); this adds, per entry, measured from the entry's
      untransformed layout:
        ARRIVAL  -- the column (title + photograph together) is eased
                    into its held position: it starts slowly, and comes
                    to rest instead of stopping dead where sticky
-                   catches it. Portrait / Editorial (data-ease="slow")
-                   uses a softer curve, so it rises more quietly and
-                   settles longer. On desktop the rise takes a set share
-                   of a full-page scroll (css --arrive, 72%; Portrait
-                   data-arrive 84%): it enters at the page's own speed
-                   and eases to rest. Meanwhile the plate travels in from
+                   catches it. On desktop the rise takes a set share of
+                   a full-page scroll (css --arrive, 72%; the same for
+                   all four): it enters at the page's own speed and
+                   eases to rest. (data-ease / data-arrive can override
+                   this per entry; no entry currently does.) Meanwhile the plate travels in from
                    its side (data-enter, desktop only) and grows from
                    its first data-scale value to full size; inside the
                    frame the photograph starts a few percent larger and
@@ -292,11 +291,12 @@ function initPageContent() {
                    into alignment with the plate's edge exactly as the
                    photograph comes to rest.
        HOLD     -- nothing moves.
-       HANDOFFS -- Street (data-recede) recedes a touch and gives way
-                   sideways as Architecture rises beside it; the two
-                   then rest on one line together. Architecture
-                   (data-closer) comes forward slightly as Street lifts
-                   away, into the space Street leaves.
+       HANDOFFS -- the same at every handoff: the held work
+                   (data-recede) recedes a touch and gives way sideways
+                   as the next rises beside it; the two then rest on
+                   one line together. The new work (data-closer) comes
+                   forward slightly as the earlier one lifts away, into
+                   the space it leaves.
        DEPARTURE-- released, the column lifts off gently (it does not
                    jump to scroll speed; on desktop it eases up to 1.5x
                    the page's speed, css --lift), drifts toward data-exit and
@@ -354,6 +354,8 @@ function initPageContent() {
         e.w = e.plate.offsetWidth;
         e.h = e.plate.offsetHeight;
         e.ox = parseFloat(getComputedStyle(e.plate).transformOrigin) || 0;
+        // The most a held plate may grow and still fit whole on screen.
+        e.room = (window.innerHeight - e.T - (e.I - e.h) - 12) / Math.max(1, e.h);
       });
     }
 
@@ -396,10 +398,12 @@ function initPageContent() {
         const prev = st[i - 1];
         const cp = e.closer !== 1 && prev ? smooth(clamp01(prev.q / R)) : 0;
 
-        const s = (e.s0 + (1 - e.s0) * E)
-          * (1 - (1 - e.rs) * rn)
-          * (1 + (e.closer - 1) * cp)
-          * (1 - (1 - e.sx) * t);
+        const s = Math.min(
+          (e.s0 + (1 - e.s0) * E)
+            * (1 - (1 - e.rs) * rn)
+            * (1 + (e.closer - 1) * cp)
+            * (1 - (1 - e.sx) * t),
+          Math.max(1, e.room));
         const xArrive = kx * e.ex * (1 - E);
         const x = xArrive + kx * (e.rx * rn + e.xx * t);
         const y = arrive + depart + ky * (e.ey * (1 - E) + e.xy * t);

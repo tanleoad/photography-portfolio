@@ -1347,21 +1347,19 @@ a.contact-value:hover{ color: var(--accent); }
 
    Pacing (desktop, 1024px+, motion allowed) -- every hold is
    position: sticky, every gap is plain layout, so the choreography
-   is carried by the page's own scrolling:
-   - Street arrives and is held, alone, for a long still stretch.
-   - Handoff 1, the spread: Architecture rises on the opposite side
-     while Street is still held; both then rest on the same top line,
-     like two pages of a book, for --spread of scroll; then Street is
-     released and leaves, and Architecture comes forward.
-     (Architecture's negative margin = Street's column height +
-     --spread, which is exactly what makes both hold together.)
-   - Handoff 2, silence: Architecture leaves completely, then a short
-     stretch of empty black before Portrait / Editorial rises from
-     the centre -- the tempo change. Its hold is the longest.
-   - Handoff 3, carry: Photo Retouching starts rising just after
-     Portrait / Editorial lifts away; it is held, then released.
-   - Release: a longer stretch of black after the final work before
-     the next section.
+   is carried by the page's own scrolling. One rule for all four
+   works (A enters -> B enters -> A + B -> A leaves -> B holds ...):
+   - each work after Street rises on the opposite side while the one
+     before is still held; both then rest on the same top line, like
+     two pages of a book, for --spread of scroll; then the earlier one
+     is released and lifts away, and the new one comes forward and is
+     held alone. (Each entry's negative margin = the previous column's
+     height + --spread, which is exactly what makes both hold together.)
+   - Street right, Architecture left, Portrait / Editorial right,
+     Photo Retouching left, so each pair always shares the view side
+     by side. Portrait / Editorial's hold is the longest.
+   - Release: Photo Retouching lifts away, a short breath of black,
+     then the next section.
    js/script.js eases every arrival and departure (so no plate ever
    starts or stops abruptly) and adds the restrained sideways travel
    and scale -- transform only.
@@ -1476,19 +1474,19 @@ a.contact-value:hover{ color: var(--accent); }
   transform: translate3d(var(--img-x, 0px), var(--img-y, 0px), 0) scale(var(--img-s, 1));
 }
 /* Scale anchors: each plate grows from / recedes toward its own side. */
-.archive-entry--street .archive-entry-photo{ transform-origin: top right; }
-.archive-entry--portrait .archive-entry-photo{ transform-origin: top center; }
+.archive-entry--street .archive-entry-photo,
+.archive-entry--portrait .archive-entry-photo{ transform-origin: top right; }
 
 /* ---- Desktop placement ----
    Street right-weighted, Architecture left-weighted (set further in
-   than Street is from its edge), Portrait / Editorial on the centre
-   line, Photo Retouching back on the left, on the opening label's
-   line. */
+   than Street is from its edge), Portrait / Editorial right-weighted
+   on Street's line, Photo Retouching back on the left, on the opening
+   label's line. */
 @media (min-width: 1024px){
   .archive-opening{ padding-left: var(--inset-retouch); }
   .archive-entry--street .archive-entry-inner{ align-items: flex-end; padding-right: var(--inset-street); }
   .archive-entry--architecture .archive-entry-inner{ align-items: flex-start; padding-left: var(--inset-arch); }
-  .archive-entry--portrait .archive-entry-inner{ align-items: center; }
+  .archive-entry--portrait .archive-entry-inner{ align-items: flex-end; padding-right: var(--inset-street); }
   .archive-entry--portrait .archive-entry-photo,
   .archive-entry--portrait .archive-entry-text{ width: var(--plate-lg); }
   .archive-entry--retouching .archive-entry-inner{ align-items: flex-start; padding-left: var(--inset-retouch); }
@@ -1497,26 +1495,29 @@ a.contact-value:hover{ color: var(--accent); }
 /* ---- Desktop pacing ----
    Each work still travels the full height of the screen to arrive and
    to leave, but over a little less of the page: it arrives over 72% of
-   the scroll a full-speed rise would take (Portrait / Editorial 84%,
-   so it stays the slowest), and once released lifts away up to 1.5x
-   the page's speed (js/script.js reads --arrive / --lift). The holds,
-   the spread and the two breaths below are then pure layout:
+   the scroll a full-speed rise would take, and once released lifts
+   away up to 1.5x the page's speed (js/script.js reads --arrive /
+   --lift). The same for all four. The holds, the spreads and the
+   final breath below are then pure layout:
      --solo-*   : held entirely on its own
-     --silence  : the empty breath before Portrait / Editorial
      --breath   : the empty breath after Photo Retouching
-   --depart = the scroll it takes a released work to clear the top of
-   the screen. */
+   --depart / --depart-lg = the scroll it takes a released work (a
+   standard / the larger Portrait plate) to clear the top of the
+   screen. A work's hold = the spread with the one before + that
+   work's departure + its solo + the next work's rise + the spread
+   with it. */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference){
   .projects-archive{
     --arrive: 0.72;
     --lift: 0.5;
     --rise: calc(100vh - var(--hold-top));
     --arrive-d: calc(var(--rise) * var(--arrive));
-    --arrive-d-portrait: calc(var(--rise) * 0.84);
     --depart: calc((var(--col) + var(--hold-top) - var(--nav-h)) / (1 + var(--lift)));
+    --depart-lg: calc((var(--col-lg) + var(--hold-top) - var(--nav-h)) / (1 + var(--lift)));
     --solo-street: 20vh;
     --solo-arch: 24vh;
-    --silence: 17vh;
+    --solo-portrait: 44vh;
+    --solo-retouch: 28vh;
     --breath: 14vh;
   }
   .archive-opening{ margin-bottom: 16vh; }
@@ -1531,22 +1532,22 @@ a.contact-value:hover{ color: var(--accent); }
   }
   /* Street: held alone, then Architecture's rise, then the spread. */
   .archive-entry--street{ --hold: calc(var(--solo-street) + var(--arrive-d) + var(--spread)); }
-  /* Architecture: the spread, Street leaving, then held alone. */
+  /* Architecture: the spread, Street leaving, held alone, then
+     Portrait / Editorial's rise and the spread with it. */
   .archive-entry--architecture{
     margin-top: calc(-1 * (var(--col) + var(--spread)));
-    --hold: calc(var(--spread) + var(--depart) + var(--solo-arch));
+    --hold: calc(var(--spread) + var(--depart) + var(--solo-arch) + var(--arrive-d) + var(--spread));
   }
-  /* Portrait / Editorial: rises only once Architecture has gone and
-     --silence of empty black has passed; the longest hold. */
+  /* Portrait / Editorial: the same, with the longest hold. */
   .archive-entry--portrait{
-    margin-top: calc(var(--arrive-d-portrait) + var(--depart) - var(--col) + var(--silence));
-    --hold: 44vh;
+    margin-top: calc(-1 * (var(--col) + var(--spread)));
+    --hold: calc(var(--spread) + var(--depart) + var(--solo-portrait) + var(--arrive-d) + var(--spread));
   }
-  /* Photo Retouching: starts rising just after Portrait / Editorial
-     is released. */
+  /* Photo Retouching: the spread, Portrait / Editorial leaving, held
+     alone. */
   .archive-entry--retouching{
-    margin-top: calc(var(--arrive-d) - var(--col-lg) + 10vh);
-    --hold: 28vh;
+    margin-top: calc(-1 * (var(--col-lg) + var(--spread)));
+    --hold: calc(var(--spread) + var(--depart-lg) + var(--solo-retouch));
   }
   /* The release: Photo Retouching clears the screen, --breath of
      black, then About. */
@@ -1559,8 +1560,7 @@ a.contact-value:hover{ color: var(--accent); }
 
 /* ---- Single column (below 1024px) ----
    One plate size for all four, sized to fit whole on screen below its
-   title; alternating alignment, Portrait / Editorial on the centre
-   line. */
+   title; alternating alignment. */
 @media (max-width: 1023px){
   .projects-archive{
     --avail: calc(100svh - var(--nav-h) - 48px - var(--label-h) - var(--label-gap));
@@ -1568,8 +1568,8 @@ a.contact-value:hover{ color: var(--accent); }
     --plate-lg: var(--plate);
     --hold-top: max(calc(var(--nav-h) + 12px), calc((100svh - var(--col)) / 2));
   }
-  .archive-entry--street .archive-entry-inner{ align-items: flex-end; }
-  .archive-entry--portrait .archive-entry-inner{ align-items: center; }
+  .archive-entry--street .archive-entry-inner,
+  .archive-entry--portrait .archive-entry-inner{ align-items: flex-end; }
 }
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference){
   .archive-opening{ margin-bottom: 24vh; }
@@ -1582,20 +1582,26 @@ a.contact-value:hover{ color: var(--accent); }
     display: block;
     height: var(--hold);
   }
-  .archive-entry--street{ --hold: 30vh; }
-  /* Architecture rises as Street is released: the two share the
-     screen as one lifts and the other arrives. */
-  .archive-entry--architecture{
-    margin-top: calc(100svh - var(--hold-top) - var(--col) + 3vh);
-    --hold: 30vh;
+  /* One rule for all four, as on desktop: each work starts rising
+     below the one before while it is still held (--coexist of scroll
+     ahead of its release), the earlier one lifts away and the new one
+     holds. --coexist is added to each hold, so every work keeps the
+     same time on its own. Portrait / Editorial's hold is the longest. */
+  .projects-archive{
+    --gap-next: 14vh;
+    --coexist: calc(100svh - var(--hold-top) - var(--col) - var(--gap-next));
   }
-  /* The same silence before Portrait / Editorial, the longest hold. */
+  .archive-entry--street{ --hold: calc(30vh + var(--coexist)); }
+  .archive-entry--architecture{
+    margin-top: var(--gap-next);
+    --hold: calc(30vh + var(--coexist));
+  }
   .archive-entry--portrait{
-    margin-top: calc(100svh - var(--nav-h) - 2vh);
-    --hold: 50vh;
+    margin-top: var(--gap-next);
+    --hold: calc(50vh + var(--coexist));
   }
   .archive-entry--retouching{
-    margin-top: calc(100svh - var(--hold-top) - var(--col) + 3vh);
+    margin-top: var(--gap-next);
     --hold: 26vh;
   }
   /* The release: Photo Retouching clears the screen, a short breath
