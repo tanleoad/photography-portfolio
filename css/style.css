@@ -54,68 +54,76 @@ body{
    was removed 2026-09-25: it sat on top of every photograph and
    altered the displayed colour of the supplied images.) */
 
-/* ---------------- Site-wide: camera cursor + shutter flash ----------------
-   Added 2026-09-08. Desktop/fine-pointer only (see js/script.js,
-   initCameraCursor) -- a small black camera glyph replaces the native
-   cursor and a brief shutter-flash answers a click on anything
-   actually interactive, giving the whole site one small, recognizable
-   Tanleo signature without touching any existing visual system. Both
-   elements are created once, outside [data-taxi-view], so they
-   persist untouched across every Taxi transition -- js/script.js only
-   ever repositions/animates them, never recreates them.
-   Above the grain overlay (z-index 9999) and everything else on the
-   page on purpose -- a cursor that a photo or the nav could cover
-   would defeat the point of it. */
+/* ---------------- Site-wide: focus-frame cursor ----------------
+   2026-09-25. Replaces the earlier camera-icon cursor + shutter-flash
+   (added 2026-09-08, removed the same day as this). Desktop/fine-
+   pointer only (see js/script.js, initFocusCursor) -- four thin,
+   unfilled corner brackets standing in for the native pointer, reading
+   as "framing/focusing" rather than a literal camera or lens glyph.
+   No fill, no centre mark, no shadow/glow, and the only motion is a
+   quiet size change: small and restrained on the page at large,
+   expanding ~12% when the pointer is over an actual photograph (any
+   <img>, or any element with an inline background-image -- the two
+   patterns this site's photographs are always built from) and easing
+   straight back down the moment it isn't. No click reaction of any
+   kind. Created once, outside [data-taxi-view], so it persists
+   untouched across every Taxi transition -- js/script.js only ever
+   repositions/rescales it, never recreates it. Above everything else
+   on the page (z-index 10000) on purpose, same reasoning as before:
+   a cursor a photo or the nav could cover would defeat the point. */
 .site-cursor{
   position: fixed;
   top: 0; left: 0;
   z-index: 10000;
-  width: 16px; height: 16px;
+  width: 18px; height: 18px;
   pointer-events: none;
   opacity: 0;
   /* js/script.js sets this transform directly on every pointermove
      with no CSS transition on it, so tracking is immediate and 1:1
-     with the real cursor rather than lagging or easing toward it.
-     Only opacity (shown/hidden at the viewport edge) animates here --
-     the cursor itself has no separate click/press state; the shutter
-     flash below is the one and only click response. */
+     with the real cursor -- quiet and precise, never lagging or
+     easing toward it. Only opacity (shown/hidden at the viewport
+     edge) animates at this level; the size change below lives one
+     level in, on .site-cursor-frame, so it can transition on its own
+     without fighting the instant position updates here. */
   transform: translate(-50%,-50%);
-  filter: drop-shadow(0 0 1px rgba(243,240,233,0.55)) drop-shadow(0 1px 2px rgba(0,0,0,0.35));
   transition: opacity 0.2s ease;
   will-change: transform;
 }
-.site-cursor svg{ display:block; width:100%; height:100%; }
+.site-cursor-frame{
+  display: block;
+  width: 100%; height: 100%;
+  transform: scale(1);
+  transform-origin: 50% 50%;
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.site-cursor.is-photo .site-cursor-frame{ transform: scale(1.12); }
+.site-cursor svg{ display:block; width:100%; height:100%; overflow: visible; }
+.site-cursor path{
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.5;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+}
 
 /* Native cursor is hidden only once JS confirms a fine (mouse-like)
    pointer -- touch devices never get this class, so the "restore
    native cursor on mobile" requirement needs nothing extra here.
    Editable text fields keep the native text-beam cursor throughout;
    everything else defers entirely to .site-cursor above. */
-html.has-camera-cursor,
-html.has-camera-cursor *{ cursor: none; }
-html.has-camera-cursor input[type="text"],
-html.has-camera-cursor input[type="email"],
-html.has-camera-cursor input[type="tel"],
-html.has-camera-cursor input[type="search"],
-html.has-camera-cursor input[type="url"],
-html.has-camera-cursor input[type="password"],
-html.has-camera-cursor textarea,
-html.has-camera-cursor [contenteditable]{ cursor: text; }
+html.has-custom-cursor,
+html.has-custom-cursor *{ cursor: none; }
+html.has-custom-cursor input[type="text"],
+html.has-custom-cursor input[type="email"],
+html.has-custom-cursor input[type="tel"],
+html.has-custom-cursor input[type="search"],
+html.has-custom-cursor input[type="url"],
+html.has-custom-cursor input[type="password"],
+html.has-custom-cursor textarea,
+html.has-custom-cursor [contenteditable]{ cursor: text; }
 
-.site-cursor-flash{
-  position: fixed;
-  top: 0; left: 0;
-  z-index: 10000;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(circle, rgba(243,240,233,0.95) 0%, rgba(243,240,233,0.35) 55%, rgba(243,240,233,0) 78%);
-  mix-blend-mode: screen;
-  will-change: opacity, transform;
-}
 @media (pointer: coarse), (hover: none){
-  .site-cursor, .site-cursor-flash{ display:none; }
+  .site-cursor{ display:none; }
 }
 
 /* display:block/max-width keep images from ever overflowing their
@@ -492,24 +500,60 @@ body.intro-active{ overflow:hidden; }
   position:absolute; inset: -3%;
   background-size: cover;
   background-position: center;
-  animation: cheroZoom 26s ease-in-out infinite alternate;
+  /* The continuous ambient cheroZoom keyframe animation (scale 1 -> 1.07
+     over 26s, infinite alternate) was removed 2026-09-25 at Tan's direct
+     request: the hero photograph must stay completely still while the
+     visitor is simply sitting on the hero, whether or not the cursor is
+     moving. The inset:-3% above is kept -- it's the same bleed margin
+     the five story layers also carry (see .chero-media .story-media
+     below), unrelated to the removed zoom, still needed so this base
+     layer's own opacity fade never exposes an edge. Only the five
+     approved LIGHT/PEOPLE/MOTION/STILLNESS/COLOUR transitions (below)
+     may still move/scale the hero photography. */
   opacity: 1;
   transition: opacity 1s ease;
 }
-@keyframes cheroZoom{
-  from{ transform: scale(1); }
-  to{ transform: scale(1.07); }
-}
-/* the 5 story images — hidden until their title is hovered */
+/* the 5 story images — hidden until their title is hovered.
+   2026-09-25: one shared transition GRAMMAR (opacity + transform, same
+   house easing curve used sitewide for settling motion) now carries a
+   distinct directional PERSONALITY per word, per Tan's direct brief --
+   not five different effects, one grammar inflected five ways, so the
+   image never just "switches," it moves toward its resting place from
+   a direction that matches its word:
+     Light      -- recedes/enters: a plain dissolve+zoom, no lateral
+                   drift (the grammar's own neutral default).
+     People     -- shifts laterally.
+     Motion     -- rises slightly, and arrives faster than the rest --
+                   the one place pacing itself carries meaning, not
+                   just direction.
+     Stillness  -- settles almost completely still: barely any
+                   movement, and slower than the rest, so it reads as
+                   settling rather than arriving.
+     Colour     -- drifts gently into place, a soft diagonal.
+   Every one of these resolves to the exact same revealed end-state
+   (centred, translate(0,0) scale(1)) -- only the starting offset and,
+   for Motion/Stillness, the pacing differ. The generic (unclassed)
+   fallback below matches Light's own values, so nothing regresses if a
+   sixth story is ever added without its own directional rule yet. */
 .chero-media .story-media{
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transform: scale(1.06);
-  transition: opacity 1.1s ease, transform 1.6s ease;
+  transform: translate(0%, 0%) scale(1.06);
+  transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1), transform 1.6s cubic-bezier(0.16,1,0.3,1);
 }
+.chero-media .story-media.s-people{ transform: translate(3%, 0%) scale(1.07); }
+.chero-media .story-media.s-motion{
+  transform: translate(0%, 3%) scale(1.07);
+  transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.chero-media .story-media.s-stillness{
+  transform: translate(0%, 0%) scale(1.015);
+  transition: opacity 1.6s cubic-bezier(0.16,1,0.3,1), transform 2.6s cubic-bezier(0.16,1,0.3,1);
+}
+.chero-media .story-media.s-colour{ transform: translate(2%, 2%) scale(1.05); }
 .chero:has(.s-light:hover) .chero-media .story-media.s-light,
 .chero:has(.s-people:hover) .chero-media .story-media.s-people,
 .chero:has(.s-motion:hover) .chero-media .story-media.s-motion,
@@ -518,7 +562,7 @@ body.intro-active{ overflow:hidden; }
 .chero:has(.s-night:hover) .chero-media .story-media.s-night,
 .chero-media .story-media.is-active{
   opacity: 1;
-  transform: scale(1);
+  transform: translate(0%, 0%) scale(1);
 }
 .chero:has(.story-link:hover) .chero-base,
 .chero:has(.story-link.is-active) .chero-base{ opacity: 0; }
@@ -649,6 +693,671 @@ body.intro-active{ overflow:hidden; }
 }
 @media (max-width: 780px){
   .statement{ min-height: 60vh; }
+}
+
+/* ---------------- STATEMENT — the site's thesis, on its own ----------------
+   2026-09-25. Split out of TANLEO's old POINT OF VIEW/RECESS/BLACK
+   beats (see index.html's doc comment above the #statement section for
+   the full history -- and note the .statement/.statement-text rules
+   directly above this one are a separate, older, already-dead/unused
+   block, left untouched per the standing conservative-diff policy;
+   this new section deliberately uses its own .statement-presence/
+   .statement-pov/.statement-pov-line names to avoid any collision).
+   This section owns exactly one moment: "I'm not photographing the
+   world as it is. / I'm photographing the way it felt to me." appears
+   word by word -- two independent per-line counters so the two
+   sentences unfold staggered rather than together -- holds, then
+   recedes upward (-56px, not a plain fade -- the thought should feel
+   like it is actually leaving the frame, the same recede principle v5
+   already used and Tan explicitly approved), into a genuine black hold
+   before this section's pin releases directly into TANLEO's own pin,
+   which begins at IDENTITY with no beat left there to duplicate this
+   one. Driven by js/statement.js, which sets four custom properties on
+   #statement from scroll progress each frame (--stPovL1Reveal,
+   --stPovL2Reveal, --stGroupOpacity, --stGroupY); this CSS only ever
+   reads them -- same technique, same file organisation, as
+   js/tanleo.js and js/threshold.js.
+   Progressive enhancement, identical gate to TANLEO/Threshold: only at
+   >=901px with no reduced-motion preference does js/statement.js add
+   .statement-sequenced and engage the tall track/sticky pin below;
+   otherwise this renders as an ordinary static block, using the
+   site's one-shot .reveal mechanic, no JS required to be legible. */
+.statement-presence{
+  position: relative;
+  background: var(--bg);
+}
+
+/* ---- Base (no JS / mobile / reduced-motion): plain static block ---- */
+.statement-track{ position: relative; }
+.statement-pin{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--bg);
+  /* Same nav-clearance logic as .tanleo-pin's own base rule -- this
+     section now sits directly under the hero, so it needs the same
+     real clearance from the fixed .side-nav across 901-1440px. */
+  padding: calc(var(--nav-h) + 13rem) var(--page-pad) clamp(6rem, 14vw, 9rem);
+}
+/* No max-width here: at this element's own large font-size a ch-based
+   cap fragments each sentence into awkward short lines in the base/
+   fallback stack. The sequenced (>=901px) rule below sets its own,
+   more generous cap for the centred composition instead. */
+.statement-pov{ display: flex; flex-direction: column; gap: clamp(0.5rem, 1.4vw, 0.9rem); max-width: 42ch; }
+.statement-pov-line{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: clamp(1.7rem, 4.4vw, 3.2rem);
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+/* ---- Sequenced (>=901px, no reduced motion): pinned scroll scene ----
+   The track supplies the scrollable distance the sequence plays
+   across; the pin holds one full viewport still while js/statement.js
+   advances the custom properties below from scroll position. */
+@media (min-width: 901px){
+  .statement-sequenced.statement-presence{ overflow: clip; }
+  /* 280vh (down from 300vh, 2026-09-25): a 100vh pin plus 180vh of
+     scrollable progress. Tan watched the black threshold back and
+     called its old ~48vh "longer than intended -- a brief photographic
+     breath, not a prolonged empty section." The reveal/hold/recess
+     bands in js/statement.js were rescaled by 200/180 so each one
+     still starts and ends at exactly the same real scroll distance as
+     before (unchanged felt pacing) -- only the trailing BLACK band
+     genuinely shrank, to ~28vh, with the pin now releasing the instant
+     it ends. See js/statement.js's computeVars() for the exact
+     rescaled bands this height is built for. */
+  .statement-sequenced .statement-track{ height: 280vh; }
+  .statement-sequenced .statement-pin{
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+  }
+
+  /* Held centre, the section's largest type -- same treatment this
+     thought had as TANLEO's old POV beat. Per-word opacity is set per
+     span via --wi against each line's OWN counter (--stPovL1Reveal /
+     --stPovL2Reveal) so the two sentences unfold in sequence rather
+     than together; the whole two-line block then fades/lifts as one
+     during RECESS via --stGroupOpacity/--stGroupY on the parent. */
+  .statement-sequenced .statement-pov{
+    position: absolute;
+    left: 50%;
+    /* Centred on the space BELOW the fixed side-nav, not the raw
+       viewport -- same fix TANLEO's own beats needed at short viewport
+       heights (caught in verification at 620px tall). */
+    top: calc(50% + var(--nav-h) / 2);
+    max-width: min(92vw, 980px);
+    text-align: center;
+    align-items: center;
+    transform: translate(-50%, -50%) translateY(var(--stGroupY, 0px));
+    opacity: var(--stGroupOpacity, 1);
+  }
+  /* The thesis as a major moment: substantially larger than the base/
+     fallback size (which stays untouched -- it serves the plain static
+     mobile/reduced-motion stack, not this cinematic composition). */
+  .statement-sequenced .statement-pov-line{
+    font-size: clamp(2.6rem, 6.4vw, 4.8rem);
+    line-height: 1.2;
+  }
+  .statement-sequenced .statement-pov-line--1 .tw{
+    opacity: clamp(0.16, calc(1 - (var(--wi) - var(--stPovL1Reveal, 0)) * 1.6), 1);
+  }
+  .statement-sequenced .statement-pov-line--2 .tw{
+    opacity: clamp(0.16, calc(1 - (var(--wi) - var(--stPovL2Reveal, 0)) * 1.6), 1);
+  }
+
+  /* Same reasoning as TANLEO's equivalent overrides just below it in
+     this file: the sitewide .reveal class is still live underneath and
+     would otherwise fight the scroll-driven values on equal
+     specificity, so this four-class override always wins instead. */
+  .statement-presence.statement-sequenced .statement-pov-line.reveal{
+    opacity: 1; /* the parent .statement-pov's own group opacity still applies */
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------------- TANLEO — photographer/retoucher introduction ----------------
+   2026-09-25, v6. v5 (POINT OF VIEW -> RECESS -> BLACK -> IDENTITY ->
+   PORTRAIT -> VOICE -> PRACTICE -> STILLNESS -> (unpins into WORK), all
+   inside this one pinned section) put the site's thesis and the
+   artist's own introduction in a single track. Tan flagged that "I'm
+   not photographing the world as it is..." was effectively appearing
+   twice on the page and asked for it to exist in exactly one place, so
+   the POINT OF VIEW / RECESS / BLACK beats were pulled out wholesale
+   into their own section, #statement (see style immediately above,
+   and that section's own comment in index.html) -- this section no
+   longer owns the thesis, and begins directly at IDENTITY the instant
+   #statement's own pin releases. Everything from IDENTITY onward below
+   is v5 unchanged, just rescaled onto this section's own, now-shorter,
+   progress axis (old progress p -> (p-0.245)/0.755 -- see js/tanleo.js).
+     IDENTITY -> PORTRAIT -> VOICE -> PRACTICE -> STILLNESS
+     -> (unpins into WORK)
+   Driven entirely by js/tanleo.js, which sets eighteen custom
+   properties on #tanleo from scroll progress each frame (see that file
+   for the exact timing bands); this CSS only ever reads them.
+   No element reuses the same reveal treatment --
+     .tanleo-mark         letter-tracking contraction (wide -> normal).
+     .tanleo-portrait     opacity + a restrained scale (0.92 -> 1.02 ->
+                          1.0, the last leg a dedicated settle added
+                          2026-09-25 so it arrives a fraction larger than
+                          its final size and only then makes a tiny
+                          contraction to stillness -- a print settling
+                          onto a table, not an image still animating) +
+                          a short settle-translate -- the one element
+                          still authorized to scale, kept to a few
+                          percent, never a zoom.
+     .tanleo-voice-line   opacity + translateY, staggered line-by-line --
+                          a coarser rhythm than the per-word thesis,
+                          deliberately different.
+     .tanleo-facets-word  arrives word-by-word beside a single hairline
+                          rule acting as their spine, drawing itself
+                          downward (scaleY, 2026-09-25 -- was scaleX
+                          beneath a horizontal row, see below), the
+                          visual thread that makes three words read as
+                          facets of one practice rather than a row of
+                          unrelated labels.
+     .tanleo-caption      opacity only -- a wall label doesn't move.
+     .tanleo-facet-image  opacity + a settling translate (each of the
+                          three carries a distinct restrained direction
+                          -- lateral / vertical / diagonal, see the
+                          rules below and js/tanleo.js's own comment).
+                          One large photographic plate per PRACTICE
+                          word, roughly 30-45vw, never more than one
+                          visible at a time.
+   No veil element: BLACK is simply the moment nothing yet has an
+   opacity, between one receded moment and the next arriving one,
+   against the section's own solid background.
+   Composition: every beat is centred, one column, full stage --
+   IDENTITY+PORTRAIT+CAPTION as one small vertical plate (mark above,
+   portrait beneath it, caption beneath that -- never a second column
+   beside it), then VOICE alone, then PRACTICE alone. Because each beat
+   has the frame to itself, none of the fixed vh anchoring v3/v4 needed
+   (to keep simultaneous elements from drifting into each other) is
+   needed here -- everything simply centres via top:50%/
+   translate(-50%,-50%), which is what "one thing on stage at a time"
+   actually buys. The three .tanleo-facet-image elements are the
+   exception -- each a large plate (roughly 30-45vw, never full-bleed,
+   never object-fit:cover) positioned to overlap the word stack from a
+   different side, deliberately asymmetric from one to the next so the
+   three moments don't read as a mechanically repeated component. They
+   sit behind the words in the DOM (first children of .tanleo-pin), so
+   where a plate and a word's letters occupy the same space, the word
+   still reads clearly on top -- "the word and image should feel
+   spatially related rather than sitting in separate columns," her
+   words, not a photo-column-beside-text-column layout.
+   Progressive enhancement: the tall track/sticky pin/absolute
+   placement below only apply once js/tanleo.js has confirmed >=901px
+   and no reduced-motion preference and added .tanleo-sequenced.
+   Without that class the section is a plain static stack, top to
+   bottom in reading order (identity+portrait+caption, voice,
+   practice), using the site's ordinary one-shot .reveal mechanic --
+   nothing here depends on JS to be legible; all three
+   .tanleo-facet-image elements are display:none in this fallback (see
+   base rules below), since the scroll-driven apparitions only make
+   sense inside the pinned desktop composition. No About link in this
+   version -- Tan's new structure never asked for one, "About" is
+   already permanently in the side nav, and the section now hands off
+   to Selected Work purely through composition and timing -- the
+   facet photographs included, since they carry no text of their own
+   either -- with no on-screen text narrating that handoff (confirmed
+   explicitly, not assumed). Note that the portrait in the
+   sequenced (>=901px) plate below was sized up ~12-13% on 2026-09-25,
+   at Tan's direct request, from its v5 clamp -- the base/mobile
+   portrait size is untouched, since her note was specifically about
+   how small the plate reads against the pinned desktop stage's
+   large black field, not about mobile. */
+.tanleo-presence{
+  position: relative;
+  background: var(--bg);
+}
+
+/* ---- Base (no JS / mobile / reduced-motion): plain static stack ---- */
+.tanleo-track{ position: relative; }
+.tanleo-pin{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(2.5rem, 6vw, 4rem);
+  background: var(--bg);
+  /* Top padding tied directly to --nav-h rather than a vw guess -- the
+     fixed .side-nav's own band needs real clearance across the whole
+     901-1440px range, not just true mobile; carried forward from v3/v4
+     unchanged, not newly introduced. */
+  padding: calc(var(--nav-h) + 13rem) var(--page-pad) clamp(6rem, 14vw, 9rem);
+}
+
+/* Base (unrevealed) word dimness -- also the pre-JS default via the
+   var() fallback below, so text reads as legible (if slightly muted)
+   rather than invisible if JS never runs. */
+.tw{ opacity: 0.7; }
+
+.tanleo-identity{ display: flex; flex-direction: column; align-items: flex-start; gap: 0.55rem; }
+.tanleo-mark{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: clamp(1.5rem, 3.8vw, 2.6rem);
+  color: var(--text);
+}
+.tanleo-role{
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Hidden in the base/fallback stack -- these three scroll-driven
+   photographic apparitions only make sense inside the pinned desktop
+   composition; re-enabled (display:block, position:absolute) in the
+   sequenced (>=901px) rules below. */
+.tanleo-facet-image{ display: none; }
+
+.tanleo-plate{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 2rem);
+  width: 100%;
+  align-self: center;
+  text-align: center;
+}
+.tanleo-plate .tanleo-identity{ align-items: center; }
+.tanleo-portrait{ width: min(82vw, 420px); background: var(--bg-elev); }
+.tanleo-portrait img{ width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
+.tanleo-caption-name{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.tanleo-caption-role,
+.tanleo-caption-location{
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+  margin-top: 0.35rem;
+}
+
+.tanleo-voice{ display: flex; flex-direction: column; gap: 1.1rem; max-width: 34ch; }
+.tanleo-voice-line{
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.tanleo-facets{ display: flex; flex-direction: column; gap: 0.9rem; }
+.tanleo-facets-words{ display: flex; flex-wrap: wrap; gap: clamp(1.1rem, 2.8vw, 2rem); }
+.tanleo-facets-word{
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: var(--text);
+}
+.tanleo-facets-rule{ width: min(70vw, 320px); height: 1px; background: var(--border); }
+
+/* ---- Sequenced (>=901px, no reduced motion): pinned scroll scene ----
+   The track supplies the scrollable distance the sequence plays across;
+   the pin holds one full viewport still while js/tanleo.js advances the
+   custom properties below from scroll position. Six named beats, each
+   getting the full centred stage in turn (down from v5's nine, now that
+   POINT OF VIEW/RECESS/BLACK have their own dedicated track in
+   #statement immediately above), still comfortably fill the space v4's
+   380vh once gave a more compressed, coexisting eight. */
+@media (min-width: 901px){
+  .tanleo-sequenced.tanleo-presence{ overflow: clip; }
+  /* 408vh -- unchanged in absolute height across v8/v9/v10. IDENTITY
+     through VOICE's own recede (0.0000-0.7075) are untouched: same
+     bands, same pacing, nothing about them plays any differently.
+     Everything from PRACTICE's first word onward (0.7075-1.0000) has
+     been rebuilt twice this round. v9 kept the three words arriving
+     together up front, then played three small off-to-the-side
+     photographs one at a time in the tail that followed -- Tan watched
+     it rendered and rejected it outright ("reads as three small
+     portfolio previews beside a small list of words... too small and
+     UI-like"), so v10 is not a refinement of v9, it replaces it: each
+     word now gets its own chapter -- word arrives, ITS large
+     photographic plate (30-45vw) enters/holds/exits, then the next
+     word arrives -- rather than all three words arriving first and the
+     images following afterward as a separate tail. The WebGL Threshold
+     module that used to follow this section is still removed outright
+     (see the removal comment further down this file, and in index.html
+     where that section used to sit), unchanged from the v9 round. Once
+     all three chapters have played, the three words and their rule
+     recede together, then a short plain-black threshold before the pin
+     releases straight into #projects -- no lengthening of the section
+     versus v8/v9, just a further different use of the same tail. See
+     js/tanleo.js's computeVars() for the exact bands. */
+  .tanleo-sequenced .tanleo-track{ height: 408vh; }
+  .tanleo-sequenced .tanleo-pin{
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 0;
+    display: block;
+    overflow: hidden;
+  }
+
+  /* IDENTITY + PORTRAIT + CAPTION: one small centred vertical plate,
+     never a second column beside it -- the specific structural fix for
+     "text left / portrait right." The whole plate centres on stage;
+     identity settles smaller/quieter (never fully hidden) to make room
+     for the portrait rising beneath it in the same column; the caption
+     arrives last, directly under the portrait. All three then recede
+     together (per-element opacity already folds in the shared
+     --tlPlateY-driven recede -- see js/tanleo.js) before VOICE. */
+  .tanleo-sequenced .tanleo-plate{
+    position: absolute;
+    left: 50%;
+    /* Centred on the space BELOW the fixed side-nav, not the raw
+       viewport -- a pure 50% centre let the now-larger portrait plate's
+       top edge slide under the nav at short viewport heights (caught in
+       verification at 620px tall). Nudging every beat down by half the
+       nav's own height keeps all of them clear of it while staying
+       visually centred at normal viewport heights. */
+    top: calc(50% + var(--nav-h) / 2);
+    transform: translate(-50%, -50%) translateY(var(--tlPlateY, 0px));
+  }
+  .tanleo-sequenced .tanleo-identity{
+    opacity: var(--tlIdentityOpacity, 0);
+    transform: translateY(var(--tlIdentityY, 14px)) scale(var(--tlIdentityScale, 1));
+    transform-origin: center top;
+  }
+  .tanleo-sequenced .tanleo-mark{
+    font-size: clamp(1.9rem, 4.6vw, 3.1rem);
+    letter-spacing: calc(0.32em + var(--tlIdentityTracking, 1) * 0.3em);
+  }
+  /* The portrait as the artist reveal: a photographic plate with real
+     compositional authority, not an About thumbnail. Sized up again
+     2026-09-25 (~12-13% over v5's own clamp) at Tan's direct request --
+     against the pin's full-viewport black field the plate was reading
+     too small -- while the surrounding single-column plate layout
+     (mark above, caption below, never a second column) is unchanged,
+     so it still fits comfortably within the 100vh pin. */
+  .tanleo-sequenced .tanleo-portrait{
+    height: clamp(270px, 59vh, 650px);
+    width: auto;
+    aspect-ratio: 4 / 5;
+    opacity: var(--tlPortraitOpacity, 0);
+    transform: translateY(var(--tlPortraitY, 24px)) scale(var(--tlPortraitScale, 0.92));
+    transform-origin: center;
+  }
+  .tanleo-sequenced .tanleo-portrait img{ width: 100%; height: 100%; }
+  .tanleo-sequenced .tanleo-caption{ opacity: var(--tlCaptionOpacity, 0); }
+
+  /* FIRST-PERSON VOICE: alone, centred, full stage -- never sharing the
+     frame with the portrait. Line-level stagger via nth-of-type, a
+     coarser rhythm than the point of view's per-word reveal. */
+  .tanleo-sequenced .tanleo-voice{
+    position: absolute;
+    left: 50%;
+    /* Centred on the space BELOW the fixed side-nav, not the raw
+       viewport -- a pure 50% centre let the now-larger portrait plate's
+       top edge slide under the nav at short viewport heights (caught in
+       verification at 620px tall). Nudging every beat down by half the
+       nav's own height keeps all of them clear of it while staying
+       visually centred at normal viewport heights. */
+    top: calc(50% + var(--nav-h) / 2);
+    max-width: min(82vw, 680px);
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+  .tanleo-sequenced .tanleo-voice-line{
+    font-size: clamp(1.25rem, 2.8vw, 1.7rem);
+  }
+  .tanleo-sequenced .tanleo-voice-line:nth-of-type(1){
+    opacity: var(--tlVoiceLine0Opacity, 0);
+    transform: translateY(var(--tlVoiceLine0Y, 16px));
+  }
+  .tanleo-sequenced .tanleo-voice-line:nth-of-type(2){
+    opacity: var(--tlVoiceLine1Opacity, 0);
+    transform: translateY(var(--tlVoiceLine1Y, 16px));
+  }
+
+  /* PRACTICE (v11, 2026-09-26): the three words are ONE FIXED SPINE for
+     the whole beat, not three self-contained word+image moments. The
+     spine (hairline rule + all three words) installs itself once, early
+     in the beat, and never moves position or rearranges after that --
+     what moves for the rest of PRACTICE is FOCUS. Photography's word
+     brightens while the other two hold at a quiet, dimmed-but-clearly-
+     present baseline (0.5 opacity, never near-invisible -- Tan's
+     explicit correction to the concept: "hierarchy should come from
+     focus/opacity/weight, not from the inactive words becoming nearly
+     invisible"); focus then passes to Retouching (Photography eases back
+     to the dimmed baseline, not to zero -- it stays as a completed
+     step); then to Colour, which is the one word that does NOT dim back
+     down -- it stays focused through to the section's own close, "the
+     culmination." See js/tanleo.js's computeVars() for the exact
+     focus-rise/focus-down bands per word and the shared final dissolve.
+     Anchored left-of-centre (left:32%, not 50%) rather than dead centre,
+     deliberately -- this leaves the right two-thirds of the frame as the
+     space photographs interrupt, so type and photograph read as two
+     halves of one composition rather than a word floating alone with a
+     picture wherever it happens to land. Scale and rhythm increased once
+     more from v10 (clamp ceiling 2.05rem, wider gap) for real
+     typographic authority -- still clearly smaller than #statement's
+     4.8rem. The hairline rule draws once during the spine's establish
+     beat and then holds at a deliberately low, CONSTANT opacity
+     (--tlFacetRuleOpacity, never brightening or pulsing with focus
+     changes) -- "an architectural axis, not a decorative graphic
+     device," her words -- unlike the words, which do carry the focus
+     motion. Focus itself is opacity plus the smallest possible scale
+     settle (0.985 -> 1.0, see --tlFacetWord*Scale) -- monotonic, no
+     overshoot past 1.0, "restrained... physical and editorial, not
+     UI-animated," per her direct correction to the first cut of this
+     concept. */
+  .tanleo-sequenced .tanleo-facets{
+    position: absolute;
+    left: 32%;
+    /* Centred on the space BELOW the fixed side-nav, not the raw
+       viewport -- a pure 50% centre let the now-larger portrait plate's
+       top edge slide under the nav at short viewport heights (caught in
+       verification at 620px tall). Nudging every beat down by half the
+       nav's own height keeps all of them clear of it while staying
+       visually centred at normal viewport heights. */
+    top: calc(50% + var(--nav-h) / 2);
+    flex-direction: row;
+    align-items: center;
+    gap: clamp(1.4rem, 3.4vw, 2.3rem);
+    transform: translate(-50%, -50%) translateY(var(--tlFacetGroupY, 0px));
+  }
+  .tanleo-sequenced .tanleo-facets-words{
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: clamp(1.1rem, 2.6vw, 1.7rem);
+  }
+  .tanleo-sequenced .tanleo-facets-word{
+    font-size: clamp(1.5rem, 3.4vw, 2.05rem);
+    transform-origin: left center;
+  }
+  .tanleo-sequenced .tanleo-facets-word:nth-child(1){
+    opacity: var(--tlFacetWord0Opacity, 0);
+    transform: scale(var(--tlFacetWord0Scale, 0.985));
+  }
+  .tanleo-sequenced .tanleo-facets-word:nth-child(2){
+    opacity: var(--tlFacetWord1Opacity, 0);
+    transform: scale(var(--tlFacetWord1Scale, 0.985));
+  }
+  .tanleo-sequenced .tanleo-facets-word:nth-child(3){
+    opacity: var(--tlFacetWord2Opacity, 0);
+    transform: scale(var(--tlFacetWord2Scale, 0.985));
+  }
+  .tanleo-sequenced .tanleo-facets-rule{
+    width: 1px;
+    height: auto;
+    align-self: stretch;
+    opacity: var(--tlFacetRuleOpacity, 0);
+    transform: scaleY(var(--tlFacetRuleScale, 0));
+    transform-origin: top;
+  }
+
+  /* PHOTOGRAPHY / RETOUCHING / COLOUR -- "flash into existence" (v11.2,
+     2026-09-26, replacing v11.1's aperture/clip-path reveal outright).
+     Tan watched the aperture version and asked for something simpler,
+     in her words: "we're trying too hard to invent a clever
+     interaction... let the image be the event." No mask, no mechanism
+     -- nothing → photograph → nothing. Each photograph is a large,
+     still, silent opacity event: it flashes in quickly (a short, soft
+     ramp, not an instant CSS pop -- "almost like a photographic
+     exposure"), holds just long enough to be seen, then dissolves back
+     into black slightly more slowly than it arrived. The <img> itself
+     never moves at all -- no scale, no translate, only opacity, on the
+     .tanleo-facet-image container. The rise*(1-close) idiom is the same
+     one used everywhere else on this page (see js/tanleo.js); what
+     changed from v11.1 is only which CSS property it drives (opacity,
+     not clip-path) and the shape of the bands themselves -- rise bands
+     are now short (quick flash), close bands are longer than their own
+     rise (a slower dissolve out), and Colour's holds far longer than
+     the other two before fading only via the shared facetImgFinalOpacity
+     below, together with the rest of the final collective dissolve --
+     "it appears, you get to look at it, then it dissolves, and
+     immediately after, Selected Work begins," which is exactly what the
+     existing locked final-dissolve/black-threshold sequence already
+     does, unchanged. Word/rule timing above this comment is completely
+     untouched -- "the typography stays exactly as it is now."
+     Composition, not a shared plate size or a repeated animation
+     direction, is what now varies photograph to photograph -- each
+     sized close to Tan's "roughly 55-70% of the viewport" note, in
+     whichever dimension its own orientation makes dominant. Photography
+     and Retouching's current placeholder photographs are both portrait
+     crops; the size ceilings below are written for the COMPOSITION Tan
+     described (a tall portrait held to one side; a wide image crossing
+     more of the frame) rather than for these specific placeholder
+     files, so Retouching in particular will read narrower than its own
+     ceiling until she supplies a landscape-leaning photograph -- these
+     three <img> sources are still placeholder slots, not her final
+     choices, each swappable independently without touching anything
+     else here. True, untreated colour throughout -- no filter/blur/
+     parallax/overlay/border/shadow/rounded corners/caption/frame, never
+     object-fit:cover, no zoom. */
+  .tanleo-sequenced .tanleo-facet-image{
+    position: absolute;
+    display: block;
+    pointer-events: none;
+  }
+  .tanleo-sequenced .tanleo-facet-image img{
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  /* PHOTOGRAPHY -- a tall portrait plate held to the upper right, the
+     first flash. Opacity only: reveal * the shared final-dissolve
+     multiplier (see facetImg0Reveal in js/tanleo.js -- a quick rise,
+     a brief hold, a slower dissolve out). */
+  .tanleo-sequenced .tanleo-facet-image--photography{
+    top: 7%;
+    right: 6%;
+    max-height: 68vh;
+    max-width: 48vw;
+    opacity: calc(var(--tlFacetImg0Reveal, 0) * var(--tlFacetImgFinalOpacity, 1));
+  }
+  /* RETOUCHING -- the wide flash, crossing further across the open
+     field than the other two (sized for a landscape-leaning composition
+     -- see comment above on the current portrait placeholder). Left
+     edge is set just clear of the word column (which runs out to
+     roughly 42% at this viewport) rather than starting under it --
+     checked against a render with the current placeholder (a close
+     face crop): starting further left put the word column directly
+     over the model's face, illegible in exactly the way Tan's "let the
+     image be the event" asks against, not merely "overlapping." */
+  .tanleo-sequenced .tanleo-facet-image--retouching{
+    top: 10%;
+    left: 40%;
+    max-height: 60vh;
+    max-width: 54vw;
+    opacity: calc(var(--tlFacetImg1Reveal, 0) * var(--tlFacetImgFinalOpacity, 1));
+  }
+  /* COLOUR -- the culmination: the largest of the three, lower right.
+     Its own reveal only ever rises (see facetImg2Reveal in
+     js/tanleo.js) and holds, by far the longest hold of the three --
+     it fades out only via the shared facetImgFinalOpacity here, in the
+     same gesture as the words/rule's own final dissolve, rather than
+     closing on its own. */
+  .tanleo-sequenced .tanleo-facet-image--colour{
+    bottom: 4%;
+    right: 4%;
+    max-height: 72vh;
+    max-width: 55vw;
+    opacity: calc(var(--tlFacetImg2Reveal, 0) * var(--tlFacetImgFinalOpacity, 1));
+  }
+
+  /* Every text leaf above also carries the sitewide .reveal class, so
+     its one-shot IntersectionObserver opacity/transform is still live
+     underneath and would otherwise fight the scroll-driven values --
+     .reveal is defined later in this file, so on equal specificity it
+     would win the cascade. These four-class overrides
+     (.tanleo-presence.tanleo-sequenced .x.reveal) always beat
+     .reveal.pre/.reveal.in's two classes regardless of source order.
+     Where an element owns its own opacity/transform directly (portrait,
+     voice lines, facet words), the override REPEATS that same var()
+     expression rather than forcing opacity:1/transform:none -- forcing
+     "none" on an element that owns a real entrance transform silently
+     kills that transform the moment .reveal.in lands, which is exactly
+     the bug caught and fixed in v4 and is not being repeated here. */
+  .tanleo-presence.tanleo-sequenced .tanleo-mark.reveal{
+    opacity: 1; /* the parent .tanleo-identity's own opacity/scale still applies */
+    transform: none;
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-role.reveal{
+    opacity: 1; /* the parent .tanleo-identity's own opacity/scale still applies */
+    transform: none;
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-portrait.reveal{
+    opacity: var(--tlPortraitOpacity, 0);
+    transform: translateY(var(--tlPortraitY, 24px)) scale(var(--tlPortraitScale, 0.92));
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-caption.reveal{
+    opacity: var(--tlCaptionOpacity, 0);
+    transform: none;
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-voice-line.reveal:nth-of-type(1){
+    opacity: var(--tlVoiceLine0Opacity, 0);
+    transform: translateY(var(--tlVoiceLine0Y, 16px));
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-voice-line.reveal:nth-of-type(2){
+    opacity: var(--tlVoiceLine1Opacity, 0);
+    transform: translateY(var(--tlVoiceLine1Y, 16px));
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-facets-word.reveal:nth-child(1){
+    opacity: var(--tlFacetWord0Opacity, 0);
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-facets-word.reveal:nth-child(2){
+    opacity: var(--tlFacetWord1Opacity, 0);
+    transition: none;
+  }
+  .tanleo-presence.tanleo-sequenced .tanleo-facets-word.reveal:nth-child(3){
+    opacity: var(--tlFacetWord2Opacity, 0);
+    transition: none;
+  }
 }
 
 /* ---------------- "Selected Works" title card ----------------
@@ -1284,47 +1993,25 @@ a.contact-value:hover{ color: var(--accent); }
 .closing.reveal.in{ opacity: var(--proximity, 1); }
 
 /* ============================================================
-   The Photographic Threshold — isolated WebGL module
-   Added 2026-09-07. Sits between Closing and the Projects Index.
-   All behavior lives in js/threshold.js, which is its own file and
-   never touches script.js, transitions.js, or retouching.html.
-   This block only lays out the pinned canvas: a tall wrapper
-   (.threshold) so scroll has room to drive the camera, containing a
-   position:sticky layer (.threshold-pin) that holds the viewport
-   while js/threshold.js reads scroll progress and drives the scene.
-   Collapsed entirely (display:none) below the same 901px breakpoint
-   and under prefers-reduced-motion that gates the Projects proximity
-   system, so mobile/reduced-motion visitors go from Closing straight
-   to Street exactly as they did before this section existed — no
-   second, simpler 3D experience is built for them, per instruction.
-   Canvas opacity is set directly by js/threshold.js every frame (no
-   CSS transition here) for the same reason --proximity above has
-   none: a transition would fight a value already being written every
-   animation frame. ============================================================ */
-.threshold{
-  position: relative;
-  height: 110vh; /* reduced 2026-09-10 -- was 220vh, halved to close the dead-scroll gap between the statement and Projects; see Tan's request */
-  background: var(--bg);
-}
-.threshold-pin{
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
-  background: var(--bg);
-}
-#thresholdCanvas{
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-@media (max-width: 900px){
-  .threshold{ display: none; }
-}
-@media (prefers-reduced-motion: reduce){
-  .threshold{ display: none; }
-}
+   The Photographic Threshold (WebGL module) -- REMOVED 2026-09-26.
+   Added 2026-09-07, sat between Closing and the Projects Index as a
+   pinned canvas (.threshold/.threshold-pin, driven by js/threshold.js).
+   Tan reviewed the actual rendered TANLEO -> Selected Work handoff and
+   found it read as a second, homepage-style hero appearing again right
+   before the real work -- "I do not want that... remove the duplicated/
+   intermediate hero treatment from this experience." Removed outright
+   (not hidden) per her explicit instruction not to leave old transition
+   logic intact: the section and its <script src="js/threshold.js">
+   are gone from index.html, and these rules along with them, rather
+   than left in place as dead CSS. js/threshold.js itself still exists
+   on disk (moved to _to_delete/, not deleted -- this bridge can't
+   delete files, and files aren't removed without being asked) but is
+   no longer referenced anywhere; it was already effectively inert
+   before this (see tanleo-practice-emergence-v1.md's Finding: it
+   depended on a #street anchor that stopped existing 2026-09-09).
+   PRACTICE now hands its own three-image sequence directly to
+   #projects -- see .tanleo-facet-image below and js/tanleo.js.
+   ============================================================ */
 
 /* ============================================================
    Projects -- a small photographic exhibition (redesign 2026-09-25,

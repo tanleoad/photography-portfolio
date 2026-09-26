@@ -4,14 +4,10 @@
 //
 // Two kinds of setup happen here:
 //  - Persistent, site-wide behaviour (nav scroll state, the menu
-//    overlay, the homepage intro) runs once, on the very first real
-//    page load. These all live outside each page's [data-taxi-view]
-//    content, so they're never removed or remounted by a client-side
-//    page transition. (A tiny black camera-icon cursor and a brief
-//    shutter-flash on meaningful clicks are approved as part of the
-//    site's finished interaction language and belong here once built
-//    -- not yet implemented; see the click-router comment further
-//    down for the current no-op cursor stub.)
+//    overlay, the homepage intro, the focus-frame cursor) runs once,
+//    on the very first real page load. These all live outside each
+//    page's [data-taxi-view] content, so they're never removed or
+//    remounted by a client-side page transition.
 //  - Per-page content behaviour (scroll reveals, the homepage hero
 //    exit, the hero's auto-cycling story list, the Projects Index
 //    proximity system) lives inside window.initPageContent(). It
@@ -26,9 +22,6 @@ let _cheroCycleTimer = null;
 let _cheroCycleHandlers = null;
 let _heroExitScrollHandler = null;
 let _heroExitResizeHandler = null;
-let _heroTiltEl = null;
-let _heroTiltMoveHandler = null;
-let _heroTiltLeaveHandler = null;
 let _projectsScrollHandler = null;
 let _projectsResizeHandler = null;
 let _projectsMql = null;
@@ -50,12 +43,6 @@ function teardownPageContent() {
 
   if (_heroExitScrollHandler) { window.removeEventListener('scroll', _heroExitScrollHandler); _heroExitScrollHandler = null; }
   if (_heroExitResizeHandler) { window.removeEventListener('resize', _heroExitResizeHandler); _heroExitResizeHandler = null; }
-
-  if (_heroTiltEl) {
-    if (_heroTiltMoveHandler) _heroTiltEl.removeEventListener('mousemove', _heroTiltMoveHandler);
-    if (_heroTiltLeaveHandler) _heroTiltEl.removeEventListener('mouseleave', _heroTiltLeaveHandler);
-  }
-  _heroTiltEl = null; _heroTiltMoveHandler = null; _heroTiltLeaveHandler = null;
 
   if (_projectsScrollHandler) { window.removeEventListener('scroll', _projectsScrollHandler); _projectsScrollHandler = null; }
   if (_projectsResizeHandler) { window.removeEventListener('resize', _projectsResizeHandler); _projectsResizeHandler = null; }
@@ -141,42 +128,24 @@ function initPageContent() {
     }
   }
 
-  /* ---- Hero: cursor-tilt parallax ----
-     As the pointer moves anywhere over the hero — not just hovering a
-     title — the whole photograph tilts very slightly toward it, like
-     looking through a window as you walk past. This deliberately
-     transforms .chero-media as one rigid block (photo + its darkening
-     scrim together) rather than tracking which individual story photo
-     is currently revealed, so it works automatically no matter which
-     one CSS is currently showing via the existing hover-reveal (see
-     the .chero:has(...) rules in style.css) — nothing about that
-     reveal mechanic itself is touched. Desktop/hover-capable only,
-     and off entirely if the visitor has motion reduction on or GSAP
-     failed to load. */
-  const cheroMedia = document.querySelector('.chero-media');
-  const cheroEl = document.querySelector('.chero');
-  const heroTiltEnabled = cheroMedia && cheroEl &&
-    typeof window.gsap !== 'undefined' &&
-    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (heroTiltEnabled) {
-    const MAX_TILT = 2.4; // degrees — subtle, not a gimmick
-    gsap.set(cheroMedia, { transformPerspective: 1000, transformOrigin: 'center center' });
-    const setTiltY = gsap.quickTo(cheroMedia, 'rotationY', { duration: 1, ease: 'power3' });
-    const setTiltX = gsap.quickTo(cheroMedia, 'rotationX', { duration: 1, ease: 'power3' });
-
-    _heroTiltEl = cheroEl;
-    _heroTiltMoveHandler = (e) => {
-      const r = cheroEl.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      setTiltY(px * MAX_TILT * 2);
-      setTiltX(-py * MAX_TILT * 2);
-    };
-    _heroTiltLeaveHandler = () => { setTiltY(0); setTiltX(0); };
-    cheroEl.addEventListener('mousemove', _heroTiltMoveHandler);
-    cheroEl.addEventListener('mouseleave', _heroTiltLeaveHandler);
-  }
+  /* ---- Hero: cursor-tilt parallax -- REMOVED 2026-09-25 ----
+     A GSAP-driven effect (rotationY/rotationX on .chero-media via
+     gsap.quickTo, tracking mousemove across .chero) used to tilt the
+     whole hero photograph slightly toward the pointer. Removed in full
+     at Tan's direct request: the hero photography must have no cursor-
+     reactive tilt/translate/rotate/scale/3D movement of any kind --
+     only the five approved LIGHT/PEOPLE/MOTION/STILLNESS/COLOUR story
+     transitions (untouched CSS in style.css) may move the image. Not
+     disabled behind a flag -- removed outright, along with its
+     teardown-state vars above (_heroTiltEl/_heroTiltMoveHandler/
+     _heroTiltLeaveHandler) -- so there is no dead code pretending to be
+     live. See also css/style.css: the .chero-base ambient cheroZoom
+     ("slowly scales up while the visitor is sitting on the hero") ---
+     removed the same day, for the same reason. The unrelated,
+     deliberate scroll-tied exit zoom immediately below (triggered only
+     by scrolling away from the hero, never by sitting still or moving
+     the cursor) is a separate effect Tan did not ask to remove and is
+     left exactly as it was. */
 
   /* ---- Hero exit: scroll-tied zoom + fade ----
      As you scroll from the hero into the statement below it, the hero
@@ -786,55 +755,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }, introLastDelay + introLetterDuration + introHoldTime);
   }
 
-  /* ---- Site-wide: camera cursor + shutter flash ----
-     Added 2026-09-08. Runs once, on every page -- persistent and
-     site-wide like the click router just below, so it's never torn
-     down or rebuilt by a Taxi transition. Two small pieces:
-       - .site-cursor: a 16px black camera glyph that replaces the
-         native pointer on desktop/fine-pointer devices only (see the
-         media query and the html.has-camera-cursor rules in
-         css/style.css). Position is set directly from pointermove
-         with no CSS transition on it, so it tracks 1:1 with no lag,
-         bounce, or eased catch-up. Touch/coarse-pointer devices never
-         get the html.has-camera-cursor class, so the native cursor
-         (irrelevant there anyway) is untouched.
-       - fireShutterFlash(): a single reusable element repositioned
-         and re-animated (via the Web Animations API, cancelling any
-         flash already in flight first) at the click point, instead of
-         creating a new DOM node per click -- rapid clicking re-triggers
-         the same flash rather than piling several up. Called from the
-         click router below for any click landing on an actual
-         interactive control; skipped entirely under
-         prefers-reduced-motion. Purely visual and fire-and-forget --
-         it never delays or blocks the navigation logic beneath it. */
-  (function initCameraCursor() {
+  /* ---- Site-wide: focus-frame cursor ----
+     Added 2026-09-25, replacing the camera-icon cursor + shutter-flash
+     that briefly lived here the same day. Runs once, on every page --
+     persistent and site-wide, so it's never torn down or rebuilt by a
+     Taxi transition. Two small, separated concerns:
+       - Position: set directly from pointermove with no CSS transition
+         on it (see .site-cursor in css/style.css), so it tracks the
+         real cursor 1:1 -- quiet and precise, no lag or catch-up.
+       - Size: a single class, .is-photo, toggled on pointerover/
+         pointerout of an actual photograph -- any <img>, or any
+         element carrying an inline background-image, which between
+         them are the only two ways a photograph is ever placed on
+         this site (the hero's story layers, project thumbnails, page
+         banners, the contact/menu-overlay imagery). CSS owns the
+         resulting scale transition entirely; this just flips the
+         class. Deliberately does nothing on click -- no flash, no
+         sound, no press state -- and nothing here ever fires on a
+         touch/coarse pointer, so mobile is untouched by default. */
+  (function initFocusCursor() {
     const pointerQuery = window.matchMedia('(pointer: fine) and (hover: hover)');
-    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const cursorEl = document.createElement('div');
     cursorEl.className = 'site-cursor';
     cursorEl.setAttribute('aria-hidden', 'true');
     cursorEl.innerHTML =
-      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-        '<rect x="9.5" y="5" width="5" height="2.4" rx="0.6" fill="#0a0908"></rect>' +
-        '<rect x="3" y="7.4" width="18" height="11.6" rx="2.2" fill="#0a0908"></rect>' +
-        '<circle cx="12" cy="13.2" r="3.1" fill="none" stroke="#f3f0e9" stroke-width="1.3"></circle>' +
-      '</svg>';
+      '<div class="site-cursor-frame">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path d="M3,9 L3,3 L9,3"></path>' +
+          '<path d="M15,3 L21,3 L21,9"></path>' +
+          '<path d="M3,15 L3,21 L9,21"></path>' +
+          '<path d="M21,15 L21,21 L15,21"></path>' +
+        '</svg>' +
+      '</div>';
     document.body.appendChild(cursorEl);
 
-    const flashEl = document.createElement('div');
-    flashEl.className = 'site-cursor-flash';
-    flashEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(flashEl);
-
     let cursorActive = false;
-    let cursorSeen = false; // true once a real pointermove has placed it, so it never flashes in from (0,0)
+    let cursorSeen = false; // true once a real pointermove has placed it, so it never eases in from (0,0)
 
     const setCursorActive = (active) => {
       cursorActive = active;
-      document.documentElement.classList.toggle('has-camera-cursor', active);
+      document.documentElement.classList.toggle('has-custom-cursor', active);
       if (!active) {
         cursorEl.style.opacity = '0';
+        cursorEl.classList.remove('is-photo');
         cursorSeen = false;
       }
     };
@@ -852,31 +816,45 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { passive: true });
 
-    // Don't leave the glyph sitting frozen over the browser chrome
+    // Don't leave the frame sitting frozen over the browser chrome
     // once the real pointer has left the page.
     document.addEventListener('mouseout', (e) => {
       if (cursorActive && !e.relatedTarget && !e.toElement) {
         cursorEl.style.opacity = '0';
+        cursorEl.classList.remove('is-photo');
         cursorSeen = false;
       }
     });
 
-    let flashAnim = null;
-    function fireShutterFlash(x, y) {
-      if (!cursorActive || reducedMotion()) return;
-      flashEl.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-      if (flashAnim) flashAnim.cancel();
-      flashAnim = flashEl.animate(
-        [
-          { opacity: 0, transform: flashEl.style.transform + ' scale(0.55)' },
-          { opacity: 0.9, transform: flashEl.style.transform + ' scale(1)', offset: 0.2 },
-          { opacity: 0, transform: flashEl.style.transform + ' scale(1.2)' }
-        ],
-        { duration: 360, easing: 'ease-out' }
-      );
-    }
+    // A photograph, site-wide, is always one of two markup patterns: an
+    // <img> element, or an element with an inline background-image
+    // (project thumbnails, page banners, the contact section and
+    // menu-overlay imagery, the hero's own story layers -- see
+    // index.html/services.html/workshops.html; nothing else on this
+    // site sets background-image inline, so this can't false-positive
+    // on an unrelated decorative element). The hero is the one place a
+    // transparent overlay (.chero-scrim) sits in front of those layers
+    // for an unrelated reason and would otherwise catch the pointer
+    // first, so .chero-media -- the hero's whole photograph stack --
+    // is named explicitly too; hovering the word list itself doesn't
+    // match anything here, since it's a sibling of .chero-media, not
+    // inside it.
+    const PHOTO_SELECTOR = 'img, [style*="background-image"], .chero-media, .archive-entry-photo, .page-banner, .contact-hero-bg, .tanleo-portrait, .menu-overlay-image';
+    const isPhoto = (el) => !!(el && el.closest && el.closest(PHOTO_SELECTOR));
 
-    window.siteCursor = { fireShutterFlash };
+    document.addEventListener('pointerover', (e) => {
+      if (!cursorActive || e.pointerType !== 'mouse') return;
+      if (isPhoto(e.target)) cursorEl.classList.add('is-photo');
+    }, { passive: true });
+
+    document.addEventListener('pointerout', (e) => {
+      if (!cursorActive || e.pointerType !== 'mouse') return;
+      // Only shrink back if where the pointer is GOING isn't also a
+      // photograph -- keeps it from flickering at the seam between two
+      // adjacent photo layers (e.g. the hero's base image and whichever
+      // story layer is revealed over it).
+      if (!isPhoto(e.relatedTarget)) cursorEl.classList.remove('is-photo');
+    }, { passive: true });
   })();
 
   /* ---- Site-wide: click-to-navigate router ----
@@ -886,21 +864,8 @@ document.addEventListener('DOMContentLoaded', () => {
      normal navigation if that router never loaded (CDN blocked,
      offline) — the site works exactly the same either way, just
      without the swap animation. In-page anchors, new-tab clicks,
-     modified clicks, and mailto/tel links are left alone. Also fires
-     the shutter flash above for any click on an actual interactive
-     control, independent of whether that same click also triggers
-     in-app navigation below -- one shared listener rather than a
-     second document-wide click handler duplicating this one. */
+     modified clicks, and mailto/tel links are left alone. */
   document.addEventListener('click', (e) => {
-    if (e.button === 0) {
-      const control = e.target.closest(
-        'a, button, input[type="submit"], input[type="button"], input[type="checkbox"], input[type="radio"], select, [role="button"]'
-      );
-      if (control && !control.disabled) {
-        window.siteCursor.fireShutterFlash(e.clientX, e.clientY);
-      }
-    }
-
     const link = e.target.closest('a[href]');
     if (
       link &&

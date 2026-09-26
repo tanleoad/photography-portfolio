@@ -131,9 +131,47 @@
 </section>
 </div>
 
-<!-- ============ Statement ============ -->
-<section class="statement reveal" id="statement">
-  <p class="statement-text">I&rsquo;m not photographing the world as it is.<br>I&rsquo;m photographing the way it felt to me.</p>
+<!-- ============================================================
+     STATEMENT — the site's point-of-view/thesis moment, on its own
+     (2026-09-25, split out of TANLEO)
+     "I'm not photographing the world as it is. / I'm photographing the
+     way it felt to me." used to exist in two places at once: a small
+     standalone .statement#statement section here (removed 2026-09-25
+     as a duplicate of TANLEO's own opening beat -- see the note this
+     comment replaces) and, at far more scale, as TANLEO's own POINT OF
+     VIEW beat. Tan watched a recording, flagged that as exactly the
+     duplication it was, and asked for the thought to appear once, on
+     its own -- not tucked inside TANLEO's sequence. It lives HERE now,
+     restored as its own isolated pinned module (same technique as
+     Threshold and TANLEO: position:sticky pin + a scroll-progress-
+     driven JS module, js/statement.js, gated identically -- >=901px,
+     no reduced-motion preference, else a plain static stack, same
+     .reveal mechanic as everywhere else on the page). Same treatment
+     this thought had as TANLEO's old POV beat: large Fraunces type,
+     each line revealing word-by-word via its own independent counter
+     (staggered, not simultaneous), a held read, then a noticeably
+     upward recede (-56px, not a plain fade -- the thought should feel
+     like it's actually leaving the frame, not just dissolving in
+     place) into a genuine, dedicated BLACK hold before this section's
+     pin releases -- "turning a page," never a loading screen or dead
+     air. TANLEO's own pin, immediately below in document order,
+     engages the instant this one releases and now begins at IDENTITY
+     directly, with no POV beat of its own (see that section's own
+     comment for what moved and why). Do not paraphrase or rewrite this
+     copy -- it is reused deliberately, unchanged, same as before this
+     split.
+     ============================================================ -->
+<section class="statement-presence" id="statement">
+  <div class="statement-track">
+    <div class="statement-pin">
+
+      <div class="statement-pov">
+        <p class="statement-pov-line statement-pov-line--1 reveal"><span class="tw" style="--wi:0">I&rsquo;m</span> <span class="tw" style="--wi:1">not</span> <span class="tw" style="--wi:2">photographing</span> <span class="tw" style="--wi:3">the</span> <span class="tw" style="--wi:4">world</span> <span class="tw" style="--wi:5">as</span> <span class="tw" style="--wi:6">it</span> <span class="tw" style="--wi:7">is.</span></p>
+        <p class="statement-pov-line statement-pov-line--2 reveal"><span class="tw" style="--wi:0">I&rsquo;m</span> <span class="tw" style="--wi:1">photographing</span> <span class="tw" style="--wi:2">the</span> <span class="tw" style="--wi:3">way</span> <span class="tw" style="--wi:4">it</span> <span class="tw" style="--wi:5">felt</span> <span class="tw" style="--wi:6">to</span> <span class="tw" style="--wi:7">me.</span></p>
+      </div>
+
+    </div>
+  </div>
 </section>
 
 <!-- Quiet closing / handoff into Projects -- removed 2026-09-09 per
@@ -147,19 +185,221 @@
      harmless with no matching element in the DOM -- rather than
      touched, per the standing conservative-diff policy on this file. -->
 
-<!-- ============ The Photographic Threshold ============
-     Isolated WebGL module (js/threshold.js) — see that file and the
-     matching CSS block for the full explanation. Desktop + motion-ok
-     only; collapsed entirely on mobile/reduced-motion, in which case
-     Closing hands off straight to Street exactly as before this
-     section existed. aria-hidden because it carries no unique
-     content of its own -- the same photograph it approaches is the
-     real Street threshold immediately below it. -->
-<section class="threshold" id="threshold" aria-hidden="true">
-  <div class="threshold-pin">
-    <canvas id="thresholdCanvas"></canvas>
+<!-- ============================================================
+     TANLEO — photographer/retoucher introduction (2026-09-26, v8:
+     EMERGENCE now shows the real photograph at true colour/full opacity
+     and the VOICE->PRACTICE seam is tightened; v7 made PRACTICE hand off
+     into a photographic emergence instead of receding into empty
+     STILLNESS; v6 split POINT OF VIEW out into its own #statement
+     section, above)
+     Sits between the new standalone Statement section and the
+     exhibition (Threshold + Projects/"Selected Work"). v5 (POINT OF
+     VIEW -> RECESS -> BLACK -> IDENTITY -> PORTRAIT -> VOICE ->
+     PRACTICE -> STILLNESS -> (unpin) -> WORK, all inside this one
+     pinned section) put the site's thesis and the artist's own
+     introduction in a single track. Watching it back, Tan pointed out
+     that the same "I'm not photographing the world as it is..." thought
+     was effectively appearing twice on the page -- once (much smaller)
+     in the .statement section that had briefly existed, and once here
+     as this section's own opening beat -- and asked for the thought to
+     exist in exactly one place, on its own. Rather than re-merge it
+     smaller, the POINT OF VIEW / RECESS / BLACK beats were pulled out
+     wholesale into their own section, #statement, immediately above
+     this one (see that section's doc comment for the full rationale).
+     This section no longer owns the thesis at all -- it now begins
+     directly at IDENTITY, the instant #statement's own pin releases,
+     with every beat below rescaled to fill the resulting shorter
+     track continuously. v9's sequence, no chapter numbers anywhere:
+       IDENTITY -> PORTRAIT -> VOICE -> PRACTICE -> PHOTOGRAPHY/
+       RETOUCHING/COLOUR (three sequential photographic apparitions)
+       -> black threshold -> (unpin) -> WORK
+     Below, everything about v5's BEAT STRUCTURE for IDENTITY through
+     PRACTICE's own arrival/hold is preserved verbatim -- only the
+     POINT OF VIEW/RECESS/BLACK paragraphs of the old v5 comment (moved
+     to #statement) and the STILLNESS paragraph (replaced by EMERGENCE,
+     see below) have changed. Each beat is still a DISCRETE moment that
+     occupies the frame largely on its own and then recedes before the
+     next arrives -- deliberately not an accumulating composition, the
+     specific structural fix for the "text left / portrait right"
+     complaint that originally drove the v4 -> v5 rebuild:
+     identity+portrait+caption form one small centred vertical plate
+     (mark above, portrait below, caption below that -- never a second
+     column beside it), and the first-person voice only ever appears
+     AFTER that plate has fully receded, alone, centred, full-width --
+     never sharing the frame with the portrait the way v4's practice
+     paragraph did.
+     - IDENTITY (mark + role line) is now the first new visual
+       information the visitor sees after #statement's black threshold
+       -- the artist being revealed after the thought, not a website
+       heading appearing. It arrives via the same letter-tracking
+       contraction v4 used for the mark, then settles smaller/quieter
+       (not fully hidden) to make room for PORTRAIT, which rises beneath
+       it in the same centred column -- one vertical plate, not a split
+       layout. CAPTION (TANLEO / Photographer / Retoucher / Abu Dhabi,
+       UAE -- three lines exactly as specified, the fourth "practice
+       areas" line from v4's caption is gone because practice is now
+       its own later beat, not folded into the caption) arrives last,
+       quiet, opacity only, directly under the portrait. The whole
+       plate holds together, then recedes as one unit before VOICE.
+     - VOICE is new first-person writing (not reused from v3/v4's
+       paragraph, which no longer fits this structure) about how
+       Tanleo actually works -- light, then colour/atmosphere/
+       retouching -- written as philosophy, not biography, arriving as
+       two lines with their own line-level stagger (a coarser rhythm
+       than the thesis's per-word reveal -- deliberately different).
+     - PRACTICE is: Photography / Retouching / Colour, presented as
+       three words stacked vertically beside a single hairline rule
+       acting as their spine, drawing itself downward as each word
+       arrives -- three facets of one practice, not three service
+       cards, no borders/boxes/icons anywhere. Given more spatial
+       presence 2026-09-25 (larger type, a vertical column instead of a
+       horizontal row, per Tan's direct note that it was "a tiny little
+       line... floating in a huge black field") without becoming a
+       second giant-typography moment like the Statement -- deliberately
+       restrained, still clearly smaller than #statement's own scale.
+     - PHOTOGRAPHY / RETOUCHING / COLOUR (v9, 2026-09-26, replacing the
+       single-photograph EMERGENCE crossfade below): Tan watched the
+       rendered handoff continuously from PRACTICE through the first
+       real Selected Work image and found two problems. First, the old
+       single-image EMERGENCE only ever showed one photograph (a stand-in
+       for the coming Street image), which gave PRACTICE's three words --
+       Photography, Retouching, Colour -- no visual evidence of their
+       own; her direction was to make Practice "an index of her visual
+       practice, demonstrated through images rather than explained."
+       Second, and more serious: the isolated WebGL Threshold module
+       immediately downstream (previously here, see the removed comment
+       below) rendered as a second, homepage-style photographic hero
+       right before the real work -- "I do not want that... remove the
+       duplicated/intermediate hero treatment." Both are addressed here.
+       PRACTICE's three words now each get their own brief photographic
+       apparition as the section's tail plays out: as Photography holds
+       and begins to recede, its own photograph (emirates-palace-corridor
+       .jpg) rises in the negative space beside the word, holds briefly,
+       and recedes before Retouching's photograph
+       (beauty-archive-warmth-shadow-depth.jpg) rises in turn, then
+       Colour's (mystic-night-lamps.jpg) -- never more than one visible
+       at once, no stacking, no persistent collage (see the three
+       .tanleo-facet-image elements, first children of .tanleo-pin so
+       they stack behind the plate/voice/facets by DOM order alone, no
+       z-index needed, and js/tanleo.js's own comment for the exact
+       bands). Each is positioned off to the side of the word column,
+       never directly underneath a word and never full-bleed -- an
+       apparition in the surrounding black, not a thumbnail or a card --
+       and each carries a slightly different restrained direction of
+       arrival (Photography drifts in laterally, Retouching rises
+       slightly, Colour moves on a shallow diagonal) so the three moments
+       read as related but not mechanically identical. All three show
+       their photograph at true, untreated colour, with no filter, no
+       blur, no crop/object-fit distortion, no border, no caption, no
+       label, no UI chrome of any kind -- opacity plus that one small
+       settling translate are the only things that ever move. Once
+       Colour's photograph has receded, the three words and their
+       connecting rule recede together (same drift-upward character PRACTICE
+       has always used), followed by a short black threshold -- black,
+       nothing animating -- before the pin releases directly into
+       #projects, the real Selected Work section: the first actual
+       Selected Work photograph is the very next major visual event, with
+       no intermediate hero or Threshold treatment of any kind in
+       between. No About link, no closing caption, no recap text, no
+       "SELECTED WORK"/"EXPLORE" transition title -- Tan was explicit,
+       across every round, that labelling the handoff would be exactly
+       the explanatory gesture this section has never used: "don't tell
+       people they're entering the work -- make them feel it."
+     - The About link v4 carried is deliberately dropped, not
+       overlooked -- Tan's new structure never mentions it, "About" is
+       already permanently available in the persistent side nav, and a
+       closing "About ->" CTA would reintroduce the small explanatory
+       gesture this rebuild exists to remove.
+     - Distinct treatments throughout, nothing reused as a generic
+       fade: POV = per-word reveal (two independent counters); IDENTITY
+       mark = letter-tracking contraction; PORTRAIT = scale+opacity
+       settle; CAPTION = opacity only (a label doesn't move); VOICE =
+       line-level stagger; PRACTICE = word arrival + a self-drawing
+       connecting rule; PHOTOGRAPHY/RETOUCHING/COLOUR = opacity + one
+       small settling translate apiece, direction distinct per image.
+       No bounce, no zoom, no unrequested parallax, anywhere.
+     Progressive enhancement: js/tanleo.js only pins/sequences at
+     >=901px with no reduced-motion preference; failing either,
+     .tanleo-sequenced is never added, the tall scroll track collapses
+     (see the @media(min-width:901px) block in style.css) and this
+     markup renders as an ordinary static stack, top to bottom in
+     reading order, using the site's ordinary one-shot .reveal mechanic
+     (the three facet photographs included, each a plain <img> that
+     simply sits in flow), so nothing here depends on JS to be legible.
+     Nothing in .projects-archive is touched by any of this. (.statement
+     and .about-presence, two earlier stand-ins for this content,
+     .tanleo-pov, the POINT OF VIEW beat that lived inside this section
+     through v5, and the isolated WebGL Threshold module that used to
+     sit immediately below this section, have all since been removed --
+     the thesis now lives once, in #statement, immediately above, and
+     PRACTICE now hands off directly to #projects, see the removal note
+     where the Threshold section used to be, below.)
+     ============================================================ -->
+<section class="tanleo-presence" id="tanleo">
+  <div class="tanleo-track">
+    <div class="tanleo-pin">
+
+      <div class="tanleo-facet-image tanleo-facet-image--photography" aria-hidden="true">
+        <img src="images/emirates-palace-corridor.jpg" alt="" width="1920" height="2400" loading="lazy">
+      </div>
+      <div class="tanleo-facet-image tanleo-facet-image--retouching" aria-hidden="true">
+        <img src="images/beauty-archive-warmth-shadow-depth.jpg" alt="" width="1000" height="1500" loading="lazy">
+      </div>
+      <div class="tanleo-facet-image tanleo-facet-image--colour" aria-hidden="true">
+        <img src="images/mystic-night-lamps.jpg" alt="" width="1921" height="2400" loading="lazy">
+      </div>
+
+      <div class="tanleo-plate">
+        <div class="tanleo-identity">
+          <div class="tanleo-mark reveal">TANLEO</div>
+          <p class="tanleo-role reveal">Photographer / Retoucher</p>
+        </div>
+        <div class="tanleo-portrait reveal">
+          <img src="images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
+        </div>
+        <div class="tanleo-caption reveal">
+          <p class="tanleo-caption-name">TANLEO</p>
+          <p class="tanleo-caption-role">Photographer / Retoucher</p>
+          <p class="tanleo-caption-location">Abu Dhabi, UAE</p>
+        </div>
+      </div>
+
+      <div class="tanleo-voice">
+        <p class="tanleo-voice-line reveal" style="--li:0">I&rsquo;m Tania. I make photographs about the things that catch me off guard: light, colour, people, places, the moments that somehow look better than they have any right to.</p>
+        <p class="tanleo-voice-line reveal" style="--li:1">I&rsquo;m interested in the feeling first. The rest is editing, retouching, and being unnecessarily particular about the details.</p>
+      </div>
+
+      <div class="tanleo-facets">
+        <div class="tanleo-facets-words">
+          <span class="tanleo-facets-word reveal" style="--pi:0">Photography</span>
+          <span class="tanleo-facets-word reveal" style="--pi:1">Retouching</span>
+          <span class="tanleo-facets-word reveal" style="--pi:2">Colour</span>
+        </div>
+        <div class="tanleo-facets-rule" aria-hidden="true"></div>
+      </div>
+
+    </div>
   </div>
 </section>
+
+<!-- ============ The Photographic Threshold -- REMOVED 2026-09-26 ============
+     Formerly an isolated WebGL module (<section class="threshold"
+     id="threshold"> + js/threshold.js) that sat here, between PRACTICE
+     and #projects, as a pinned canvas. Tan inspected the actual rendered
+     handoff, continuously, from the end of PRACTICE through the first
+     real Selected Work image, and found this section reading as a
+     second, homepage-style photographic hero appearing again right
+     before the real work: "remove the duplicated/intermediate hero
+     treatment from this experience." Removed outright, not hidden, per
+     her explicit instruction not to leave the old transition logic
+     intact -- the matching CSS rules and the <script src="js/threshold
+     .js"> tag are gone along with it (see css/style.css's own removal
+     comment; js/threshold.js still exists on disk, moved to
+     _to_delete/, but is no longer referenced anywhere). PRACTICE's own
+     PHOTOGRAPHY/RETOUCHING/COLOUR apparitions (see the doc comment
+     above #tanleo and js/tanleo.js) now hand off directly to #projects
+     below -- the first actual Selected Work photograph is the next
+     visual event, with no intermediate hero or threshold in between. -->
 
 <!-- ============================================================
      PROJECTS — a small photographic exhibition (redesign 2026-09-25,
@@ -245,46 +485,21 @@
 </section>
 
 <!-- ============================================================
-     ABOUT — editorial sequence (Held Print coherence pass, 2026-09-07)
-     Same real content as before (portrait, the two-sentence bio, the
-     same seven recognition credits) restructured into sequential
-     beats -- presence, statement, practice, recognition, closing --
-     so the reading mode matches the rest of the site (one held thing
-     at a time) instead of a two-column bio card plus a scannable
-     award grid. Nothing invented, nothing gated behind hover or
-     dwell: every beat is a plain .reveal block using the exact same
-     IntersectionObserver every other section already uses, so a
-     normal scroll surfaces all of it, in order, for every visitor
-     and every screen reader. The source bio is exactly two sentences
-     -- sentence one (identity/credentials) is the defining-statement
-     beat, sentence two (light/mood/colour, everyday scenes into
-     narrative) is specifically about her practice, so it gets its
-     own quieter beat rather than being padded into a paragraph that
-     doesn't exist in the real copy. -->
-<section class="about-presence" id="about">
-  <div class="about-presence-media reveal photo-presence">
-    <img src="images/tania-portrait.jpg" alt="Portrait of Tania Khan" width="6400" height="8000" loading="lazy">
-  </div>
-  <div class="about-presence-caption reveal">
-    <p class="eyebrow">The Photographer</p>
-    <h1>Tanleo_</h1>
-    <p class="about-presence-location">Abu Dhabi, UAE</p>
-  </div>
-</section>
-
-<section class="section about-statement-wrap">
-  <div class="container">
-    <p class="about-statement reveal">Tania Khan is a photographer, visual storyteller, and SonyMEA Speaker, born &amp; raised in Abu Dhabi, specializing in street and architectural imagery with a strong focus on cinematic color grading.</p>
-  </div>
-</section>
-
-<section class="section about-practice-wrap">
-  <div class="container">
-    <p class="about-practice reveal">Her work explores the relationship between light, mood, and colour, transforming everyday scenes into intentional visual narratives.</p>
-  </div>
-</section>
-
-<section class="section recognition">
+     The portrait+bio "artist reveal" block that used to open this
+     sequence (.about-presence#about, .about-statement-wrap,
+     .about-practice-wrap -- portrait, "The Photographer / Tanleo_ /
+     Abu Dhabi, UAE", then the two-sentence bio) was removed 2026-09-25
+     at Tan's direct request: that introduction has effectively moved
+     up the page into the rebuilt TANLEO section (point of view, artist
+     reveal, portrait plate, caption, first-person voice, practice),
+     making this copy of it redundant. id="about" moves to the
+     .recognition section immediately below, which is now the first
+     thing "About" in the nav lands on -- without this, both the
+     persistent side-nav's "About" link and the footer's "About" link
+     (the two #about references elsewhere in this file) would point at
+     a dead anchor. Nothing else in this sequence (recognition,
+     whatever follows it) was touched. -->
+<section class="section recognition" id="about">
   <div class="container">
     <p class="eyebrow about-recognition-eyebrow reveal" style="text-align:center;">Exhibited &amp; Featured</p>
     <ol class="recognition-index">
@@ -426,6 +641,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@unseenco/taxi@1.4.0/dist/taxi.umd.js"></script>
 <script src="js/transitions.js"></script>
 <script src="js/script.js"></script>
-<script src="js/threshold.js"></script>
+<script src="js/statement.js"></script>
+<script src="js/tanleo.js"></script>
 </body>
 </html>
